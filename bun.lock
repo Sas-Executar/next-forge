@@ -385,9 +385,13 @@
     "packages/domain": {
       "name": "@repo/domain",
       "version": "0.0.0",
+      "dependencies": {
+        "@repo/schemas": "workspace:*",
+      },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
         "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
       },
     },
     "packages/email": {

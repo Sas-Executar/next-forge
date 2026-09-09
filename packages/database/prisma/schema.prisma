@@ -11,9 +11,799 @@ datasource db {
   relationMode = "foreignKeys"
 }
 
-// This is a stub model.
-// Delete it and add your own Prisma models.
+// Kept for the /cron/keep-alive route (apps/api/app/cron/keep-alive/route.ts),
+// which creates+deletes a throwaway row on a schedule to keep the Neon
+// connection warm. Unrelated to the domain model below — do not repurpose.
 model Page {
   id   Int    @id @default(autoincrement())
   name String
+}
+
+// -----------------------------------------------------------------------
+// Enums mirroring packages/schemas (D9). Prisma can't import TS types, so
+// these string values are kept in lockstep by hand with
+// packages/schemas/src/{task-state,routine,evidence,authority}.ts —
+// changing one without the other is a bug.
+// -----------------------------------------------------------------------
+
+enum TaskState {
+  BACKLOG_VALIDATED
+  READY
+  DOING
+  VERIFY
+  DONE
+  BLOCKED
+}
+
+enum RoutineStatus {
+  DRAFT
+  ENABLED
+  PAUSED
+  DISABLED
+}
+
+enum RunStatus {
+  SCHEDULED
+  RUNNING
+  SUCCESS
+  PARTIAL
+  BLOCKED
+  FAILED
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum EvidenceGrade {
+  A_OBSERVADO
+  B_PRIMARIO
+  C_PUBLICADO
+  D_INTERNO
+  E_INFERIDO
+}
+
+enum BehaviorAuthority {
+  DETERMINISTICO
+  INTERPRETATIVO
+  EXIGE_HUMANO
+  NAO_DETERMINADO
+}
+
+// -----------------------------------------------------------------------
+// Schema-local enums. Not (yet) mirrored in packages/schemas because
+// they're new to this milestone (M02), not pre-existing Blueprint
+// vocabulary — promote to packages/schemas if/when another package needs
+// to reference them by type.
+// -----------------------------------------------------------------------
+
+// Provisional (2 roles only) pending the real permission matrix (M16-T01,
+// packages/auth/src/permissions.ts) — SEC-004 in the Blueprint is an
+// empty stub, so there is no richer role vocabulary to mirror yet.
+enum MembershipRole {
+  OWNER
+  MEMBER
+}
+
+// PRD-SCANNER-001 V1 vocabulary (Blueprint, read-only): exactly 3 symbols.
+enum VisualSymbolSemantic {
+  CHAT
+  SELECTOR
+  DONE
+}
+
+enum VisualCommand {
+  OPEN_CHAT
+  OPEN_SELECTOR
+  COMPLETE_LATEST_OPEN_TASK
+}
+
+// OBJETIVOS E OUTPUT REQUIREMNETS.md §12-15 (Blueprint, read-only).
+enum IntegrationProvider {
+  WHATSAPP
+  GMAIL
+  OUTLOOK
+  GOOGLE_CALENDAR
+  OUTLOOK_CALENDAR
+}
+
+enum IntegrationConnectionStatus {
+  PENDING
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+// PRICING-001 (Blueprint, read-only) — Trial/Solo/Pro/Business/Enterprise.
+// Prices there are explicitly PROPOSED, not published; this enum only
+// fixes the plan identifiers, not amounts.
+enum SubscriptionPlan {
+  TRIAL
+  SOLO
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+// Mirrors packages/schemas/src/actor.ts (D9).
+enum ActorType {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum ToolCallStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// -----------------------------------------------------------------------
+// Identity / tenancy
+//
+// No local User/Account table: Clerk is the identity source of truth
+// (packages/auth), matching the existing next-forge pattern. Workspace is
+// the local tenancy root, keyed to a Clerk organization (D3); Membership
+// mirrors Clerk org membership, kept in sync via the Clerk webhook
+// (apps/api/app/webhooks/auth/route.ts, M03-T01).
+// -----------------------------------------------------------------------
+
+model Workspace {
+  id         String   @id @default(cuid())
+  clerkOrgId String   @unique
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  memberships            Membership[]
+  projects               Project[]
+  processes              Process[]
+  deliverables           Deliverable[]
+  tasks                  Task[]
+  actions                Action[]
+  evidences              Evidence[]
+  dependencies           Dependency[]
+  routines               Routine[]
+  routineRuns            RoutineRun[]
+  workflowDefinitions    WorkflowDefinition[]
+  workflowRuns           WorkflowRun[]
+  statusReports          StatusReport[]
+  mapaOsArtifacts        MapaOS[]
+  visualSymbols          VisualSymbol[]
+  scannerMutations       ScannerMutation[]
+  attachments            Attachment[]
+  integrationConnections IntegrationConnection[]
+  externalObjectRefs     ExternalObjectRef[]
+  agentRuns              AgentRun[]
+  toolCalls              ToolCall[]
+  aiUsages               AIUsage[]
+  notifications          Notification[]
+  subscription           Subscription?
+  usageLedgerEntries     UsageLedger[]
+  executionCredits       ExecutionCredit[]
+  auditEvents            AuditEvent[]
+
+  @@index([clerkOrgId])
+}
+
+model Membership {
+  id          String         @id @default(cuid())
+  workspaceId String
+  clerkUserId String
+  role        MembershipRole @default(MEMBER)
+  createdAt   DateTime       @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, clerkUserId])
+  @@index([clerkUserId])
+}
+
+// -----------------------------------------------------------------------
+// Core domain
+//
+// Hierarchy per the Blueprint (read-only): Project/Process/Value Stream →
+// Deliverable → Task → Action → Evidence, with Dependency governing
+// eligibility. Field lists are not specified in the Blueprint for these
+// entities (docs/07-data and docs/03-domain are empty templates there) —
+// the shapes below are this repo's own domain modeling, not a Blueprint
+// transcription; only the entity names, the Task state machine, and the
+// evidence grade are Blueprint-sourced.
+// -----------------------------------------------------------------------
+
+model Project {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace       Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  processes       Process[]
+  deliverables    Deliverable[]
+  tasks           Task[]
+  statusReports   StatusReport[]
+  mapaOsArtifacts MapaOS[]
+
+  @@index([workspaceId])
+}
+
+model Process {
+  id          String   @id @default(cuid())
+  workspaceId String
+  projectId   String?
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  deliverables Deliverable[]
+  tasks        Task[]
+
+  @@index([workspaceId])
+  @@index([projectId])
+}
+
+model Deliverable {
+  id          String    @id @default(cuid())
+  workspaceId String
+  projectId   String?
+  processId   String?
+  title       String
+  description String?
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  process     Process?     @relation(fields: [processId], references: [id], onDelete: SetNull)
+  tasks       Task[]
+  attachments Attachment[]
+
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([processId])
+}
+
+// Task.state is the canonical state machine (D9, packages/schemas):
+// BACKLOG_VALIDATED → READY → DOING → VERIFY → DONE, exception BLOCKED.
+// Legal transitions are enforced by packages/domain (M02-T04), not by the
+// database — this column stores the state, it doesn't validate it.
+model Task {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  projectId     String?
+  processId     String?
+  deliverableId String?
+  title         String
+  description   String?
+  state         TaskState @default(BACKLOG_VALIDATED)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  process     Process?     @relation(fields: [processId], references: [id], onDelete: SetNull)
+  deliverable Deliverable? @relation(fields: [deliverableId], references: [id], onDelete: SetNull)
+
+  actions          Action[]
+  evidences        Evidence[]
+  attachments      Attachment[]
+  scannerMutations ScannerMutation[]
+
+  // Dependency is a self-relation on Task (A depends on B); named relations
+  // distinguish the two directions.
+  dependenciesFrom Dependency[] @relation("DependencyFromTask")
+  dependenciesTo   Dependency[] @relation("DependencyToTask")
+
+  @@index([workspaceId])
+  @@index([projectId])
+  @@index([processId])
+  @@index([deliverableId])
+}
+
+model Action {
+  id                  String    @id @default(cuid())
+  workspaceId         String
+  taskId              String
+  title               String
+  description         String?
+  expectedDuration    Int? // minutes
+  completionCriterion String?
+  completedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  task      Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  evidences Evidence[]
+
+  @@index([workspaceId])
+  @@index([taskId])
+}
+
+// Evidence.grade is the epistemic classification (D9, packages/schemas):
+// A_OBSERVADO..E_INFERIDO. Core domain invariant across the Blueprint
+// (both copiloto-executar and executar-mapa-os skills): "'feito' não
+// substitui evidência" — completion always requires a matching row here.
+model Evidence {
+  id          String        @id @default(cuid())
+  workspaceId String
+  taskId      String?
+  actionId    String?
+  grade       EvidenceGrade
+  description String
+  url         String?
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  task      Task?     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  action    Action?   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([taskId])
+  @@index([actionId])
+}
+
+// A --depends on--> B: `fromTask` cannot be eligible until `toTask` is
+// DONE. Matches the EligibilityEngine dependency check (SPEC-ROUTINES-001
+// §6, implemented in packages/application, M04).
+model Dependency {
+  id          String   @id @default(cuid())
+  workspaceId String
+  fromTaskId  String
+  toTaskId    String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  fromTask  Task      @relation("DependencyFromTask", fields: [fromTaskId], references: [id], onDelete: Cascade)
+  toTask    Task      @relation("DependencyToTask", fields: [toTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([fromTaskId, toTaskId])
+  @@index([workspaceId])
+  @@index([toTaskId])
+}
+
+// -----------------------------------------------------------------------
+// Automation
+//
+// Field shapes below mirror the JSON contracts SPEC-ROUTINES-001 §2-4
+// actually specifies (Blueprint, read-only) — the richest spec in the
+// repo. `config`/`sourceSnapshotRefs`/`mutations` stay Json because the
+// spec itself templates them as nested, provider-shaped objects rather
+// than flat columns.
+// -----------------------------------------------------------------------
+
+model Routine {
+  id          String        @id @default(cuid())
+  workspaceId String
+  projectId   String?
+  name        String
+  description String?
+  status      RoutineStatus @default(DRAFT)
+  // Full RoutineConfig shape (SPEC-ROUTINES-001 §2): scope, trigger,
+  // sources[], execution_policy, report, delivery[], retry.
+  config      Json
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  runs      RoutineRun[]
+
+  @@index([workspaceId])
+  @@index([projectId])
+}
+
+// runKey is the idempotency key from SPEC-ROUTINES-001 §9:
+// `run_key = routine_id + scheduled_slot`. Enforced unique so the same
+// scheduled slot can only ever produce one run (SPEC §12 test case).
+model RoutineRun {
+  id                 String    @id @default(cuid())
+  workspaceId        String
+  routineId          String
+  runKey             String    @unique
+  status             RunStatus @default(SCHEDULED)
+  triggeredAt        DateTime  @default(now())
+  startedAt          DateTime?
+  finishedAt         DateTime?
+  sourceSnapshotRefs Json?
+  mutations          Json?
+  blockReason        String?
+  createdAt          DateTime  @default(now())
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  routine      Routine       @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  statusReport StatusReport?
+
+  @@index([workspaceId])
+  @@index([routineId])
+}
+
+// -----------------------------------------------------------------------
+// Workflows
+// -----------------------------------------------------------------------
+
+model WorkflowDefinition {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  // triggers/steps/conditions/actions/retries — not specified by any
+  // Blueprint doc (§20 Workflows in OBJETIVOS is a bare requirement list,
+  // no shape); kept as Json pending a real WorkflowDefinition spec.
+  definition  Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  runs      WorkflowRun[]
+
+  @@index([workspaceId])
+}
+
+model WorkflowRun {
+  id                   String    @id @default(cuid())
+  workspaceId          String
+  workflowDefinitionId String
+  status               RunStatus @default(SCHEDULED)
+  startedAt            DateTime  @default(now())
+  finishedAt           DateTime?
+  result               Json?
+  createdAt            DateTime  @default(now())
+
+  workspace          Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workflowDefinition WorkflowDefinition @relation(fields: [workflowDefinitionId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workflowDefinitionId])
+}
+
+// -----------------------------------------------------------------------
+// Outputs
+// -----------------------------------------------------------------------
+
+// StatusReport is canonical (ADR-ROUTINES-001, Blueprint, read-only):
+// "um report não é fonte de verdade do estado" — this table records what
+// was reported, it never drives Task/Action mutation on its own. Shape
+// mirrors SPEC-ROUTINES-001 §4's 3P+N model.
+model StatusReport {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  projectId    String?
+  routineRunId String?  @unique
+  generatedAt  DateTime @default(now())
+  status       String
+  progress     Json // { project_percent, cycle_current, today_delta }
+  triptych     Json // { previous, current, next }
+  now          Json // { action_id, title, duration, completion_criterion, evidence_required }
+  properties   Json // 3P+N: context, problem, process, progress, next_1..3, risk, prevention, delivery
+  evidenceRefs Json?
+  gaps         Json?
+  createdAt    DateTime @default(now())
+
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  routineRun RoutineRun? @relation(fields: [routineRunId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([projectId])
+}
+
+// MapaOS is versioned per skills/executar-mapa-os/SKILL.md (Blueprint,
+// read-only): "histórico; versionamento; PDFs/impressão". `artifactUrl`
+// points at the rendered PDF/HTML (packages/storage, once wired);
+// `metadata` carries the populated-template provenance (which of the 4
+// projections, placeholder-fill status, etc).
+model MapaOS {
+  id          String   @id @default(cuid())
+  workspaceId String
+  projectId   String?
+  version     Int      @default(1)
+  generatedAt DateTime @default(now())
+  artifactUrl String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([projectId])
+}
+
+// -----------------------------------------------------------------------
+// Scanner
+//
+// Shape mirrors the TypeScript interfaces SPEC-SCANNER-001 and
+// API-SCANNER-ACTION-001 specify verbatim (Blueprint, read-only):
+// VisualSymbol { id, semantic, command, embeddings, enabled },
+// TaskCompletionMutation { mutationId, taskId, previousState, newState }.
+// `embeddings` stays Bytes — the spec types it as Float32Array[], which
+// is a binary on-device representation, not a JSON-serializable shape.
+// -----------------------------------------------------------------------
+
+model VisualSymbol {
+  id          String               @id @default(cuid())
+  workspaceId String
+  symbolId    String // e.g. "SYM-CHAT-001" (PRD-SCANNER-001 vocabulary)
+  semantic    VisualSymbolSemantic
+  command     VisualCommand
+  embeddings  Bytes?
+  enabled     Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  scannerMutations ScannerMutation[]
+
+  @@unique([workspaceId, symbolId])
+  @@index([workspaceId])
+}
+
+// One row per dispatched command (REQ-SCAN-007..010): records the
+// mutation so Undo (SPEC-SCANNER-001) can reverse it by mutationId.
+model ScannerMutation {
+  id             String     @id @default(cuid())
+  workspaceId    String
+  visualSymbolId String
+  taskId         String?
+  previousState  TaskState?
+  newState       TaskState?
+  undone         Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  visualSymbol VisualSymbol @relation(fields: [visualSymbolId], references: [id], onDelete: Cascade)
+  task         Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([visualSymbolId])
+  @@index([taskId])
+}
+
+// -----------------------------------------------------------------------
+// Files
+// -----------------------------------------------------------------------
+
+model Attachment {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  taskId        String?
+  deliverableId String?
+  url           String
+  filename      String
+  mimeType      String?
+  size          Int?
+  createdAt     DateTime @default(now())
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  task        Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  deliverable Deliverable? @relation(fields: [deliverableId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([taskId])
+  @@index([deliverableId])
+}
+
+// -----------------------------------------------------------------------
+// Integrations
+//
+// ExternalObjectRef is the normalization layer PRD-OMNI-001 requires
+// (Blueprint, read-only, REQ-OMNI-001..003): every external object maps
+// to exactly one canonical row here — "um canal não cria estado
+// concorrente".
+// -----------------------------------------------------------------------
+
+model IntegrationConnection {
+  id                String                      @id @default(cuid())
+  workspaceId       String
+  provider          IntegrationProvider
+  status            IntegrationConnectionStatus @default(PENDING)
+  externalAccountId String?
+  scopes            Json?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+
+  workspace          Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  externalObjectRefs ExternalObjectRef[]
+
+  @@unique([workspaceId, provider])
+  @@index([workspaceId])
+}
+
+model ExternalObjectRef {
+  id                      String   @id @default(cuid())
+  workspaceId             String
+  integrationConnectionId String
+  externalId              String
+  externalObjectType      String
+  canonicalObjectType     String // e.g. "Task", "Deliverable"
+  canonicalObjectId       String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  integrationConnection IntegrationConnection @relation(fields: [integrationConnectionId], references: [id], onDelete: Cascade)
+
+  @@unique([integrationConnectionId, externalId])
+  @@index([workspaceId])
+  @@index([canonicalObjectType, canonicalObjectId])
+}
+
+// -----------------------------------------------------------------------
+// AI
+//
+// AIUsage carries the cost-tracking fields OBS-006 requires (Blueprint,
+// read-only) for the per-call budget/attribution model; kept minimal here
+// (full 18-field contract lands with M15 observability instrumentation).
+// -----------------------------------------------------------------------
+
+model AgentRun {
+  id          String    @id @default(cuid())
+  workspaceId String
+  // AGENT-FLOW-001 phase name (Blueprint, read-only): SYNC, UNDERSTAND,
+  // STRUCTURE, VISUALIZE, PRE_APPROVE, DECOMPOSE, EXECUTE, RECONCILE,
+  // REPORT, REPLAN. Kept as String, not an enum, since packages/agent-
+  // runtime (M06) owns the pipeline and hasn't landed yet.
+  phase       String
+  input       Json
+  output      Json?
+  status      RunStatus @default(RUNNING)
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  toolCalls ToolCall[]
+  aiUsages  AIUsage[]
+
+  @@index([workspaceId])
+}
+
+model ToolCall {
+  id          String         @id @default(cuid())
+  workspaceId String
+  agentRunId  String
+  toolName    String
+  input       Json
+  output      Json?
+  status      ToolCallStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agentRun  AgentRun  @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([agentRunId])
+}
+
+model AIUsage {
+  id                String   @id @default(cuid())
+  workspaceId       String
+  agentRunId        String?
+  model             String
+  inputTokens       Int
+  outputTokens      Int
+  cachedInputTokens Int?
+  costBrl           Decimal? @db.Decimal(12, 6)
+  createdAt         DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agentRun  AgentRun? @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([agentRunId])
+}
+
+// -----------------------------------------------------------------------
+// Comms
+// -----------------------------------------------------------------------
+
+model Notification {
+  id           String         @id @default(cuid())
+  workspaceId  String
+  recipientRef String
+  channel      String // "APP_REPORTS" | "EMAIL" | "WHATSAPP" (API-ROUTINE-DELIVERY-001)
+  status       DeliveryStatus @default(PENDING)
+  payload      Json
+  createdAt    DateTime       @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+// -----------------------------------------------------------------------
+// Billing
+//
+// Plan identifiers and the "never expose tokens, sell Execution Credits"
+// rule are Blueprint-sourced (PRICING-001, OBS-006); real Stripe wiring
+// and the Entitlement Engine land in M13 (packages/billing) — this is
+// the schema those will read/write, not itself a billing implementation.
+// -----------------------------------------------------------------------
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  workspaceId          String             @unique
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  plan                 SubscriptionPlan   @default(TRIAL)
+  status               SubscriptionStatus @default(TRIALING)
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model UsageLedger {
+  id          String   @id @default(cuid())
+  workspaceId String
+  category    String // "AI" | "WHATSAPP" | ... (OBS-006, modelo de negocio.md)
+  amount      Decimal  @db.Decimal(12, 4)
+  unit        String
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([periodStart, periodEnd])
+}
+
+// "Não expomos tokens — o cliente compra capacidade de execução"
+// (Financeiro.md, Blueprint, read-only). Signed amount: positive = grant
+// (included allowance, top-up), negative = consumption.
+model ExecutionCredit {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  amount       Decimal  @db.Decimal(12, 4)
+  reason       String
+  balanceAfter Decimal? @db.Decimal(12, 4)
+  createdAt    DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+// -----------------------------------------------------------------------
+// Audit
+//
+// Core domain invariant (ADR-ROUTINES-001, Blueprint, read-only): "toda
+// mutação automática deve indicar a regra que a autorizou" — authorityRuleId
+// is populated whenever actorType is AGENT.
+// -----------------------------------------------------------------------
+
+model AuditEvent {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  actorType       ActorType
+  actorRef        String?
+  action          String
+  objectType      String
+  objectId        String?
+  authorityRuleId String?
+  metadata        Json?
+  createdAt       DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([objectType, objectId])
 }
