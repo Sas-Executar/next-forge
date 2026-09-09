@@ -489,7 +489,10 @@ model StatusReport {
   status       String
   progress     Json // { project_percent, cycle_current, today_delta }
   triptych     Json // { previous, current, next }
-  now          Json // { action_id, title, duration, completion_criterion, evidence_required }
+  // Nullable (M07): a workspace can have nothing currently eligible
+  // (nextAction() returns NONE/TIE) — that's a real, distinct state
+  // from an empty JSON object, not something to fake a placeholder for.
+  now          Json? // { action_id, title, duration, completion_criterion, evidence_required }
   properties   Json // 3P+N: context, problem, process, progress, next_1..3, risk, prevention, delivery
   evidenceRefs Json?
   gaps         Json?

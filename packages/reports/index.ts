@@ -1,5 +1,7 @@
-// Package skeleton — registered ahead of its milestone (plan §4) so
-// workspace resolution exists before implementation lands here. No
-// behavior yet; this file exists only so the package has a real
-// typecheck target instead of an empty project.
-export {};
+export { buildStatusReport } from "./src/builder";
+export {
+  reportStatusSchema,
+  type StatusReport,
+  statusReportSchema,
+  validateStatusReport,
+} from "./src/status-report-schema";

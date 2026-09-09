@@ -1,5 +1,5 @@
 {
-  "name": "@repo/reports",
+  "name": "@repo/mapa-os",
   "private": true,
   "version": "0.0.0",
   "scripts": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "@repo/application": "workspace:*",
     "@repo/database": "workspace:*",
-    "zod": "^4.3.6"
+    "@repo/reports": "workspace:*"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
