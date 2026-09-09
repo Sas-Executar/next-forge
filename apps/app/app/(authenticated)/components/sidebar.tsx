@@ -51,6 +51,7 @@ import {
   ShareIcon,
   SquareTerminalIcon,
   Trash2Icon,
+  ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -67,6 +68,16 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    {
+      title: "Agora",
+      url: "/now",
+      icon: ZapIcon,
+    },
+    {
+      title: "Projetos",
+      url: "/projects",
+      icon: FolderIcon,
+    },
     {
       title: "Playground",
       url: "#",
