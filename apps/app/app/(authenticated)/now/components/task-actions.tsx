@@ -7,15 +7,7 @@ import { TASK_STATE_TRANSITIONS, type TaskState } from "@repo/schemas";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { completeAction } from "@/app/actions/execution/complete-action";
-
-const STATE_LABEL_PT: Record<TaskState, string> = {
-  BACKLOG_VALIDATED: "Validado",
-  READY: "Pronto",
-  DOING: "Em execução",
-  VERIFY: "Verificar",
-  DONE: "Concluído",
-  BLOCKED: "Bloqueado",
-};
+import { TASK_STATE_LABEL_PT } from "../../components/task-state-badge";
 
 // PT-BR labels are presentation only — never alter the canonical state
 // value itself (skills/copiloto-executar/SKILL.md, Blueprint, read-only:
@@ -76,7 +68,7 @@ export const TaskActions = ({ task }: TaskActionsProperties) => {
               type="button"
               variant={evidenceTargetOpen ? "secondary" : "default"}
             >
-              {TRANSITION_LABEL_PT[toState] ?? STATE_LABEL_PT[toState]}
+              {TRANSITION_LABEL_PT[toState] ?? TASK_STATE_LABEL_PT[toState]}
             </Button>
           ) : (
             <Button
@@ -86,7 +78,7 @@ export const TaskActions = ({ task }: TaskActionsProperties) => {
               type="button"
               variant={toState === "BLOCKED" ? "outline" : "default"}
             >
-              {TRANSITION_LABEL_PT[toState] ?? STATE_LABEL_PT[toState]}
+              {TRANSITION_LABEL_PT[toState] ?? TASK_STATE_LABEL_PT[toState]}
             </Button>
           )
         )}

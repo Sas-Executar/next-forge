@@ -1,4 +1,3 @@
-import { Badge } from "@repo/design-system/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -7,13 +6,9 @@ import {
   CardTitle,
 } from "@repo/design-system/components/ui/card";
 import { nextAction } from "@repo/application";
-import {
-  NoActiveOrganizationError,
-  requireWorkspace,
-  WorkspaceNotFoundError,
-} from "@repo/auth/server";
-import type { TaskState } from "@repo/schemas";
 import type { Metadata } from "next";
+import { resolveWorkspace } from "../lib/resolve-workspace";
+import { TaskStateBadge } from "../components/task-state-badge";
 import { TaskActions } from "./components/task-actions";
 
 export const metadata: Metadata = {
@@ -21,41 +16,12 @@ export const metadata: Metadata = {
   description: "A única próxima ação elegível — WIP=1.",
 };
 
-const STATE_LABEL_PT: Record<TaskState, string> = {
-  BACKLOG_VALIDATED: "Validado",
-  READY: "Pronto",
-  DOING: "Em execução",
-  VERIFY: "Verificar",
-  DONE: "Concluído",
-  BLOCKED: "Bloqueado",
-};
-
 const NowPage = async () => {
-  let workspace: Awaited<ReturnType<typeof requireWorkspace>>;
-  try {
-    workspace = await requireWorkspace();
-  } catch (error) {
-    if (
-      error instanceof NoActiveOrganizationError ||
-      error instanceof WorkspaceNotFoundError
-    ) {
-      return (
-        <div className="p-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Nenhum workspace ativo</CardTitle>
-              <CardDescription>
-                {error instanceof NoActiveOrganizationError
-                  ? "Selecione ou crie uma organização para continuar."
-                  : "Este workspace ainda não foi sincronizado. Tente novamente em instantes."}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      );
-    }
-    throw error;
+  const resolved = await resolveWorkspace();
+  if (!resolved.ok) {
+    return resolved.fallback;
   }
+  const { workspace } = resolved;
 
   const result = await nextAction(workspace.id);
 
@@ -108,9 +74,7 @@ const NowPage = async () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{result.task.title}</CardTitle>
-              <Badge variant="secondary">
-                {STATE_LABEL_PT[result.task.state]}
-              </Badge>
+              <TaskStateBadge state={result.task.state} />
             </div>
             <CardDescription>{result.reason}</CardDescription>
           </CardHeader>

@@ -7,45 +7,163 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /*
+   * EXECUTAR design tokens — ported from
+   * Executar-app-Blueprint/references/design-system/variables.css
+   * (UI-005, read-only source, CORPUS_DIRECT extract). Ramp naming
+   * (1-12) kept verbatim from the source.
+   *
+   * --color-azure-8 fix: the source file has --color-azure-8 as a
+   * verbatim duplicate of --color-azure-9 (#1F93FF) — a known
+   * token-source gap. Per explicit product decision (not left
+   * undocumented, not silently ignored), the value below is
+   * interpolated as the midpoint between --color-azure-7 (#58ACFB)
+   * and --color-azure-9 (#1F93FF); it is NOT a value supplied by the
+   * source file.
+   */
+  --color-green-1: #fcfdfc;
+  --color-green-2: #f3faf6;
+  --color-green-3: #e4f6ed;
+  --color-green-4: #cff4e2;
+  --color-green-5: #b4f4d5;
+  --color-green-6: #8bf6c2;
+  --color-green-7: #58fbad;
+  --color-green-8: #1fff93;
+  --color-green-9: #00bf63;
+  --color-green-10: #008c49;
+  --color-green-11: #007a45;
+  --color-green-12: #064727;
+  --color-azure-1: #fcfcfd;
+  --color-azure-2: #f3f6fa;
+  --color-azure-3: #e4edf6;
+  --color-azure-4: #cfe2f4;
+  --color-azure-5: #b4d5f4;
+  --color-azure-6: #8bc2f6;
+  --color-azure-7: #58acfb;
+  --color-azure-8: #3ca0fd; /* interpolated — see note above */
+  --color-azure-9: #1f93ff;
+  --color-azure-10: #007aeb;
+  --color-azure-11: #0b6fd3;
+  --color-azure-12: #062747;
+  --color-neutral-1: #ffffff;
+  --color-neutral-2: #f6f6f6;
+  --color-neutral-3: #f0f0f0;
+  --color-neutral-4: #eaeaea;
+  --color-neutral-5: #e4e4e4;
+  --color-neutral-6: #dedede;
+  --color-neutral-7: #c5c5c5;
+  --color-neutral-8: #adadad;
+  --color-neutral-9: #959494;
+  --color-neutral-10: #7c7b7b;
+  --color-neutral-11: #646363;
+  --color-neutral-12: #4b4a4a;
+
+  /* Type scale, spacing, radius, shadow, layout — same source. */
+  --font-size-display: 56px;
+  --font-size-h1: 44px;
+  --font-size-h2: 34px;
+  --font-size-h3: 26px;
+  --font-size-title: 20px;
+  --font-size-subtitle: 18px;
+  --font-size-body-lg: 18px;
+  --font-size-body: 16px;
+  --font-size-body-sm: 14px;
+  --font-size-caption: 12px;
+  --font-size-label: 13px;
+  --font-size-button: 15px;
+  --font-size-overline: 11px;
+  --font-size-mono-data: 14px;
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+  /*
+   * --radius-sm/md/lg/xl are intentionally NOT ported under those bare
+   * names: Tailwind's own --radius-sm/md/lg/xl (below, in @theme
+   * inline) are derived from --radius and drive every shadcn
+   * component's rounding already — porting the source's differently-
+   * scaled px values (4/8/12/16) under the same names would shadow
+   * that derivation with a same-named, different-valued, effectively
+   * dead property. --radius-none/pill/full don't collide, so those
+   * are ported directly.
+   */
+  --radius-none: 0px;
+  --radius-pill: 999px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --shadow-md: 0 4px 12px rgba(20, 20, 20, 0.06);
+  --shadow-hover: 0 4px 16px rgba(20, 20, 20, 0.08);
+  --container-page: 1200px;
+  --container-reading: 720px;
+  /*
+   * Raw family tokens are ported for reference, but NOT wired into
+   * --font-sans/--font-mono below (@theme inline) in this pass — doing
+   * so needs an actual IBM Plex next/font load in apps/app's layout,
+   * which is out of scope for a design-tokens-file-only change.
+   */
+  --font-family-sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  --font-family-mono: "IBM Plex Mono", SFMono-Regular, Consolas, monospace;
+
+  /* shadcn/next-forge semantic tokens, remapped onto the ramps above. */
+  --background: var(--color-neutral-1);
+  --foreground: var(--color-neutral-12);
+  --card: var(--color-neutral-1);
+  --card-foreground: var(--color-neutral-12);
+  --popover: var(--color-neutral-1);
+  --popover-foreground: var(--color-neutral-12);
+  --primary: var(--color-green-9);
+  --primary-foreground: var(--color-neutral-1);
+  --secondary: var(--color-neutral-3);
+  --secondary-foreground: var(--color-neutral-12);
+  --muted: var(--color-neutral-2);
+  --muted-foreground: var(--color-neutral-10);
+  --accent: var(--color-azure-3);
+  --accent-foreground: var(--color-azure-11);
+  /*
+   * No red/error ramp exists in the source file — destructive stays on
+   * the stock oklch red rather than fabricating an EXECUTAR red ramp
+   * that isn't in the Blueprint. Genuine, disclosed gap.
+   */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --success: oklch(50.8% 0.118 165.612);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --success: var(--color-green-9);
+  --border: var(--color-neutral-5);
+  --input: var(--color-neutral-5);
+  --ring: var(--color-azure-8);
+  --chart-1: var(--color-green-9);
+  --chart-2: var(--color-azure-9);
+  --chart-3: var(--color-green-7);
+  --chart-4: var(--color-azure-7);
+  --chart-5: var(--color-neutral-9);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: var(--color-neutral-2);
+  --sidebar-foreground: var(--color-neutral-12);
+  --sidebar-primary: var(--color-green-9);
+  --sidebar-primary-foreground: var(--color-neutral-1);
+  --sidebar-accent: var(--color-azure-3);
+  --sidebar-accent-foreground: var(--color-azure-11);
+  --sidebar-border: var(--color-neutral-5);
+  --sidebar-ring: var(--color-azure-8);
 
   --font-weight-bold: 700;
 }
 
 .dark {
+  /*
+   * The Blueprint source (references/design-system/variables.css)
+   * supplies a single ramp per hue with no dedicated dark-mode values,
+   * and its darkest neutral (--color-neutral-12, #4B4A4A) is a mid
+   * gray, not a usable dark background. Rather than fabricate a dark
+   * ramp the source doesn't provide, dark mode is left on the stock
+   * oklch values — a genuine, disclosed gap, not a silent omission.
+   */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);

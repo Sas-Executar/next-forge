@@ -1,41 +1,20 @@
-import { Badge } from "@repo/design-system/components/ui/badge";
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
 import { forWorkspace } from "@repo/database";
 import { requireWorkspace } from "@repo/auth/server";
-import type { TaskState } from "@repo/schemas";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { TaskListView } from "../../components/task-list-view";
+import { ViewModeToggle } from "../../components/view-mode-toggle";
 import { CreateTaskForm } from "./components/create-task-form";
 
 interface ProjectPageProperties {
   readonly params: Promise<{ projectId: string }>;
+  readonly searchParams: Promise<{ view?: string }>;
 }
-
-const STATE_LABEL_PT: Record<TaskState, string> = {
-  BACKLOG_VALIDATED: "Validado",
-  READY: "Pronto",
-  DOING: "Em execução",
-  VERIFY: "Verificar",
-  DONE: "Concluído",
-  BLOCKED: "Bloqueado",
-};
-
-const STATE_BADGE_VARIANT: Record<
-  TaskState,
-  "default" | "secondary" | "outline" | "destructive"
-> = {
-  BACKLOG_VALIDATED: "outline",
-  READY: "secondary",
-  DOING: "default",
-  VERIFY: "secondary",
-  DONE: "outline",
-  BLOCKED: "destructive",
-};
 
 export const generateMetadata = async ({
   params,
@@ -50,8 +29,11 @@ export const generateMetadata = async ({
   return { title: project?.name ?? "Projeto" };
 };
 
-const ProjectPage = async ({ params }: ProjectPageProperties) => {
+const ProjectPage = async ({ params, searchParams }: ProjectPageProperties) => {
   const { projectId } = await params;
+  const { view: viewParam } = await searchParams;
+  const view = viewParam === "kanban" ? "kanban" : "lista";
+
   const workspace = await requireWorkspace();
   const db = forWorkspace(workspace.id);
 
@@ -78,16 +60,19 @@ const ProjectPage = async ({ params }: ProjectPageProperties) => {
       : Math.round((doneCount / project.tasks.length) * 100);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 p-8">
-      <div>
-        <h1 className="font-semibold text-2xl">{project.name}</h1>
-        {project.description && (
-          <p className="text-muted-foreground">{project.description}</p>
-        )}
-        <p className="mt-1 text-muted-foreground text-sm">
-          {doneCount}/{project.tasks.length} tarefas concluídas ({progressPercent}%
-          — calculado, não armazenado)
-        </p>
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-8">
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="font-semibold text-2xl">{project.name}</h1>
+          {project.description && (
+            <p className="text-muted-foreground">{project.description}</p>
+          )}
+          <p className="mt-1 text-muted-foreground text-sm">
+            {doneCount}/{project.tasks.length} tarefas concluídas (
+            {progressPercent}% — calculado, não armazenado)
+          </p>
+        </div>
+        <ViewModeToggle current={view} />
       </div>
 
       <CreateTaskForm
@@ -105,28 +90,17 @@ const ProjectPage = async ({ params }: ProjectPageProperties) => {
           </CardHeader>
         </Card>
       ) : (
-        <div className="flex flex-col gap-2">
-          {project.tasks.map((task) => (
-            <Card key={task.id}>
-              <CardContent className="flex items-center justify-between py-4">
-                <div>
-                  <p className="font-medium">{task.title}</p>
-                  {task.dependenciesFrom.length > 0 && (
-                    <p className="text-muted-foreground text-xs">
-                      depende de:{" "}
-                      {task.dependenciesFrom
-                        .map((dep) => dep.toTask.title)
-                        .join(", ")}
-                    </p>
-                  )}
-                </div>
-                <Badge variant={STATE_BADGE_VARIANT[task.state]}>
-                  {STATE_LABEL_PT[task.state]}
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <TaskListView
+          tasks={project.tasks.map((task) => ({
+            id: task.id,
+            title: task.title,
+            state: task.state,
+            dependsOnTitles: task.dependenciesFrom.map(
+              (dep) => dep.toTask.title
+            ),
+          }))}
+          view={view}
+        />
       )}
     </div>
   );

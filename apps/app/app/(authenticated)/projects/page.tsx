@@ -1,19 +1,14 @@
 import { Badge } from "@repo/design-system/components/ui/badge";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
 import { forWorkspace } from "@repo/database";
-import {
-  NoActiveOrganizationError,
-  requireWorkspace,
-  WorkspaceNotFoundError,
-} from "@repo/auth/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { resolveWorkspace } from "../lib/resolve-workspace";
 import { CreateProjectForm } from "./components/create-project-form";
 
 export const metadata: Metadata = {
@@ -21,26 +16,11 @@ export const metadata: Metadata = {
 };
 
 const ProjectsPage = async () => {
-  let workspace: Awaited<ReturnType<typeof requireWorkspace>>;
-  try {
-    workspace = await requireWorkspace();
-  } catch (error) {
-    if (
-      error instanceof NoActiveOrganizationError ||
-      error instanceof WorkspaceNotFoundError
-    ) {
-      return (
-        <div className="p-8">
-          <p className="text-muted-foreground">
-            {error instanceof NoActiveOrganizationError
-              ? "Selecione ou crie uma organização para continuar."
-              : "Este workspace ainda não foi sincronizado. Tente novamente em instantes."}
-          </p>
-        </div>
-      );
-    }
-    throw error;
+  const resolved = await resolveWorkspace();
+  if (!resolved.ok) {
+    return resolved.fallback;
   }
+  const { workspace } = resolved;
 
   const db = forWorkspace(workspace.id);
   const projects = await db.project.findMany({
@@ -50,9 +30,17 @@ const ProjectsPage = async () => {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-8">
-      <div>
-        <h1 className="font-semibold text-2xl">Projetos</h1>
-        <p className="text-muted-foreground">Escopo de projeto único — visão Lista.</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="font-semibold text-2xl">Projetos</h1>
+          <p className="text-muted-foreground">Escopo de projeto único — visão Lista.</p>
+        </div>
+        <Link
+          className="text-primary text-sm underline-offset-4 hover:underline"
+          href="/projects/remix"
+        >
+          Ver todas em Remix →
+        </Link>
       </div>
 
       <CreateProjectForm />

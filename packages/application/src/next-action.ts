@@ -1,6 +1,6 @@
 import { forWorkspace } from "@repo/database";
 import type { Task } from "@repo/database";
-import { evaluateEligibility } from "./eligibility";
+import { datesEqual, rankEligibleTasks } from "./rank-eligible-tasks";
 
 export type NextActionResult =
   | { kind: "SELECTED"; task: Task; reason: string }
@@ -16,7 +16,8 @@ export type NextActionResult =
  * precedence chain the Blueprint gives, since SPEC-ROUTINES-001 §6
  * specifies the eligibility predicate but not a full tie-break order).
  *
- * Implemented tiers, in order:
+ * Implemented tiers, in order (see rank-eligible-tasks.ts for the actual
+ * ranking — shared with /sprint, M05-T01):
  *  1. Eligibility (dependencies DONE, WIP=1) — a hard filter, not a
  *     ranking signal. See eligibility.ts.
  *  2. Criticality proxy: how many other tasks this one's completion
@@ -53,86 +54,25 @@ export const nextAction = async (
     };
   }
 
-  const candidates = await db.task.findMany({
-    where: { state: "READY" },
-    include: {
-      dependenciesFrom: { include: { toTask: { select: { state: true } } } },
-      deliverable: { select: { dueDate: true } },
-    },
-  });
-
-  if (candidates.length === 0) {
+  const ranked = await rankEligibleTasks(workspaceId);
+  if (ranked.length === 0) {
     return { kind: "NONE" };
   }
-
-  const blockingCounts = await db.dependency.groupBy({
-    by: ["toTaskId"],
-    _count: { toTaskId: true },
-  });
-  const blockingCountByTaskId = new Map(
-    blockingCounts.map((row) => [row.toTaskId, row._count.toTaskId])
-  );
-
-  const eligible = candidates.filter((task) => {
-    const dependencyStates = new Map(
-      task.dependenciesFrom.map((dep) => [dep.toTaskId, dep.toTask.state])
-    );
-    return evaluateEligibility({
-      taskState: task.state,
-      dependencyStates,
-      wipTaskInProgress: false, // already returned above if WIP was spent
-    }).eligible;
-  });
-
-  if (eligible.length === 0) {
-    return { kind: "NONE" };
-  }
-
-  const criticalityOf = (task: (typeof eligible)[number]) =>
-    blockingCountByTaskId.get(task.id) ?? 0;
-  const dueDateOf = (task: (typeof eligible)[number]) =>
-    task.deliverable?.dueDate ?? null;
-
-  const ranked = [...eligible].sort((a, b) => {
-    const criticalityDiff = criticalityOf(b) - criticalityOf(a);
-    if (criticalityDiff !== 0) {
-      return criticalityDiff;
-    }
-
-    const aDue = dueDateOf(a);
-    const bDue = dueDateOf(b);
-    if (aDue && bDue) {
-      return aDue.getTime() - bDue.getTime();
-    }
-    if (aDue) {
-      return -1;
-    }
-    if (bDue) {
-      return 1;
-    }
-    return 0;
-  });
 
   const winner = ranked[0];
   const tiedWithWinner = ranked.filter(
-    (task) =>
-      criticalityOf(task) === criticalityOf(winner) &&
-      datesEqual(dueDateOf(task), dueDateOf(winner))
+    (candidate) =>
+      candidate.criticality === winner.criticality &&
+      datesEqual(candidate.dueDate, winner.dueDate)
   );
 
   if (tiedWithWinner.length > 1) {
-    return { kind: "TIE", candidates: tiedWithWinner };
+    return { kind: "TIE", candidates: tiedWithWinner.map((c) => c.task) };
   }
 
-  return { kind: "SELECTED", task: winner, reason: "highest-ranked eligible task" };
-};
-
-const datesEqual = (a: Date | null, b: Date | null): boolean => {
-  if (a === null && b === null) {
-    return true;
-  }
-  if (a === null || b === null) {
-    return false;
-  }
-  return a.getTime() === b.getTime();
+  return {
+    kind: "SELECTED",
+    task: winner.task,
+    reason: "highest-ranked eligible task",
+  };
 };
