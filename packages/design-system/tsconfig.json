@@ -13,5 +13,9 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  // Mirrors biome.jsonc's files.includes exclusions: these directories are
+  // regenerated wholesale by `bun bump-ui` (bunx shadcn@latest add --all
+  // --overwrite), not hand-maintained, and can drift from the pinned
+  // recharts/react-resizable-panels versions between shadcn releases.
+  "exclude": ["node_modules", "components/ui", "lib", "hooks"]
 }

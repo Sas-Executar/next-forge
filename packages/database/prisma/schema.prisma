@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider     = "postgresql"
-  relationMode = "prisma"
+  relationMode = "foreignKeys"
 }
 
 // This is a stub model.
