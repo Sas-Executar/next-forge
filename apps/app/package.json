@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
+    "@repo/agent-runtime": "workspace:*",
+    "@repo/ai": "workspace:*",
     "@repo/analytics": "workspace:*",
     "@repo/application": "workspace:*",
     "@repo/auth": "workspace:*",

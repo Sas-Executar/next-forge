@@ -1,5 +1,16 @@
-// Package skeleton — registered ahead of its milestone (plan §4) so
-// workspace resolution exists before implementation lands here. No
-// behavior yet; this file exists only so the package has a real
-// typecheck target instead of an empty project.
-export {};
+export * from "./src/commands";
+export { formatOrchestratorOutputText } from "./src/format";
+export {
+  type OrchestratorOutput,
+  orchestratorOutputSchema,
+  orchestratorRouteModuleSchema,
+  validateOrchestratorOutput,
+} from "./src/output-schema";
+export {
+  AGENT_FLOW_PHASES,
+  type AgentFlowPhase,
+  isDecomposePhase,
+  REPLAN_RETURNS_TO,
+} from "./src/phases";
+export { COPILOT_SYSTEM_PROMPT } from "./src/prompts/system";
+export { buildCopilotTools } from "./src/tools";

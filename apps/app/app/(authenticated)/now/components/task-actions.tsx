@@ -1,13 +1,16 @@
 "use client";
 
+import type { Task } from "@repo/database";
 import { Button } from "@repo/design-system/components/ui/button";
 import { Textarea } from "@repo/design-system/components/ui/textarea";
-import type { Task } from "@repo/database";
-import { TASK_STATE_TRANSITIONS, type TaskState } from "@repo/schemas";
+import {
+  TASK_STATE_LABEL_PT,
+  TASK_STATE_TRANSITIONS,
+  type TaskState,
+} from "@repo/schemas";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { completeAction } from "@/app/actions/execution/complete-action";
-import { TASK_STATE_LABEL_PT } from "../../components/task-state-badge";
 
 // PT-BR labels are presentation only — never alter the canonical state
 // value itself (skills/copiloto-executar/SKILL.md, Blueprint, read-only:
@@ -47,7 +50,11 @@ export const TaskActions = ({ task }: TaskActionsProperties) => {
         setEvidenceDescription("");
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Falha ao atualizar a tarefa.");
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : "Falha ao atualizar a tarefa."
+        );
       }
     });
   };
@@ -87,7 +94,9 @@ export const TaskActions = ({ task }: TaskActionsProperties) => {
       {evidenceTargetOpen && (
         <div className="flex flex-col gap-2 rounded-lg border p-3">
           <p className="text-muted-foreground text-sm">
-            {"'feito' não substitui evidência — descreva o que comprova a conclusão."}
+            {
+              "'feito' não substitui evidência — descreva o que comprova a conclusão."
+            }
           </p>
           <Textarea
             onChange={(event) => setEvidenceDescription(event.target.value)}

@@ -1,3 +1,4 @@
+import { forWorkspace } from "@repo/database";
 import {
   Card,
   CardContent,
@@ -5,16 +6,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { forWorkspace } from "@repo/database";
 import type { TaskState } from "@repo/schemas";
+import { TASK_STATE_LABEL_PT } from "@repo/schemas";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { TASK_STATE_LABEL_PT } from "../components/task-state-badge";
 import { resolveWorkspace } from "../lib/resolve-workspace";
 
 export const metadata: Metadata = {
   title: "Visão geral",
-  description: "Projeto/Portfolio Projection — leitura agregada, não altera estado.",
+  description:
+    "Projeto/Portfolio Projection — leitura agregada, não altera estado.",
 };
 
 const STATE_ORDER: readonly TaskState[] = [

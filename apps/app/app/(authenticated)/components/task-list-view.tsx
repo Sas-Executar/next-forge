@@ -1,7 +1,8 @@
-import { Card, CardContent } from "@repo/design-system/components/ui/card";
 import type { Task } from "@repo/database";
+import { Card, CardContent } from "@repo/design-system/components/ui/card";
 import type { TaskState } from "@repo/schemas";
-import { TASK_STATE_LABEL_PT, TaskStateBadge } from "./task-state-badge";
+import { TASK_STATE_LABEL_PT } from "@repo/schemas";
+import { TaskStateBadge } from "./task-state-badge";
 
 export type TaskWithContext = Pick<Task, "id" | "title" | "state"> & {
   /** Shown per-card only in Remix (multi-project) scope — SPEC-WORKSPACE-001

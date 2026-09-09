@@ -1,17 +1,6 @@
 import { Badge } from "@repo/design-system/components/ui/badge";
 import type { TaskState } from "@repo/schemas";
-
-// PT-BR labels are presentation only — never alter the canonical state
-// value itself (skills/copiloto-executar/SKILL.md, Blueprint, read-only:
-// "Não alterar o estado canônico apenas para traduzir a interface").
-export const TASK_STATE_LABEL_PT: Record<TaskState, string> = {
-  BACKLOG_VALIDATED: "Validado",
-  READY: "Pronto",
-  DOING: "Em execução",
-  VERIFY: "Verificar",
-  DONE: "Concluído",
-  BLOCKED: "Bloqueado",
-};
+import { TASK_STATE_LABEL_PT } from "@repo/schemas";
 
 const TASK_STATE_BADGE_VARIANT: Record<
   TaskState,

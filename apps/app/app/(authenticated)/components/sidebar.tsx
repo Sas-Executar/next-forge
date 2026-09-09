@@ -23,6 +23,7 @@ import {
   AnchorIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
+  BotIcon,
   CalendarIcon,
   FolderIcon,
   GaugeIcon,
@@ -41,9 +42,9 @@ interface GlobalSidebarProperties {
 
 /*
  * SPEC-WORKSPACE-001 §1 Route Model, in the order given there. Only
- * routes that exist today (M04 + M05) are linked — /copilot, /mapa-os,
+ * routes that exist today (M04 + M05 + M06) are linked — /mapa-os,
  * /scanner, /reports, /automations, /workflows, and
- * /projects/:projectId/documents belong to later milestones (M06-M10)
+ * /projects/:projectId/documents belong to later milestones (M07-M10)
  * and aren't real pages yet, so they're deliberately not listed here
  * rather than added as dead links.
  */
@@ -63,6 +64,7 @@ const data = {
     { title: "Visão Geral", url: "/overview", icon: LayoutDashboardIcon },
     { title: "Roadmap", url: "/roadmap", icon: MapIcon },
     { title: "Calendário", url: "/calendar", icon: CalendarIcon },
+    { title: "Copiloto", url: "/copilot", icon: BotIcon },
   ],
   navSecondary: [
     {
