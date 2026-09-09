@@ -7,7 +7,8 @@
     "analyze": "prisma generate --no-hints --schema=./prisma/schema.prisma",
     "build": "prisma generate --no-hints --schema=./prisma/schema.prisma",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "test": "NODE_ENV=test vitest run"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
@@ -27,6 +28,7 @@
     "bufferutil": "^4.1.0",
     "dotenv": "^16.5.0",
     "prisma": "7.4.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

@@ -265,6 +265,7 @@
       "dependencies": {
         "@clerk/nextjs": "^7.0.1",
         "@clerk/themes": "^2.4.57",
+        "@repo/database": "workspace:*",
         "@t3-oss/env-nextjs": "^0.13.10",
         "next-themes": "^0.4.6",
         "react": "19.2.4",
@@ -338,6 +339,7 @@
         "dotenv": "^16.5.0",
         "prisma": "7.4.2",
         "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
       },
     },
     "packages/design-system": {
