@@ -42,7 +42,14 @@
           "icon": "./assets/images/icon.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "EXECUTAR usa a câmera para reconhecer símbolos visuais do Mapa-OS (Scanner)."
+        }
+      ],
+      "onnxruntime-react-native"
     ],
     "experiments": {
       "typedRoutes": true

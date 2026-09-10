@@ -39,3 +39,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# M09-T01: release-managed model artifact, fetched by
+# scripts/fetch-model.ts and SHA-256-verified — never committed raw.
+assets/models/*.onnx
+assets/models/*.download

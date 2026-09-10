@@ -89,6 +89,9 @@ enum MembershipRole {
 }
 
 // PRD-SCANNER-001 V1 vocabulary (Blueprint, read-only): exactly 3 symbols.
+// Promoted to packages/schemas/src/scanner.ts (M09) — packages/scanner
+// needs these types from a React-Native-safe context that can't import
+// @repo/database — mirrored here by hand like every other D9 enum.
 enum VisualSymbolSemantic {
   CHAT
   SELECTOR
