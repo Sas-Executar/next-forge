@@ -103,6 +103,7 @@ because no live deployment has ever existed for this project.
 | M17 | Tests/Evals | ✅ Playwright infra, `@repo/schemas` coverage, real eval harness, `ci.yml` | ✅ 26 + 19 tests, first real CI gate | ✅ CI genuinely green on this PR |
 | M18 | Production infra | ✅ Neon preview-branch workflow, env matrix, secrets inventory | — (config) | Needs real Neon/Vercel accounts |
 | M19 | Web/mobile release | ✅ CD Web + CD Mobile workflows, store-submission prep | — (config) | Needs real Vercel/Expo/Apple/Google accounts |
+| M21 | Launch readiness | ✅ apps/mobile's 5 placeholder screens replaced with real ones (7 new apps/api adapter routes + 5 mobile client modules); real Neon prod DB (`snowy-dawn-65785764`, all 8 migrations applied); real Vercel projects (`executar-nf-{app,web,api,storybook}`); real Stripe test-mode products/prices/webhook | ✅ 18 new apps/api tests, 36/36 typecheck, 0 lint errors | ✅ Neon tables confirmed via `get_database_tables`; Vercel/Stripe resources confirmed via their own API responses — env vars, domain, Clerk/OpenAI/BaseHub/WhatsApp/Gmail/Outlook/EAS credentials still needed (`LAUNCH_RUNBOOK.md`) |
 
 ## M20-T03 — Blueprint traceability
 

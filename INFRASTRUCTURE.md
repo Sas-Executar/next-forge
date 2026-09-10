@@ -56,10 +56,18 @@ Four apps already carry a real `vercel.json` (`apps/{app,web,api,storybook}`
 deployments): `bunVersion: "1.x"`, a `scripts/skip-ci.js` ignore-command
 (Next Forge's own path-based build-skip convention), and `apps/api` adds
 its two real Vercel Cron entries (`/cron/keep-alive`, `/cron/routines` —
-M10-T03). Linking each to a real Vercel project (`vercel link`, or the
-Vercel GitHub integration's own PR-based auto-linking) is an account
-action this repo's code can't perform — no `NEON_API_KEY`/Vercel token
-exists in this sandbox to do it.
+M10-T03).
+
+**M21 update**: the Vercel connector's own project-creation API is now
+available in this environment, so linking is done — 4 real projects exist
+under team `Sas_Executar` (`team_fJe21quDM0egDSTPE0CFwNnm`), each linked to
+`Sas-Executar/next-forge` with the matching `rootDirectory`:
+`executar-nf-app` (`prj_MkAbPkEyQRJboeX6xTKiLFoviPdl`), `executar-nf-web`
+(`prj_h4tfuhTnIiedTObU16xvBAEWkBWI`), `executar-nf-api`
+(`prj_eT3E4NGlkjWnDhv1XmGCnxi0932M`), `executar-nf-storybook`
+(`prj_ZaRfOZdchptCOpjViZj4RubN4I4C`). What remains a real account action —
+populating each project's environment variables — has no Vercel MCP tool
+either; see `LAUNCH_RUNBOOK.md` §2 for the exact per-project list.
 
 ### Environment matrix
 
@@ -91,6 +99,16 @@ themselves.
 `vars.NEON_PROJECT_ID` repository variable so it safely no-ops (not
 errors) until a real Neon project exists to point it at. See that file's
 own header for exactly what it does and doesn't wire up.
+
+**M21 update**: a real Neon production project now exists —
+`executar-production` (`snowy-dawn-65785764`), org
+`sas_executar@outlook.com` (`org-winter-mountain-31273448`), created via
+the Neon MCP connector's own provisioning API. All 8 existing Prisma
+migrations were applied for real (30 tables, RLS policies included,
+`_prisma_migrations` populated with real checksums so a future `prisma
+migrate deploy` sees them as already-applied). `vars.NEON_PROJECT_ID` in
+GitHub and each Vercel project's `DATABASE_URL` still need to be set
+manually — see `LAUNCH_RUNBOOK.md` §1/§9.
 
 ## EAS / Expo (M18-T03)
 
