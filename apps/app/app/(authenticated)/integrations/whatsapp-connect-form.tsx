@@ -35,6 +35,7 @@ export const WhatsAppConnectForm = () => {
   return (
     <form className="flex flex-col gap-2" onSubmit={onSubmit}>
       <Input
+        aria-label="phone_number_id do WhatsApp (Meta Business Manager)"
         onChange={(event) => setPhoneNumberId(event.target.value)}
         placeholder="phone_number_id (Meta Business Manager)"
         value={phoneNumberId}

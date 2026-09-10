@@ -1,0 +1,77 @@
+# M16-T05 — secrets scanning + dependency vulnerability scanning.
+# Narrower than the full CI gate M19 is meant to build (this repo's only
+# other workflow, release.yml, publishes the `next-forge` CLI to npm on
+# push to main — there is still no lint/typecheck/test/build gate on
+# pull requests as of this milestone): a security-specific workflow, not
+# a substitute for M19's real CI.
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Dependency advisories change even when this repo doesn't — a weekly
+  # run catches a newly-published CVE against an already-merged
+  # dependency, not just ones introduced by a given push/PR.
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  secrets-scan:
+    name: Secrets scan (TruffleHog OSS)
+    runs-on: ubuntu-latest
+    # TruffleHog needs the commit range to diff, not just the tip —
+    # without full history `--since-commit`/`base` resolves against a
+    # shallow clone and silently scans less than intended.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@v3.96.0
+        with:
+          path: ./
+          # push/schedule: no prior commit to diff against in this job's
+          # own context — scan the whole checked-out history instead of
+          # a single commit range. pull_request: diff base...head so a
+          # PR is scanned against what it actually changes.
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'HEAD' }}
+          extra_args: --only-verified
+
+  dependency-audit:
+    name: Dependency vulnerability audit (bun audit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Real scan, real findings — as of this workflow's introduction,
+      # `bun audit` reports 306 known advisories against this repo's
+      # dependency tree (9 critical), overwhelmingly in transitive
+      # dev-tooling (e.g. @turbo/gen's bundled handlebars, several
+      # packages' picomatch), not runtime-shipped app code. Bulk-bumping
+      # ~300 transitive versions with zero verification budget in this
+      # milestone would risk breaking the build far more than it fixes
+      # today — that remediation is real follow-up work, not something
+      # to wave through here. `continue-on-error` so this job still runs
+      # for real on every push/PR/week and its output stays visible in
+      # the Actions log, without making every PR red from this
+      # workflow's first run with no fix in scope. M17-T04 is where this
+      # repo defines the real, enforced thresholds for its quality gates
+      # (typecheck/tests/evals/security) — that's the milestone that
+      # turns this from "visible" to "blocking".
+      - name: bun audit
+        continue-on-error: true
+        run: bun audit

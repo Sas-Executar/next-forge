@@ -15,7 +15,9 @@
       "docs": "Documentação",
       "contact": "Contato",
       "signIn": "Entrar",
-      "signUp": "Comece agora"
+      "signUp": "Comece agora",
+      "openMenu": "Abrir menu",
+      "closeMenu": "Fechar menu"
     },
     "home": {
       "meta": {

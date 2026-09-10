@@ -137,7 +137,16 @@ export const Header = ({ dictionary }: HeaderProps) => {
           </Button>
         </div>
         <div className="flex w-12 shrink items-end justify-end lg:hidden">
-          <Button onClick={() => setOpen(!isOpen)} variant="ghost">
+          <Button
+            aria-expanded={isOpen}
+            aria-label={
+              isOpen
+                ? dictionary.web.header.closeMenu
+                : dictionary.web.header.openMenu
+            }
+            onClick={() => setOpen(!isOpen)}
+            variant="ghost"
+          >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           {isOpen && (

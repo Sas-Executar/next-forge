@@ -99,6 +99,7 @@ export const TaskActions = ({ task }: TaskActionsProperties) => {
             }
           </p>
           <Textarea
+            aria-label="Descrição da evidência de conclusão"
             onChange={(event) => setEvidenceDescription(event.target.value)}
             placeholder="O que comprova que esta tarefa foi concluída?"
             value={evidenceDescription}

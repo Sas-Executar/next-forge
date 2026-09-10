@@ -15,7 +15,9 @@
       "docs": "Docs",
       "contact": "Contact",
       "signIn": "Sign in",
-      "signUp": "Get started"
+      "signUp": "Get started",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "home": {
       "meta": {

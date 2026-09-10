@@ -1,10 +1,12 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import { database } from "@repo/database";
 import type { MembershipRole } from "@repo/database";
+import { database } from "@repo/database";
+import { hasRole } from "./src/permissions";
 
 export * from "@clerk/nextjs/server";
+export * from "./src/permissions";
 
 export class NoActiveOrganizationError extends Error {
   constructor() {
@@ -57,15 +59,14 @@ export const requireWorkspace = async () => {
   return workspace;
 };
 
-const ROLE_RANK: Record<MembershipRole, number> = { MEMBER: 0, OWNER: 1 };
-
 /**
  * Requires the session's user to hold at least `role` in the resolved
- * workspace (OWNER satisfies a MEMBER requirement, not the reverse).
- * Provisional 2-role model — see the MembershipRole comment in
- * packages/database/prisma/schema.prisma; this is not the real
- * permission matrix (M16-T01), which the Blueprint's own SEC-004 leaves
- * an empty stub today.
+ * workspace (OWNER satisfies a MEMBER requirement, not the reverse), via
+ * `hasRole()` (./src/permissions.ts) — the same comparator M16-T01's
+ * permission matrix regression test exercises directly, so this real
+ * gate and that matrix can't drift into two different definitions of
+ * "at least". Provisional 2-role model — see the MembershipRole comment
+ * in packages/database/prisma/schema.prisma.
  */
 export const requireRole = async (role: MembershipRole) => {
   const { userId } = await auth();
@@ -82,7 +83,7 @@ export const requireRole = async (role: MembershipRole) => {
       })
     : null;
 
-  if (!membership || ROLE_RANK[membership.role] < ROLE_RANK[role]) {
+  if (!(membership && hasRole(membership.role, role))) {
     throw new InsufficientRoleError(role);
   }
 

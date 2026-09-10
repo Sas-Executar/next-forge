@@ -73,6 +73,7 @@ export const CopilotChat = () => {
 
       <form className="flex gap-2" onSubmit={onSubmit}>
         <Textarea
+          aria-label="Mensagem para o Copiloto"
           className="min-h-0 flex-1 resize-none"
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={(event) => {
