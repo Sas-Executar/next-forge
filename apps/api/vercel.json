@@ -6,6 +6,10 @@
     {
       "path": "/cron/keep-alive",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/cron/routines",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

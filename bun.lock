@@ -32,6 +32,7 @@
         "@repo/next-config": "workspace:*",
         "@repo/observability": "workspace:*",
         "@repo/payments": "workspace:*",
+        "@repo/routines": "workspace:*",
         "@sentry/nextjs": "^10.42.0",
         "@t3-oss/env-nextjs": "^0.13.10",
         "import-in-the-middle": "^3.0.0",
@@ -61,6 +62,7 @@
         "@repo/analytics": "workspace:*",
         "@repo/application": "workspace:*",
         "@repo/auth": "workspace:*",
+        "@repo/automation": "workspace:*",
         "@repo/collaboration": "workspace:*",
         "@repo/database": "workspace:*",
         "@repo/design-system": "workspace:*",
@@ -71,6 +73,7 @@
         "@repo/notifications": "workspace:*",
         "@repo/observability": "workspace:*",
         "@repo/reports": "workspace:*",
+        "@repo/routines": "workspace:*",
         "@repo/schemas": "workspace:*",
         "@repo/security": "workspace:*",
         "@repo/seo": "workspace:*",
@@ -300,6 +303,19 @@
         "@types/react": "19.2.14",
         "@types/react-dom": "19.2.3",
         "typescript": "^5.9.3",
+      },
+    },
+    "packages/automation": {
+      "name": "@repo/automation",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/database": "workspace:*",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
       },
     },
     "packages/cms": {
@@ -578,6 +594,26 @@
       "dependencies": {
         "@repo/application": "workspace:*",
         "@repo/database": "workspace:*",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
+      },
+    },
+    "packages/routines": {
+      "name": "@repo/routines",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/application": "workspace:*",
+        "@repo/database": "workspace:*",
+        "@repo/domain": "workspace:*",
+        "@repo/email": "workspace:*",
+        "@repo/reports": "workspace:*",
+        "@repo/schemas": "workspace:*",
+        "@t3-oss/env-nextjs": "^0.13.10",
+        "cron-schedule": "^5.0.4",
         "zod": "^4.3.6",
       },
       "devDependencies": {
@@ -1614,6 +1650,8 @@
 
     "@repo/auth": ["@repo/auth@workspace:packages/auth"],
 
+    "@repo/automation": ["@repo/automation@workspace:packages/automation"],
+
     "@repo/cms": ["@repo/cms@workspace:packages/cms"],
 
     "@repo/collaboration": ["@repo/collaboration@workspace:packages/collaboration"],
@@ -1643,6 +1681,8 @@
     "@repo/rate-limit": ["@repo/rate-limit@workspace:packages/rate-limit"],
 
     "@repo/reports": ["@repo/reports@workspace:packages/reports"],
+
+    "@repo/routines": ["@repo/routines@workspace:packages/routines"],
 
     "@repo/schemas": ["@repo/schemas@workspace:packages/schemas"],
 

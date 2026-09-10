@@ -48,3 +48,30 @@ export const forWorkspace = (workspaceId: string) =>
       },
     },
   });
+
+/**
+ * The one narrow exception to "no bypass client" above (M10-T03,
+ * prisma/migrations/*_routine_system_job_discovery): read-only,
+ * cross-tenant discovery of ENABLED Routine rows for the scheduler,
+ * which has no single workspace to scope to before it even knows which
+ * workspaces have due routines. Sets `app.is_system_job`, a distinct
+ * GUC from `app.current_workspace_id` — this does not grant access to
+ * any other table or operation, and every actual execution step
+ * (packages/routines/src/pipeline.ts) still runs through
+ * forWorkspace(routine.workspaceId) exactly as request-scoped code
+ * does. Do not reach for this outside that one discovery query.
+ */
+export const forSystemJob = () =>
+  database.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ args, query }) {
+          const [, result] = await database.$transaction([
+            database.$executeRaw`SELECT set_config('app.is_system_job', 'true', TRUE)`,
+            query(args),
+          ]);
+          return result;
+        },
+      },
+    },
+  });

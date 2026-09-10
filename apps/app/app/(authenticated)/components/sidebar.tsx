@@ -31,7 +31,9 @@ import {
   LayoutDashboardIcon,
   MapIcon,
   PrinterIcon,
+  RepeatIcon,
   SunIcon,
+  WorkflowIcon,
   ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -44,10 +46,10 @@ interface GlobalSidebarProperties {
 
 /*
  * SPEC-WORKSPACE-001 §1 Route Model, in the order given there. Only
- * routes that exist today (M04 + M05 + M06 + M07) are linked —
- * /scanner, /automations, /workflows, and /projects/:projectId/documents
- * belong to later milestones (M08-M10) and aren't real pages yet, so
- * they're deliberately not listed here rather than added as dead links.
+ * routes that exist today (M04 + M05 + M06 + M07 + M10) are linked —
+ * /scanner and /projects/:projectId/documents belong to later
+ * milestones (M08/M09) and aren't real pages yet, so they're
+ * deliberately not listed here rather than added as dead links.
  */
 const data = {
   user: {
@@ -68,6 +70,8 @@ const data = {
     { title: "Copiloto", url: "/copilot", icon: BotIcon },
     { title: "Mapa-OS", url: "/mapa-os", icon: PrinterIcon },
     { title: "Reports", url: "/reports", icon: FileTextIcon },
+    { title: "Automações", url: "/automations", icon: RepeatIcon },
+    { title: "Workflows", url: "/workflows", icon: WorkflowIcon },
   ],
   navSecondary: [
     {
