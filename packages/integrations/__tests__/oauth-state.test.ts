@@ -30,7 +30,19 @@ describe("signOAuthState / verifyOAuthState", () => {
 
   it("rejects a tampered state", () => {
     const state = signOAuthState("workspace-123");
-    const tampered = `${state.slice(0, -1)}${state.at(-1) === "A" ? "B" : "A"}`;
+    // Tamper the second-to-last character, not the last one: the final
+    // character of a base64url-encoded SHA-256 digest (oauth-state.ts's
+    // `sign()`) carries 2 padding bits that Buffer's base64url decoder
+    // ignores — flipping only that character can decode to the exact
+    // same signature bytes, occasionally making this assertion falsely
+    // pass depending on the random key `beforeEach` generates (caught
+    // by a real CI run, not a flake — every character before the final
+    // one sits in a full, unpadded base64 group, so tampering there is
+    // guaranteed to change the decoded bytes).
+    const index = state.length - 2;
+    const tamperedChar = state[index] === "A" ? "B" : "A";
+    const tampered =
+      state.slice(0, index) + tamperedChar + state.slice(index + 1);
     expect(verifyOAuthState(tampered)).toBeNull();
   });
 
