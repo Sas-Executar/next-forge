@@ -25,6 +25,7 @@ import {
   ArrowRightIcon,
   BotIcon,
   CalendarIcon,
+  CreditCardIcon,
   FileTextIcon,
   FolderIcon,
   GaugeIcon,
@@ -51,10 +52,12 @@ interface GlobalSidebarProperties {
  * linked — /scanner and /projects/:projectId/documents belong to later
  * milestones (M08/M09) and aren't real pages yet, so they're
  * deliberately not listed here rather than added as dead links.
- * /integrations (M11) isn't in SPEC-WORKSPACE-001's route list at all
- * (the Blueprint has no settings/integrations surface named anywhere)
- * — a code-owned addition, since PRD-OMNI-001's connections need
- * somewhere for a human to actually connect/disconnect them.
+ * /integrations (M11) and /settings/billing (M13) aren't in
+ * SPEC-WORKSPACE-001's route list at all (the Blueprint has no
+ * settings/integrations or settings/billing surface named anywhere) —
+ * code-owned additions, since PRD-OMNI-001's connections and
+ * PRICING-001's plans both need somewhere for a human to actually act on
+ * them.
  */
 const data = {
   user: {
@@ -78,6 +81,7 @@ const data = {
     { title: "Automações", url: "/automations", icon: RepeatIcon },
     { title: "Workflows", url: "/workflows", icon: WorkflowIcon },
     { title: "Integrações", url: "/integrations", icon: PlugIcon },
+    { title: "Cobrança", url: "/settings/billing", icon: CreditCardIcon },
   ],
   navSecondary: [
     {

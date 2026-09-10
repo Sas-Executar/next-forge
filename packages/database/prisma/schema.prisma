@@ -122,7 +122,9 @@ enum IntegrationConnectionStatus {
 
 // PRICING-001 (Blueprint, read-only) — Trial/Solo/Pro/Business/Enterprise.
 // Prices there are explicitly PROPOSED, not published; this enum only
-// fixes the plan identifiers, not amounts.
+// fixes the plan identifiers, not amounts. Mirrored (D9) to
+// packages/schemas/src/billing.ts — packages/billing (M13) needs it from
+// a DB-independent context; keep the two definitions in lockstep by hand.
 enum SubscriptionPlan {
   TRIAL
   SOLO
@@ -765,8 +767,15 @@ model Subscription {
   plan                 SubscriptionPlan   @default(TRIAL)
   status               SubscriptionStatus @default(TRIALING)
   currentPeriodEnd     DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  // M13-T05 (Business workspace seats, PRICING-001 §5): additional
+  // seats purchased beyond the plan's included baseline (5 for
+  // Business, packages/billing/src/seats.ts's own INCLUDED_SEATS
+  // table). Meaningless for Solo/Pro (single-executor plans) — always 0
+  // there. Not itself the seat *limit*; packages/billing/src/seats.ts
+  // computes total capacity as includedSeats(plan) + purchasedSeats.
+  purchasedSeats Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }

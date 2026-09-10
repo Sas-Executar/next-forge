@@ -1,5 +1,6 @@
 import { analytics } from "@repo/analytics/server";
 import { clerkClient } from "@repo/auth/server";
+import { syncSubscriptionFromStripe } from "@repo/billing";
 import { parseError } from "@repo/observability/error";
 import { log } from "@repo/observability/log";
 import type { Stripe } from "@repo/payments";
@@ -88,6 +89,19 @@ export const POST = async (request: Request): Promise<Response> => {
       }
       case "subscription_schedule.canceled": {
         await handleSubscriptionScheduleCanceled(event.data.object);
+        break;
+      }
+      // M13-T04 — Subscription.plan/status/currentPeriodEnd mirror
+      // (packages/billing's own real ledger, not this generic
+      // boilerplate route's original Clerk-user-metadata path above,
+      // which stays as-is for the analytics event it already sends).
+      // `.created`/`.updated` share one handler since both events carry
+      // the subscription's full current state, not a diff — the same
+      // upsert-by-current-value shape applies either way.
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        await syncSubscriptionFromStripe(event.data.object);
         break;
       }
       default: {

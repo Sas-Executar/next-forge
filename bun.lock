@@ -28,6 +28,7 @@
         "@modelcontextprotocol/sdk": "^1.27.1",
         "@repo/analytics": "workspace:*",
         "@repo/auth": "workspace:*",
+        "@repo/billing": "workspace:*",
         "@repo/database": "workspace:*",
         "@repo/design-system": "workspace:*",
         "@repo/integrations": "workspace:*",
@@ -68,6 +69,7 @@
         "@repo/application": "workspace:*",
         "@repo/auth": "workspace:*",
         "@repo/automation": "workspace:*",
+        "@repo/billing": "workspace:*",
         "@repo/collaboration": "workspace:*",
         "@repo/database": "workspace:*",
         "@repo/design-system": "workspace:*",
@@ -359,6 +361,22 @@
       "version": "0.0.0",
       "dependencies": {
         "@repo/database": "workspace:*",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
+      },
+    },
+    "packages/billing": {
+      "name": "@repo/billing",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/database": "workspace:*",
+        "@repo/payments": "workspace:*",
+        "@repo/schemas": "workspace:*",
+        "server-only": "^0.0.1",
         "zod": "^4.3.6",
       },
       "devDependencies": {
@@ -1892,6 +1910,8 @@
     "@repo/auth": ["@repo/auth@workspace:packages/auth"],
 
     "@repo/automation": ["@repo/automation@workspace:packages/automation"],
+
+    "@repo/billing": ["@repo/billing@workspace:packages/billing"],
 
     "@repo/cms": ["@repo/cms@workspace:packages/cms"],
 

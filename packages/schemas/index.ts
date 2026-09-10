@@ -1,6 +1,7 @@
 export * from "./src/actor";
 export * from "./src/authority";
 export * from "./src/authority-decision";
+export * from "./src/billing";
 export * from "./src/evidence";
 export * from "./src/routine";
 export * from "./src/scanner";

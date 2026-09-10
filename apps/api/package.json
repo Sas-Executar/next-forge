@@ -16,6 +16,7 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@repo/analytics": "workspace:*",
     "@repo/auth": "workspace:*",
+    "@repo/billing": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/design-system": "workspace:*",
     "@repo/integrations": "workspace:*",
