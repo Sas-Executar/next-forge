@@ -1,0 +1,109 @@
+# M19-T02 — CD Web: migration gate → deploy (apps/app, apps/web,
+# apps/api, each its own Vercel project, matching their existing
+# vercel.json files) → health check, on every push to main. Uses
+# Vercel's own first-party CLI flow (`vercel pull` → `vercel build` →
+# `vercel deploy --prebuilt`), not a third-party action — confirmed via
+# Vercel's own current docs, not assumed.
+#
+# M19-T01 (a real lint/typecheck/test gate on every PR) is already
+# .github/workflows/ci.yml, built ahead of schedule in M17 because
+# M17-T04's quality gates needed it — not duplicated here.
+#
+# Gated on a real vercel-org-id repository variable so this safely
+# no-ops (not errors) until a real Vercel org/projects/tokens exist —
+# this repo's CI has none. Rollback: `vercel rollback` is a single real
+# command (see the job's own comment) — not wired to auto-trigger on a
+# failed health check here, since doing that safely needs a real
+# deployment's URL/ID from a real `vercel deploy` run to test against,
+# which this sandbox cannot produce; documented as a manual/on-call step
+# instead of a guessed-at automation.
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Apply production migrations
+    if: vars.VERCEL_ORG_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Migrate deploy (production)
+        working-directory: packages/database
+        run: bunx prisma migrate deploy --schema=./prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  deploy:
+    name: Deploy ${{ matrix.app }}
+    needs: migrate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - app: app
+            project_id_secret: VERCEL_PROJECT_ID_APP
+            health_path: /sign-in
+          - app: web
+            project_id_secret: VERCEL_PROJECT_ID_WEB
+            health_path: /en
+          - app: api
+            project_id_secret: VERCEL_PROJECT_ID_API
+            health_path: /health
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel project settings
+        working-directory: apps/${{ matrix.app }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets[matrix.project_id_secret] }}
+
+      - name: Build
+        working-directory: apps/${{ matrix.app }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets[matrix.project_id_secret] }}
+
+      - name: Deploy prebuilt output
+        id: deploy
+        working-directory: apps/${{ matrix.app }}
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets[matrix.project_id_secret] }}
+
+      - name: Health check
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.deploy.outputs.url }}${{ matrix.health_path }}")
+          echo "HTTP $status from ${{ steps.deploy.outputs.url }}${{ matrix.health_path }}"
+          if [ "$status" -ge 500 ]; then
+            echo "::error::Deployed ${{ matrix.app }} returned a server error ($status) — see 'vercel rollback ${{ steps.deploy.outputs.url }} --token=...' to roll back manually."
+            exit 1
+          fi

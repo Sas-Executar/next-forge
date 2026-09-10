@@ -1,12 +1,53 @@
 # Infrastructure
 
-M18 — Vercel/Neon/EAS environment wiring, real code/config where a real
-config file can express it (`vercel.json`, `eas.json`,
-`.github/workflows/preview-db.yml`), documented where the actual
-linkage is inherently a dashboard/account action (`vercel link`,
-creating a real Neon/EAS project) no file in this repo can perform or
+M18 (env wiring) + M19 (release/deploy) — Vercel/Neon/EAS environment
+wiring and CD, real code/config where a real config file can express it
+(`vercel.json`, `eas.json`, `.github/workflows/{preview-db,deploy-web,
+deploy-mobile}.yml`), documented where the actual linkage is inherently
+a dashboard/account action (`vercel link`, creating a real Neon/EAS/App
+Store Connect/Google Play project) no file in this repo can perform or
 verify. Every "not done here" item below is a real external-account
 step, not a shortcut around code that could have been written instead.
+
+## Release workflows (M19)
+
+- **`ci.yml`** (M17-T04) — lint/typecheck/test on every PR. M19-T01's
+  own target; built ahead of schedule because M17's quality gates
+  needed it. Already green on this branch's own PR.
+- **`security.yml`** (M16-T05) — secrets + dependency scanning.
+- **`preview-db.yml`** (M18-T02) — a Neon branch per PR.
+- **`deploy-web.yml`** (M19-T02) — migration gate → deploy
+  `apps/{app,web,api}` (Vercel's own CLI flow: `vercel pull` →
+  `vercel build` → `vercel deploy --prebuilt`) → an HTTP health check
+  per app. Gated on a real `vars.VERCEL_ORG_ID`; rollback is `vercel
+  rollback <url> --token=...` — a real, single command, documented in
+  the health-check step's own error message rather than wired to
+  auto-fire, since a real trigger needs a real deployment URL from a
+  real run to test against.
+- **`deploy-mobile.yml`** (M19-T03) — EAS Update (OTA) on every push to
+  `main`, EAS Build on a `mobile-v*` tag, EAS Submit on manual dispatch
+  only (store submission is a deliberate, reviewed action, never
+  auto-triggered by a build). Gated on `vars.EAS_PROJECT_CONFIGURED`.
+
+None of these four release/deploy workflows have run for real in this
+sandbox — each needs a real cloud account this project has never had
+credentials for (Vercel, Neon, Expo/EAS). Every command in them was
+verified against each tool's own current documentation/CLI reference
+before being written, not assumed (see each milestone's own commit for
+the exact sources).
+
+## Store submission (M19-T04)
+
+`apps/mobile/app.json` already carries real, non-placeholder identity
+(`bundleIdentifier: "app.executar.mobile"`, matching Android `package`)
+and `eas.json`'s `appVersionSource: "remote"` means EAS manages build
+numbers remotely — both landed in M08, nothing to add here. `eas.json`'s
+`submit.production` profile is deliberately left empty: `eas submit`
+prompts interactively for whatever Apple ID/App Store Connect app
+ID/Apple Team ID/Android service-account-key path isn't configured —
+fabricating placeholder values for real developer-account identifiers
+would be actively wrong, not a shortcut. Populating them is a real
+Apple/Google developer account action, done once a real account exists.
 
 ## Vercel projects
 
