@@ -1,188 +1,187 @@
 {
   "web": {
     "global": {
-      "primaryCta": "Agende uma chamada",
-      "secondaryCta": "Inscreva-se"
+      "primaryCta": "Fale com a gente",
+      "secondaryCta": "Comece agora"
     },
     "header": {
       "home": "Início",
       "product": {
         "title": "Produto",
-        "description": "Gerenciar uma pequena empresa hoje já é difícil.",
+        "description": "Um único estado em cada canal: App, MCP, WhatsApp, E-mail, Copiloto, Mapa-OS, Scanner.",
         "pricing": "Preços"
       },
       "blog": "Blog",
-      "docs": "Documentos",
+      "docs": "Documentação",
       "contact": "Contato",
       "signIn": "Entrar",
       "signUp": "Comece agora"
     },
     "home": {
       "meta": {
-        "title": "Transforme as Operações da Sua Empresa Hoje",
-        "description": "No mundo acelerado de hoje, sua empresa merece mais do que sistemas de negociação ultrapassados. Nossa plataforma inovadora simplifica operações, reduz a complexidade e ajuda pequenas empresas a prosperar na economia moderna."
+        "title": "Execute uma ação por vez. Sem trocar de tarefa toda hora.",
+        "description": "O EXECUTAR mostra sua próxima ação elegível — uma por vez — e só aceita \"concluído\" com evidência. Continue direto no app, WhatsApp, e-mail, Copiloto ou Scanner."
       },
       "hero": {
         "announcement": "Leia nosso último artigo"
       },
-      "cases": {
-        "title": "Histórias de Sucesso que Empoderam o Mundo Todo"
-      },
       "features": {
-        "title": "Ferramentas Poderosas para Negócios Modernos",
-        "description": "Descubra como nossos recursos de ponta podem revolucionar suas operações diárias.",
+        "title": "A superfície de execução, não mais um backlog",
+        "description": "Cinco capacidades reais, um único estado — nada aqui é maquete.",
         "items": [
           {
-            "title": "Operações Simplificadas",
-            "description": "Nossa plataforma simplifica operações, reduz a complexidade e ajuda pequenas empresas a prosperar na economia moderna."
+            "title": "Copiloto",
+            "description": "Sincroniza seu estado e propõe o próximo passo, mas pede aprovação antes de decompor qualquer plano — nunca executa sozinho."
           },
           {
-            "title": "Análises em Tempo Real",
-            "description": "Obtenha insights instantâneos sobre o desempenho da sua empresa com ferramentas abrangentes de análise e relatórios."
+            "title": "Mapa-OS",
+            "description": "Gera um retrato operacional imprimível do agora, da semana e dos bloqueios direto dos seus dados reais — sem quadro em branco pra preencher."
           },
           {
-            "title": "Fluxos de Trabalho Automatizados",
-            "description": "Economize tempo e reduza erros com automação inteligente que cuida de tarefas repetitivas para você."
+            "title": "Scanner",
+            "description": "Reconhece três símbolos físicos pela câmera do celular para abrir o chat, trocar de projeto ou fechar a tarefa atual — sem digitar nada."
           },
           {
-            "title": "Transações Seguras",
-            "description": "Fique tranquilo sabendo que as operações da sua empresa estão protegidas por segurança e criptografia de nível empresarial."
+            "title": "Rotinas e automações",
+            "description": "Promove tarefas prontas automaticamente, mas espera sua confirmação pra iniciar, verificar ou concluir qualquer uma delas."
+          }
+        ]
+      },
+      "principles": {
+        "title": "Regras que não flexibilizamos",
+        "items": [
+          {
+            "title": "\"Feito\" exige prova",
+            "description": "Fechar uma tarefa sem evidência é recusado na hora. Descreva o resultado, anexe um link ou registre o que você observou."
+          },
+          {
+            "title": "Foque em uma ação",
+            "description": "Você vê uma única ação elegível por vez. Abrir uma segunda antes de terminar a primeira não é um fluxo que existe aqui."
+          },
+          {
+            "title": "Mantenha um estado só",
+            "description": "App, WhatsApp, e-mail, Copiloto e MCP leem e escrevem no mesmo lugar. Nenhum canal guarda sua própria versão da verdade."
+          },
+          {
+            "title": "Confirme antes de automatizar",
+            "description": "Uma rotina promove o backlog pronto sozinha. Iniciar, verificar ou concluir sempre espera o seu sim."
           }
         ]
       },
       "stats": {
-        "title": "Resultados Reais, Impacto Real",
-        "description": "Junte-se a milhares de empresas que transformaram suas operações com nossa plataforma. Nossas soluções ajudaram empresas a reduzir a sobrecarga administrativa em 60% e aumentar a eficiência comercial em 45% em média.",
+        "title": "O que isso muda na prática",
+        "description": "Não são métricas de crescimento — é o que o produto de fato impõe, em cada requisição.",
         "items": [
           {
-            "title": "Usuários ativos mensais",
-            "metric": "100000",
-            "delta": "10",
-            "type": "unidade"
+            "value": "1",
+            "label": "ação elegível mostrada por vez"
           },
           {
-            "title": "Usuários ativos diários",
-            "metric": "10000",
-            "delta": "-5",
-            "type": "unidade"
+            "value": "3",
+            "label": "símbolos físicos reconhecidos pelo Scanner"
           },
           {
-            "title": "Receita recorrente mensal",
-            "metric": "100000",
-            "delta": "20",
-            "type": "moeda"
+            "value": "6",
+            "label": "canais lendo o mesmo estado: App, MCP, WhatsApp, E-mail, Copiloto, Scanner"
           },
           {
-            "title": "Custo por aquisição",
-            "metric": "100",
-            "delta": "-10",
-            "type": "moeda"
-          }
-        ]
-      },
-      "testimonials": {
-        "title": "Ouça Nossa Comunidade Próspera",
-        "items": [
-          {
-            "title": "Melhor decisão",
-            "description": "Nosso objetivo era simplificar o comércio de PME, tornando-o mais fácil e rápido do que nunca, e conseguimos isso juntos.",
-            "author": {
-              "name": "Hayden Bleasel",
-              "image": "https://github.com/haydenbleasel.png"
-            }
-          },
-          {
-            "title": "Mudança de jogo",
-            "description": "Esta plataforma revolucionou a forma como lidamos com nossas operações diárias. Os ganhos de eficiência foram notáveis.",
-            "author": {
-              "name": "Lee Robinson",
-              "image": "https://github.com/leerob.png"
-            }
-          },
-          {
-            "title": "Superou as expectativas",
-            "description": "A implementação foi tranquila e os resultados foram imediatos. Nossa equipe se adaptou rapidamente e a produtividade disparou.",
-            "author": {
-              "name": "shadcn",
-              "image": "https://github.com/shadcn.png"
-            }
-          },
-          {
-            "title": "Suporte excepcional",
-            "description": "Não só a plataforma é poderosa, mas a equipe de suporte ao cliente tem sido excepcional em nos ajudar a maximizar seu potencial.",
-            "author": {
-              "name": "Pontus Abrahamsson",
-              "image": "https://github.com/pontusab.png"
-            }
+            "value": "0",
+            "label": "conclusões aceitas sem evidência"
           }
         ]
       },
       "faq": {
-        "title": "Perguntas Comuns, Respostas de Especialistas",
-        "description": "Obtenha respostas rápidas para suas perguntas mais urgentes sobre nossa plataforma. Compilamos tudo o que você precisa saber sobre como transformar suas operações comerciais e começar com soluções de negociação modernas.",
-        "cta": "Alguma dúvida? Entre em contato",
+        "title": "Perguntas que merecem resposta direta",
+        "description": "Se algo aqui não resolver sua dúvida, fale com a gente — preferimos explicar uma vez do que deixar vago.",
+        "cta": "Ainda tem dúvidas? Fale com a gente",
         "items": [
           {
-            "question": "O que é a plataforma?",
-            "answer": "A plataforma é uma plataforma de negociação que permite que você negocie com confiança."
+            "question": "O que é o EXECUTAR, em uma frase?",
+            "answer": "Uma fila única com sua próxima ação elegível — acessível pelo app, WhatsApp, e-mail, o Copiloto, MCP ou a câmera do celular apontada pra um símbolo físico."
           },
           {
-            "question": "Quão segura é a plataforma?",
-            "answer": "Nossa plataforma emprega medidas de segurança de nível empresarial, incluindo criptografia de ponta a ponta e autenticação multifatorial, para garantir que suas atividades de negociação permaneçam completamente seguras."
+            "question": "Por que só uma ação por vez?",
+            "answer": "Trocar de tarefa custa caro pra sua cabeça. Mostrar uma só elimina a decisão de \"o que fazer agora\" e corta o retrabalho de voltar pro que ficou pela metade."
           },
           {
-            "question": "Quais recursos de negociação estão disponíveis?",
-            "answer": "A plataforma oferece ferramentas de negociação abrangentes, incluindo dados de mercado em tempo real, gráficos avançados, estratégias de negociação automatizadas e análises detalhadas para apoiar a tomada de decisões informadas."
+            "question": "Como funciona o preço?",
+            "answer": "Solo e Pro cobram por 1 executor, mensal ou anual. Business cobra por workspace, com 5 seats incluídos. Veja a página de preços — os valores estão marcados como PROPOSED porque ainda não foram publicados como condição comercial final."
           },
           {
-            "question": "Como funciona a precificação?",
-            "answer": "Oferecemos níveis de preços flexíveis projetados para escalar com as necessidades da sua empresa, desde planos iniciais para traders individuais até soluções empresariais para grandes organizações."
+            "question": "Meus dados ficam sincronizados entre canais?",
+            "answer": "Sim. Existe um único repositório canônico. WhatsApp, e-mail, Copiloto e MCP leem e escrevem nele — nenhum guarda uma versão concorrente do seu estado."
           },
           {
-            "question": "Que tipo de suporte você oferece?",
-            "answer": "Nossa equipe de suporte dedicada está disponível 24/7 através de vários canais, incluindo chat ao vivo, e-mail e telefone. Também fornecemos documentação extensa e recursos de treinamento."
+            "question": "Preciso saber programar pra usar o Scanner?",
+            "answer": "Não. Baixe o app mobile, aponte a câmera pro símbolo e pronto — o reconhecimento roda no próprio aparelho, sem ida e volta na nuvem por frame."
           }
         ]
       },
       "cta": {
-        "title": "Comece Sua Transformação Empresarial",
-        "description": "Junte-se a milhares de empresas visionárias que já modernizaram suas operações. Nossa plataforma oferece as ferramentas, suporte e eficiência que você precisa para ter sucesso no mercado competitivo de hoje. Comece em minutos."
+        "title": "Escolha sua próxima ação",
+        "description": "Comece no Trial — 14 dias, sem cartão — e veja se uma fila com uma ação por vez muda sua semana de verdade."
       }
     },
     "blog": {
       "meta": {
         "title": "Blog",
-        "description": "Pensamentos, ideias e opiniões."
+        "description": "Decisões, trade-offs e o que mudamos de ideia construindo o EXECUTAR."
       }
     },
     "contact": {
       "meta": {
-        "title": "Vamos Falar Sobre Seu Negócio",
-        "description": "Agende uma consulta com nossa equipe para discutir como podemos ajudar a simplificar suas operações e impulsionar o crescimento da sua empresa."
+        "title": "Fale com a gente",
+        "description": "Dúvidas sobre um plano, um workspace Business ou como o EXECUTAR se encaixa no seu time — mande uma mensagem e respondemos com uma pessoa de verdade."
       },
       "hero": {
         "benefits": [
           {
-            "title": "Consulta Personalizada",
-            "description": "Obtenha soluções personalizadas e conselhos de especialistas específicos para as necessidades da sua empresa."
+            "title": "Receba uma resposta real",
+            "description": "Cada mensagem chega direto pra quem constrói o produto — não pra uma fila de tickets."
           },
           {
-            "title": "Integração Sem Costura",
-            "description": "Integramos perfeitamente com seus sistemas existentes para garantir uma transição suave e mínima interrupção."
+            "title": "Avalie o plano Business",
+            "description": "Conte o tamanho do seu time e a gente retorna com o encaixe certo pra um workspace multiusuário."
           },
           {
-            "title": "Orientação Especializada",
-            "description": "Nossa equipe de especialistas irá guiá-lo durante o processo, garantindo que você aproveite ao máximo nossa plataforma."
+            "title": "Pule direto pro Trial",
+            "description": "Prefere testar primeiro? Comece agora, sem cartão, e fale com a gente depois se precisar."
           }
         ],
         "form": {
-          "title": "Agende uma reunião",
-          "date": "Data",
-          "firstName": "Primeiro nome",
-          "lastName": "Último nome",
-          "resume": "Carregar currículo",
-          "cta": "Agende a reunião"
+          "title": "Mande uma mensagem",
+          "name": "Nome",
+          "email": "Email",
+          "message": "Mensagem",
+          "cta": "Enviar mensagem",
+          "sending": "Enviando…",
+          "success": "Mensagem enviada — a gente responde em breve.",
+          "error": "Não deu pra enviar sua mensagem agora. Tente de novo."
         }
+      }
+    },
+    "pricing": {
+      "meta": {
+        "title": "Preços",
+        "description": "Planos Solo, Pro e Business do EXECUTAR, em reais."
+      },
+      "title": "Escolha o plano do tamanho do seu time",
+      "description": "Copiloto, Mapa-OS e Scanner vêm em todos os planos — não ficam trancados no mais caro.",
+      "proposedNotice": "Estes valores são PROPOSED conforme PRICING-001 — a arquitetura de cobrança está autorizada para experimentação e modelagem, ainda não publicada como condição comercial final.",
+      "monthly": "/mês",
+      "annual": "/ano",
+      "currentPlanLabel": "Plano atual",
+      "contactSales": "Falar com vendas",
+      "startTrial": "Começar trial grátis",
+      "enterprise": {
+        "title": "Enterprise",
+        "description": "Integrações customizadas, SLA e implantação — vendido fora do checkout self-serve.",
+        "unit": "contrato"
+      },
+      "trial": {
+        "title": "Trial",
+        "description": "Acesso completo por 14 dias, sem cartão.",
+        "unit": "14 dias"
       }
     }
   }

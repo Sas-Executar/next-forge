@@ -1,26 +1,44 @@
 "use client";
 
 import { Button } from "@repo/design-system/components/ui/button";
-import { Calendar } from "@repo/design-system/components/ui/calendar";
 import { Input } from "@repo/design-system/components/ui/input";
 import { Label } from "@repo/design-system/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@repo/design-system/components/ui/popover";
-import { cn } from "@repo/design-system/lib/utils";
+import { Textarea } from "@repo/design-system/components/ui/textarea";
 import type { Dictionary } from "@repo/internationalization";
-import { format } from "date-fns";
-import { CalendarIcon, Check, MoveRight } from "lucide-react";
+import { Check, MoveRight } from "lucide-react";
 import { useState } from "react";
+import { contact } from "../actions/contact";
 
 interface ContactFormProps {
   dictionary: Dictionary;
 }
 
+/**
+ * Rewritten (M14-T01/T02): the stock Next Forge version collected a
+ * meeting date, first/last name, and a résumé upload — a
+ * "book a call with recruiting" shape that made no sense for a SaaS
+ * contact form and, worse, never actually submitted anywhere (no
+ * onSubmit/action at all). `../actions/contact.tsx`'s real server
+ * action (`contact(name, email, message)`, real Resend send) already
+ * existed and was simply never wired to this component — a genuine
+ * disconnected-path gap, fixed here rather than left in place.
+ */
 export const ContactForm = ({ dictionary }: ContactFormProps) => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") ?? "");
+    const email = String(form.get("email") ?? "");
+    const message = String(form.get("message") ?? "");
+
+    setStatus("sending");
+    const result = await contact(name, email, message);
+    setStatus(result.error ? "error" : "success");
+  };
 
   return (
     <div className="w-full py-20 lg:py-40">
@@ -54,63 +72,52 @@ export const ContactForm = ({ dictionary }: ContactFormProps) => {
           </div>
 
           <div className="flex items-center justify-center">
-            <div className="flex max-w-sm flex-col gap-4 rounded-md border p-8">
+            <form
+              className="flex w-full max-w-sm flex-col gap-4 rounded-md border p-8"
+              onSubmit={onSubmit}
+            >
               <p>{dictionary.web.contact.hero.form.title}</p>
-              <div className="grid w-full max-w-sm items-center gap-1">
-                <Label htmlFor="picture">
-                  {dictionary.web.contact.hero.form.date}
+              <div className="grid w-full items-center gap-1">
+                <Label htmlFor="name">
+                  {dictionary.web.contact.hero.form.name}
                 </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      className={cn(
-                        "w-full max-w-sm justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
-                      variant="outline"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? (
-                        format(date, "PPP")
-                      ) : (
-                        <span>{dictionary.web.contact.hero.form.date}</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      initialFocus
-                      mode="single"
-                      onSelect={setDate}
-                      selected={date}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input id="name" name="name" required type="text" />
               </div>
-              <div className="grid w-full max-w-sm items-center gap-1">
-                <Label htmlFor="firstname">
-                  {dictionary.web.contact.hero.form.firstName}
+              <div className="grid w-full items-center gap-1">
+                <Label htmlFor="email">
+                  {dictionary.web.contact.hero.form.email}
                 </Label>
-                <Input id="firstname" type="text" />
+                <Input id="email" name="email" required type="email" />
               </div>
-              <div className="grid w-full max-w-sm items-center gap-1">
-                <Label htmlFor="lastname">
-                  {dictionary.web.contact.hero.form.lastName}
+              <div className="grid w-full items-center gap-1">
+                <Label htmlFor="message">
+                  {dictionary.web.contact.hero.form.message}
                 </Label>
-                <Input id="lastname" type="text" />
-              </div>
-              <div className="grid w-full max-w-sm items-center gap-1">
-                <Label htmlFor="picture">
-                  {dictionary.web.contact.hero.form.resume}
-                </Label>
-                <Input id="picture" type="file" />
+                <Textarea id="message" name="message" required rows={4} />
               </div>
 
-              <Button className="w-full gap-4">
-                {dictionary.web.contact.hero.form.cta}{" "}
+              <Button
+                className="w-full gap-4"
+                disabled={status === "sending"}
+                type="submit"
+              >
+                {status === "sending"
+                  ? dictionary.web.contact.hero.form.sending
+                  : dictionary.web.contact.hero.form.cta}{" "}
                 <MoveRight className="h-4 w-4" />
               </Button>
-            </div>
+
+              {status === "success" && (
+                <p className="text-primary text-sm">
+                  {dictionary.web.contact.hero.form.success}
+                </p>
+              )}
+              {status === "error" && (
+                <p className="text-destructive text-sm">
+                  {dictionary.web.contact.hero.form.error}
+                </p>
+              )}
+            </form>
           </div>
         </div>
       </div>

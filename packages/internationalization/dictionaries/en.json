@@ -1,14 +1,14 @@
 {
   "web": {
     "global": {
-      "primaryCta": "Book a call",
-      "secondaryCta": "Sign up"
+      "primaryCta": "Talk to us",
+      "secondaryCta": "Get started"
     },
     "header": {
       "home": "Home",
       "product": {
         "title": "Product",
-        "description": "Managing a small business today is already tough.",
+        "description": "One state, every channel: App, MCP, WhatsApp, Email, Copilot, Mapa-OS, Scanner.",
         "pricing": "Pricing"
       },
       "blog": "Blog",
@@ -19,170 +19,169 @@
     },
     "home": {
       "meta": {
-        "title": "Transform Your Business Operations Today",
-        "description": "In today's fast-paced world, your business deserves better than outdated trading systems. Our innovative platform streamlines operations, reduces complexity, and helps small businesses thrive in the modern economy."
+        "title": "Work one action at a time. Stop switching tasks.",
+        "description": "EXECUTAR shows your one eligible next action and only accepts \"done\" with evidence attached. Keep going from the app, WhatsApp, email, the Copilot, or the Scanner."
       },
       "hero": {
         "announcement": "Read our latest article"
       },
-      "cases": {
-        "title": "Empowering Success Stories Across the Globe"
-      },
       "features": {
-        "title": "Powerful Tools for Modern Business",
-        "description": "Discover how our cutting-edge features can revolutionize your daily operations.",
+        "title": "The execution surface, not another backlog",
+        "description": "Five real capabilities, one shared state — nothing here is a mockup.",
         "items": [
           {
-            "title": "Streamlined Operations",
-            "description": "Our platform streamlines operations, reduces complexity, and helps small businesses thrive in the modern economy."
+            "title": "Copilot",
+            "description": "Syncs your state and proposes the next step, but asks for approval before decomposing any plan — it never executes alone."
           },
           {
-            "title": "Real-Time Analytics",
-            "description": "Get instant insights into your business performance with comprehensive analytics and reporting tools."
+            "title": "Mapa-OS",
+            "description": "Builds a printable snapshot of now, this week, and what's blocked straight from your real data — no blank template to fill in."
           },
           {
-            "title": "Automated Workflows",
-            "description": "Save time and reduce errors with intelligent automation that handles repetitive tasks for you."
+            "title": "Scanner",
+            "description": "Reads three physical symbols through your phone's camera to open chat, switch projects, or close the current task — no typing."
           },
           {
-            "title": "Secure Transactions",
-            "description": "Rest easy knowing your business operations are protected by enterprise-grade security and encryption."
+            "title": "Routines & automations",
+            "description": "Promotes ready work on its own, but waits for your confirmation before starting, verifying, or completing any of it."
+          }
+        ]
+      },
+      "principles": {
+        "title": "Rules we don't bend",
+        "items": [
+          {
+            "title": "\"Done\" needs proof",
+            "description": "Closing a task without evidence gets rejected outright. Describe the result, attach a link, or log what you observed."
+          },
+          {
+            "title": "Work one action",
+            "description": "You see exactly one eligible action at a time. Opening a second before finishing the first isn't a flow this product offers."
+          },
+          {
+            "title": "Keep one state",
+            "description": "The app, WhatsApp, email, the Copilot, and MCP all read and write the same store. No channel keeps its own version of the truth."
+          },
+          {
+            "title": "Confirm before automating",
+            "description": "A routine promotes ready backlog work on its own. Starting, verifying, or completing always waits for your yes."
           }
         ]
       },
       "stats": {
-        "title": "Real Results, Real Impact",
-        "description": "Join thousands of businesses that have transformed their operations with our platform. Our solutions have helped companies reduce administrative overhead by 60% and increase trading efficiency by 45% on average.",
+        "title": "What that looks like in practice",
+        "description": "Not growth metrics — this is what the product actually enforces, on every request.",
         "items": [
           {
-            "title": "Monthly active users",
-            "metric": "100000",
-            "delta": "10",
-            "type": "unit"
+            "value": "1",
+            "label": "eligible action shown at a time"
           },
           {
-            "title": "Daily active users",
-            "metric": "10000",
-            "delta": "-5",
-            "type": "unit"
+            "value": "3",
+            "label": "physical symbols the Scanner recognizes"
           },
           {
-            "title": "Monthly recurring revenue",
-            "metric": "100000",
-            "delta": "20",
-            "type": "currency"
+            "value": "6",
+            "label": "channels reading one state: App, MCP, WhatsApp, Email, Copilot, Scanner"
           },
           {
-            "title": "Cost per acquisition",
-            "metric": "100",
-            "delta": "-10",
-            "type": "currency"
-          }
-        ]
-      },
-      "testimonials": {
-        "title": "Hear from Our Thriving Community",
-        "items": [
-          {
-            "title": "Best decision",
-            "description": "Our goal was to streamline SMB trade, making it easier and faster than ever and we did it together.",
-            "author": {
-              "name": "Hayden Bleasel",
-              "image": "https://github.com/haydenbleasel.png"
-            }
-          },
-          {
-            "title": "Game changer",
-            "description": "This platform revolutionized how we handle our day-to-day operations. The efficiency gains have been remarkable.",
-            "author": {
-              "name": "Lee Robinson",
-              "image": "https://github.com/leerob.png"
-            }
-          },
-          {
-            "title": "Exceeded expectations",
-            "description": "Implementation was smooth and the results were immediate. Our team adapted quickly and productivity soared.",
-            "author": {
-              "name": "shadcn",
-              "image": "https://github.com/shadcn.png"
-            }
-          },
-          {
-            "title": "Outstanding support",
-            "description": "Not only is the platform powerful, but the customer support team has been exceptional in helping us maximize its potential.",
-            "author": {
-              "name": "Pontus Abrahamsson",
-              "image": "https://github.com/pontusab.png"
-            }
+            "value": "0",
+            "label": "completions accepted without evidence"
           }
         ]
       },
       "faq": {
-        "title": "Common Questions, Expert Answers",
-        "description": "Get quick answers to your most pressing questions about our platform. We've compiled everything you need to know about transforming your business operations and getting started with modern trading solutions.",
-        "cta": "Any questions? Reach out",
+        "title": "Questions worth answering directly",
+        "description": "If something here doesn't answer your question, reach out — we'd rather explain it once than leave it vague.",
+        "cta": "Still have questions? Reach out",
         "items": [
           {
-            "question": "What is the platform?",
-            "answer": "The platform is a trading platform that allows you to trade with confidence."
+            "question": "What is EXECUTAR, in one sentence?",
+            "answer": "One queue holding your next eligible action — reachable from the app, WhatsApp, email, the Copilot, MCP, or a phone camera pointed at a physical symbol."
           },
           {
-            "question": "How secure is the platform?",
-            "answer": "Our platform employs enterprise-grade security measures, including end-to-end encryption and multi-factor authentication, to ensure your trading activities remain completely secure."
-          },
-          {
-            "question": "What trading features are available?",
-            "answer": "The platform offers comprehensive trading tools including real-time market data, advanced charting, automated trading strategies, and detailed analytics to support informed decision-making."
+            "question": "Why only one action at a time?",
+            "answer": "Switching tasks has a real cost. Showing one removes the \"what should I do now\" decision and cuts the rework of picking back up something you left half-done."
           },
           {
             "question": "How does pricing work?",
-            "answer": "We offer flexible pricing tiers designed to scale with your business needs, from starter plans for individual traders to enterprise solutions for large organizations."
+            "answer": "Solo and Pro bill per executor, monthly or annually. Business bills per workspace with 5 seats included. See the pricing page for current figures — they're marked PROPOSED because they haven't been published as final commercial terms yet."
           },
           {
-            "question": "What kind of support do you provide?",
-            "answer": "Our dedicated support team is available 24/7 through multiple channels including live chat, email, and phone. We also provide extensive documentation and training resources."
+            "question": "Does my data stay in sync across channels?",
+            "answer": "Yes. There's one canonical store. WhatsApp, email, the Copilot, and MCP all read and write through it — none of them holds a competing version of your state."
+          },
+          {
+            "question": "Do I need to code anything to use the Scanner?",
+            "answer": "No. Install the mobile app, point the camera at the symbol, done — recognition runs on-device, no cloud round-trip per frame."
           }
         ]
       },
       "cta": {
-        "title": "Start Your Business Transformation",
-        "description": "Join thousands of forward-thinking businesses who have already modernized their operations. Our platform offers the tools, support, and efficiency you need to succeed in today's competitive market. Get started in minutes."
+        "title": "Pick your one next action",
+        "description": "Start on Trial — 14 days, no card — and see whether a single-action queue actually changes your week."
       }
     },
     "blog": {
       "meta": {
         "title": "Blog",
-        "description": "Thoughts, ideas, and opinions."
+        "description": "Decisions, trade-offs, and what we changed our minds about building EXECUTAR."
       }
     },
     "contact": {
       "meta": {
-        "title": "Let's Talk About Your Business",
-        "description": "Schedule a consultation with our team to discuss how we can help streamline your operations and drive growth for your business."
+        "title": "Talk to us",
+        "description": "Questions about a plan, a Business workspace, or how EXECUTAR fits your team — send a message and a real person replies."
       },
       "hero": {
         "benefits": [
           {
-            "title": "Personalized Consultation",
-            "description": "Get tailored solutions and expert advice specific to your business needs."
+            "title": "Get a real answer",
+            "description": "Every message reaches the team building the product, not a ticket queue."
           },
           {
-            "title": "Seamless Integration",
-            "description": "We seamlessly integrate with your existing systems to ensure a smooth transition and minimal disruption."
+            "title": "Scope a Business plan",
+            "description": "Tell us your team size and we'll follow up with the right fit for a multi-seat workspace."
           },
           {
-            "title": "Expert Guidance",
-            "description": "Our team of experts will guide you through the process, ensuring you get the most out of our platform."
+            "title": "Skip straight to Trial",
+            "description": "Rather try it first? Start now, no card required, and talk to us later if you need to."
           }
         ],
         "form": {
-          "title": "Book a meeting",
-          "date": "Date",
-          "firstName": "First name",
-          "lastName": "Last name",
-          "resume": "Upload resume",
-          "cta": "Book the meeting"
+          "title": "Send us a message",
+          "name": "Name",
+          "email": "Email",
+          "message": "Message",
+          "cta": "Send message",
+          "sending": "Sending…",
+          "success": "Message sent — we'll get back to you soon.",
+          "error": "Couldn't send your message right now. Please try again."
         }
+      }
+    },
+    "pricing": {
+      "meta": {
+        "title": "Pricing",
+        "description": "Solo, Pro, and Business plans for EXECUTAR, priced in BRL."
+      },
+      "title": "Pick the plan that matches your team",
+      "description": "Copilot, Mapa-OS, and Scanner ship on every plan — they're never locked behind the most expensive tier.",
+      "proposedNotice": "These figures are PROPOSED per PRICING-001 — the billing architecture is authorized for experimentation and modeling, not yet published as final commercial terms.",
+      "monthly": "/mo",
+      "annual": "/yr",
+      "currentPlanLabel": "Current plan",
+      "contactSales": "Contact sales",
+      "startTrial": "Start free trial",
+      "enterprise": {
+        "title": "Enterprise",
+        "description": "Custom integrations, SLA, and deployment — sold outside self-serve checkout.",
+        "unit": "contract"
+      },
+      "trial": {
+        "title": "Trial",
+        "description": "Full access for 14 days, no card required.",
+        "unit": "14 days"
       }
     }
   }

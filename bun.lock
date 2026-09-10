@@ -228,6 +228,7 @@
         "@arcjet/next": "1.2.0",
         "@radix-ui/react-icons": "^1.3.2",
         "@repo/analytics": "workspace:*",
+        "@repo/billing": "workspace:*",
         "@repo/cms": "workspace:*",
         "@repo/design-system": "workspace:*",
         "@repo/email": "workspace:*",
