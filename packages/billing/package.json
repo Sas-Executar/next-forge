@@ -5,7 +5,8 @@
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "test": "NODE_ENV=test vitest run"
+    "test": "NODE_ENV=test vitest run",
+    "sync:stripe": "bun --conditions=react-server scripts/sync-products.ts"
   },
   "dependencies": {
     "@repo/database": "workspace:*",
