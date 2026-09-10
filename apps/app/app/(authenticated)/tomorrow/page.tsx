@@ -1,3 +1,4 @@
+import { forWorkspace } from "@repo/database";
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import { dayRange } from "../lib/day-range";
 import { resolveWorkspace } from "../lib/resolve-workspace";

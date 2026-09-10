@@ -24,7 +24,9 @@ export const CreateProjectForm = () => {
         setName("");
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Falha ao criar o projeto.");
+        setError(
+          caught instanceof Error ? caught.message : "Falha ao criar o projeto."
+        );
       }
     });
   };

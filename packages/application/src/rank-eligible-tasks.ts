@@ -1,11 +1,11 @@
-import { forWorkspace } from "@repo/database";
 import type { Task } from "@repo/database";
+import { forWorkspace } from "@repo/database";
 import { evaluateEligibility } from "./eligibility";
 
 export interface RankedTask {
-  task: Task;
   criticality: number;
   dueDate: Date | null;
+  task: Task;
 }
 
 /**

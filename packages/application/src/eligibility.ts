@@ -1,11 +1,9 @@
 import type { TaskState } from "@repo/schemas";
 
 export interface EligibilityContext {
-  taskState: TaskState;
+  availableCapacityMinutes?: number;
   /** States of the tasks this one depends on (Dependency.toTaskId -> Task.state). */
   dependencyStates: ReadonlyMap<string, TaskState>;
-  /** Is another task already DOING in this scope? WIP=1. */
-  wipTaskInProgress: boolean;
   /**
    * Estimated effort for this task and time actually available right
    * now, when known. Neither is derived from a schema field today — no
@@ -16,7 +14,9 @@ export interface EligibilityContext {
    * clause is skipped, not silently treated as satisfied.
    */
   estimatedDurationMinutes?: number;
-  availableCapacityMinutes?: number;
+  taskState: TaskState;
+  /** Is another task already DOING in this scope? WIP=1. */
+  wipTaskInProgress: boolean;
 }
 
 export interface EligibilityResult {

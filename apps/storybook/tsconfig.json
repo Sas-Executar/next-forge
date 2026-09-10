@@ -13,5 +13,9 @@
   // chart.stories.tsx and resizable.stories.tsx exercise the two generated
   // shadcn components excluded in packages/design-system/tsconfig.json (see
   // that file for why) — excluded here for the same reason.
-  "exclude": ["node_modules", "stories/chart.stories.tsx", "stories/resizable.stories.tsx"]
+  "exclude": [
+    "node_modules",
+    "stories/chart.stories.tsx",
+    "stories/resizable.stories.tsx"
+  ]
 }

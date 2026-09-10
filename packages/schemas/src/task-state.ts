@@ -28,7 +28,9 @@ export type TaskState = z.infer<typeof taskStateSchema>;
  * that return path is a domain decision (packages/domain, M02), not
  * encoded here since it depends on why the task was blocked.
  */
-export const TASK_STATE_TRANSITIONS: Readonly<Record<TaskState, readonly TaskState[]>> = {
+export const TASK_STATE_TRANSITIONS: Readonly<
+  Record<TaskState, readonly TaskState[]>
+> = {
   BACKLOG_VALIDATED: ["READY", "BLOCKED"],
   READY: ["DOING", "BLOCKED"],
   DOING: ["VERIFY", "BLOCKED"],

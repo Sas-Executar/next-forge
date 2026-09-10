@@ -22,6 +22,7 @@
     "check": "ultracite check",
     "fix": "ultracite fix",
     "test": "turbo test",
+    "e2e": "turbo e2e",
     "analyze": "turbo analyze",
     "translate": "turbo translate",
     "boundaries": "turbo boundaries",

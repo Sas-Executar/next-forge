@@ -1,12 +1,11 @@
+import { forWorkspace } from "@repo/database";
+import { Badge } from "@repo/design-system/components/ui/badge";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { Badge } from "@repo/design-system/components/ui/badge";
-import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import { resolveWorkspace } from "../lib/resolve-workspace";
 
@@ -96,8 +95,8 @@ const RoadmapPage = async () => {
                     )}
                   </div>
                   <CardDescription>
-                    {deliverable.project?.name ?? "Sem projeto"} ·{" "}
-                    {doneCount}/{deliverable.tasks.length} tarefas ({percent}
+                    {deliverable.project?.name ?? "Sem projeto"} · {doneCount}/
+                    {deliverable.tasks.length} tarefas ({percent}
                     %)
                   </CardDescription>
                 </CardHeader>

@@ -1,10 +1,10 @@
+import { requireWorkspace } from "@repo/auth/server";
+import { forWorkspace } from "@repo/database";
 import {
   Card,
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { forWorkspace } from "@repo/database";
-import { requireWorkspace } from "@repo/auth/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TaskListView } from "../../components/task-list-view";
@@ -43,7 +43,9 @@ const ProjectPage = async ({ params, searchParams }: ProjectPageProperties) => {
       tasks: {
         orderBy: { createdAt: "asc" },
         include: {
-          dependenciesFrom: { include: { toTask: { select: { title: true } } } },
+          dependenciesFrom: {
+            include: { toTask: { select: { title: true } } },
+          },
         },
       },
     },
@@ -53,7 +55,9 @@ const ProjectPage = async ({ params, searchParams }: ProjectPageProperties) => {
     notFound();
   }
 
-  const doneCount = project.tasks.filter((task) => task.state === "DONE").length;
+  const doneCount = project.tasks.filter(
+    (task) => task.state === "DONE"
+  ).length;
   const progressPercent =
     project.tasks.length === 0
       ? 0

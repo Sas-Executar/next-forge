@@ -117,13 +117,11 @@ async function main() {
     },
   });
 
-  // biome-ignore lint/suspicious/noConsole: seed script, not app code
   console.log(`Seeded workspace ${workspace.id} (${workspace.name})`);
 }
 
 main()
   .catch((error: unknown) => {
-    // biome-ignore lint/suspicious/noConsole: seed script, not app code
     console.error(error);
     process.exitCode = 1;
   })

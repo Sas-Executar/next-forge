@@ -1,4 +1,15 @@
 export * from "./src/commands";
+export {
+  type GradeResult,
+  gradeEvalCase,
+} from "./src/evals/graders";
+export { loadEvalCases } from "./src/evals/load-cases";
+export {
+  type EvalCase,
+  type EvalGrader,
+  type EvalSeverity,
+  evalCaseSchema,
+} from "./src/evals/types";
 export { formatOrchestratorOutputText } from "./src/format";
 export {
   type OrchestratorOutput,

@@ -13,8 +13,8 @@ interface ExistingTaskOption {
 }
 
 interface CreateTaskFormProperties {
-  readonly projectId: string;
   readonly existingTasks: readonly ExistingTaskOption[];
+  readonly projectId: string;
 }
 
 export const CreateTaskForm = ({
@@ -52,13 +52,18 @@ export const CreateTaskForm = ({
         setDependsOn([]);
         router.refresh();
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "Falha ao criar a tarefa.");
+        setError(
+          caught instanceof Error ? caught.message : "Falha ao criar a tarefa."
+        );
       }
     });
   };
 
   return (
-    <form className="flex flex-col gap-3 rounded-lg border p-4" onSubmit={onSubmit}>
+    <form
+      className="flex flex-col gap-3 rounded-lg border p-4"
+      onSubmit={onSubmit}
+    >
       <div className="flex gap-2">
         <Input
           aria-label="Título da nova tarefa"
@@ -77,7 +82,10 @@ export const CreateTaskForm = ({
           <Label>Depende de (opcional)</Label>
           <div className="flex flex-wrap gap-3">
             {existingTasks.map((task) => (
-              <label className="flex items-center gap-1.5 text-sm" key={task.id}>
+              <label
+                className="flex items-center gap-1.5 text-sm"
+                key={task.id}
+              >
                 <input
                   checked={dependsOn.includes(task.id)}
                   onChange={() => toggleDependency(task.id)}

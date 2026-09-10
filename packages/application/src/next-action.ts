@@ -1,5 +1,5 @@
-import { forWorkspace } from "@repo/database";
 import type { Task } from "@repo/database";
+import { forWorkspace } from "@repo/database";
 import { datesEqual, rankEligibleTasks } from "./rank-eligible-tasks";
 
 export type NextActionResult =

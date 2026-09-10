@@ -1,3 +1,4 @@
+import { nextAction } from "@repo/application";
 import {
   Card,
   CardContent,
@@ -5,10 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { nextAction } from "@repo/application";
 import type { Metadata } from "next";
-import { resolveWorkspace } from "../lib/resolve-workspace";
 import { TaskStateBadge } from "../components/task-state-badge";
+import { resolveWorkspace } from "../lib/resolve-workspace";
 import { TaskActions } from "./components/task-actions";
 
 export const metadata: Metadata = {

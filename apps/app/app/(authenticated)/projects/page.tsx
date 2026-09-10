@@ -1,3 +1,4 @@
+import { forWorkspace } from "@repo/database";
 import { Badge } from "@repo/design-system/components/ui/badge";
 import {
   Card,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { resolveWorkspace } from "../lib/resolve-workspace";
@@ -33,7 +33,9 @@ const ProjectsPage = async () => {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-semibold text-2xl">Projetos</h1>
-          <p className="text-muted-foreground">Escopo de projeto único — visão Lista.</p>
+          <p className="text-muted-foreground">
+            Escopo de projeto único — visão Lista.
+          </p>
         </div>
         <Link
           className="text-primary text-sm underline-offset-4 hover:underline"

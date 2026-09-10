@@ -11,18 +11,21 @@ describe("evaluateEligibility", () => {
     expect(result).toEqual({ eligible: true, reasons: [] });
   });
 
-  test.each(["BACKLOG_VALIDATED", "DOING", "VERIFY", "DONE", "BLOCKED"] as const)(
-    "%s task is not eligible",
-    (taskState) => {
-      const result = evaluateEligibility({
-        taskState,
-        dependencyStates: new Map(),
-        wipTaskInProgress: false,
-      });
-      expect(result.eligible).toBe(false);
-      expect(result.reasons).toContain(`task is ${taskState}, not READY`);
-    }
-  );
+  test.each([
+    "BACKLOG_VALIDATED",
+    "DOING",
+    "VERIFY",
+    "DONE",
+    "BLOCKED",
+  ] as const)("%s task is not eligible", (taskState) => {
+    const result = evaluateEligibility({
+      taskState,
+      dependencyStates: new Map(),
+      wipTaskInProgress: false,
+    });
+    expect(result.eligible).toBe(false);
+    expect(result.reasons).toContain(`task is ${taskState}, not READY`);
+  });
 
   test("all dependencies DONE is eligible", () => {
     const result = evaluateEligibility({
@@ -92,9 +95,7 @@ describe("evaluateEligibility", () => {
       availableCapacityMinutes: 60,
     });
     expect(result.eligible).toBe(false);
-    expect(result.reasons).toEqual([
-      "estimated 90min exceeds available 60min",
-    ]);
+    expect(result.reasons).toEqual(["estimated 90min exceeds available 60min"]);
   });
 
   test("duration exactly equal to capacity is eligible (<=, not <)", () => {

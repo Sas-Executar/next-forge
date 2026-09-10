@@ -1,3 +1,5 @@
+import { rankEligibleTasks } from "@repo/application";
+import { forWorkspace } from "@repo/database";
 import {
   Card,
   CardContent,
@@ -5,15 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { rankEligibleTasks } from "@repo/application";
-import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import { TaskStateBadge } from "../components/task-state-badge";
 import { resolveWorkspace } from "../lib/resolve-workspace";
 
 export const metadata: Metadata = {
   title: "Sprint",
-  description: "Execution Window — a fila de trabalho elegível, além da única ação de /now.",
+  description:
+    "Execution Window — a fila de trabalho elegível, além da única ação de /now.",
 };
 
 const SPRINT_WINDOW_SIZE = 5;
@@ -44,8 +45,8 @@ const SprintPage = async () => {
       <div>
         <h1 className="font-semibold text-2xl">Sprint</h1>
         <p className="text-muted-foreground">
-          Janela de execução — próximas {SPRINT_WINDOW_SIZE} elegíveis, na
-          mesma ordem usada por /now.
+          Janela de execução — próximas {SPRINT_WINDOW_SIZE} elegíveis, na mesma
+          ordem usada por /now.
         </p>
       </div>
 

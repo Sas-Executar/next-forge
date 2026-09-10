@@ -1,3 +1,4 @@
+import { forWorkspace } from "@repo/database";
 import {
   Card,
   CardContent,
@@ -5,13 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import { resolveWorkspace } from "../lib/resolve-workspace";
 
 export const metadata: Metadata = {
   title: "Calendário",
-  description: "Entregáveis por prazo — calendário influencia capacidade, não promove progresso.",
+  description:
+    "Entregáveis por prazo — calendário influencia capacidade, não promove progresso.",
 };
 
 /**

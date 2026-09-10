@@ -26,8 +26,14 @@ export class IllegalInitialStateError extends Error {
 }
 
 export const createTask = async (input: CreateTaskInput) => {
-  const { projectId, processId, deliverableId, title, description, dependsOnTaskIds } =
-    createTaskSchema.parse(input);
+  const {
+    projectId,
+    processId,
+    deliverableId,
+    title,
+    description,
+    dependsOnTaskIds,
+  } = createTaskSchema.parse(input);
   const { workspace, membership } = await requireRole("MEMBER");
   const db = forWorkspace(workspace.id);
 
@@ -62,7 +68,9 @@ export const createTask = async (input: CreateTaskInput) => {
       select: { id: true },
     });
     if (resolvable.length !== dependsOnTaskIds.length) {
-      throw new Error("One or more dependsOnTaskIds were not found in this workspace.");
+      throw new Error(
+        "One or more dependsOnTaskIds were not found in this workspace."
+      );
     }
 
     await db.dependency.createMany({

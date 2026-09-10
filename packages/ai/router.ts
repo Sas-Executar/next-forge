@@ -18,7 +18,11 @@ import { keys } from "./keys";
  */
 const openai = createOpenAI({ apiKey: keys().OPENAI_API_KEY });
 
-export const models: { cheap: LanguageModel; mid: LanguageModel; high: LanguageModel } = {
+export const models: {
+  cheap: LanguageModel;
+  mid: LanguageModel;
+  high: LanguageModel;
+} = {
   cheap: openai("gpt-4o-mini"),
   mid: openai("gpt-4o"),
   high: openai("o1"),

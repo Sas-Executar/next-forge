@@ -37,11 +37,19 @@ describe("canTransitionTask — structural legality (actor: USER)", () => {
 // auto-promote into READY or BLOCKED; DOING/VERIFY/DONE require a human,
 // whether reached directly or by unblocking back into them.
 describe("canTransitionTask — AuthorityGate (actor: AGENT / SYSTEM)", () => {
-  test.each(["AGENT", "SYSTEM"] as const)("%s: BACKLOG_VALIDATED -> READY is ALLOW", (actor) => {
-    expect(canTransitionTask("BACKLOG_VALIDATED", "READY", actor)).toBe("ALLOW");
+  test.each([
+    "AGENT",
+    "SYSTEM",
+  ] as const)("%s: BACKLOG_VALIDATED -> READY is ALLOW", (actor) => {
+    expect(canTransitionTask("BACKLOG_VALIDATED", "READY", actor)).toBe(
+      "ALLOW"
+    );
   });
 
-  test.each(["AGENT", "SYSTEM"] as const)("%s: BLOCKED -> READY is ALLOW", (actor) => {
+  test.each([
+    "AGENT",
+    "SYSTEM",
+  ] as const)("%s: BLOCKED -> READY is ALLOW", (actor) => {
     expect(canTransitionTask("BLOCKED", "READY", actor)).toBe("ALLOW");
   });
 

@@ -1,9 +1,14 @@
-import { Card, CardDescription, CardHeader, CardTitle } from "@repo/design-system/components/ui/card";
 import {
   NoActiveOrganizationError,
   requireWorkspace,
   WorkspaceNotFoundError,
 } from "@repo/auth/server";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/design-system/components/ui/card";
 import type { ReactElement } from "react";
 
 type Workspace = Awaited<ReturnType<typeof requireWorkspace>>;
@@ -21,8 +26,7 @@ type Workspace = Awaited<ReturnType<typeof requireWorkspace>>;
  * member — so the tag has to be `ok`, not truthiness of `fallback`.
  */
 export const resolveWorkspace = async (): Promise<
-  | { ok: true; workspace: Workspace }
-  | { ok: false; fallback: ReactElement }
+  { ok: true; workspace: Workspace } | { ok: false; fallback: ReactElement }
 > => {
   try {
     const workspace = await requireWorkspace();

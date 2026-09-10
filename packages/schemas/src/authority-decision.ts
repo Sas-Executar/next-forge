@@ -11,6 +11,10 @@ import { z } from "zod";
  * `sync_mirror` and `BACKLOG_VALIDATED → READY`; `DOING`/`VERIFY`/`DONE`
  * are HUMAN_REQUIRED.
  */
-export const authorityDecisionSchema = z.enum(["ALLOW", "BLOCK", "HUMAN_REQUIRED"]);
+export const authorityDecisionSchema = z.enum([
+  "ALLOW",
+  "BLOCK",
+  "HUMAN_REQUIRED",
+]);
 
 export type AuthorityDecision = z.infer<typeof authorityDecisionSchema>;

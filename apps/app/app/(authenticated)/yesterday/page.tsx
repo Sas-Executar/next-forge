@@ -1,3 +1,4 @@
+import { forWorkspace } from "@repo/database";
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/design-system/components/ui/card";
-import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import { dayRange } from "../lib/day-range";
 import { resolveWorkspace } from "../lib/resolve-workspace";
@@ -49,7 +49,9 @@ const YesterdayPage = async () => {
       <Card>
         <CardHeader>
           <CardTitle>O que aconteceu</CardTitle>
-          <CardDescription>Trilha de auditoria completa do dia.</CardDescription>
+          <CardDescription>
+            Trilha de auditoria completa do dia.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {events.length === 0 ? (

@@ -1,12 +1,13 @@
-import { forWorkspace } from "@repo/database";
 import { requireWorkspace } from "@repo/auth/server";
+import { forWorkspace } from "@repo/database";
 import type { Metadata } from "next";
 import { TaskListView } from "../../components/task-list-view";
 import { ViewModeToggle } from "../../components/view-mode-toggle";
 
 export const metadata: Metadata = {
   title: "Remix",
-  description: "Agregação multi-projeto — não duplica tarefas nem cria um projeto sintético.",
+  description:
+    "Agregação multi-projeto — não duplica tarefas nem cria um projeto sintético.",
 };
 
 interface RemixPageProperties {
@@ -51,7 +52,9 @@ const RemixPage = async ({ searchParams }: RemixPageProperties) => {
       </div>
 
       {tasks.length === 0 ? (
-        <p className="text-muted-foreground">Nenhuma tarefa em nenhum projeto ainda.</p>
+        <p className="text-muted-foreground">
+          Nenhuma tarefa em nenhum projeto ainda.
+        </p>
       ) : (
         <TaskListView
           tasks={tasks.map((task) => ({
