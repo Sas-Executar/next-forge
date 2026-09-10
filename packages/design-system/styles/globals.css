@@ -1,209 +1,116 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@repo/design-tokens/css/variables.css";
 @source "../**/*.{ts,tsx}";
 
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * EXECUTAR design tokens (ADR-DS-001): the primitive ramps, type scale,
+ * spacing, canonical radius, shadows, containers, and the color.*
+ * semantic layer (--ds-color-*) all now come from
+ * @repo/design-tokens/css/variables.css, imported above — this package
+ * is a consumer/adaptor of that SOT, not the owner. What follows is only
+ * the shadcn-specific remapping onto those tokens.
+ */
 :root {
   /*
-   * EXECUTAR design tokens — ported from
-   * Executar-app-Blueprint/references/design-system/variables.css
-   * (UI-005, read-only source, CORPUS_DIRECT extract). Ramp naming
-   * (1-12) kept verbatim from the source.
-   *
-   * --color-azure-8 fix: the source file has --color-azure-8 as a
-   * verbatim duplicate of --color-azure-9 (#1F93FF) — a known
-   * token-source gap. Per explicit product decision (not left
-   * undocumented, not silently ignored), the value below is
-   * interpolated as the midpoint between --color-azure-7 (#58ACFB)
-   * and --color-azure-9 (#1F93FF); it is NOT a value supplied by the
-   * source file.
+   * shadcn/next-forge semantic tokens, remapped onto @repo/design-tokens'
+   * color.* semantic layer (--ds-color-*) wherever a 1:1 mapping exists —
+   * this satisfies ADR-DS-001's rule that product/component code consumes
+   * semantic tokens, not bare ramp steps. `accent`/`chart-*`/`sidebar-*`
+   * have no equivalent in the ADR's semantic set (background, surface,
+   * text.primary/secondary, action.primary/secondary,
+   * status.success/warning/error, border, focus) — those stay mapped
+   * directly onto ramp steps, same as before.
    */
-  --color-green-1: #fcfdfc;
-  --color-green-2: #f3faf6;
-  --color-green-3: #e4f6ed;
-  --color-green-4: #cff4e2;
-  --color-green-5: #b4f4d5;
-  --color-green-6: #8bf6c2;
-  --color-green-7: #58fbad;
-  --color-green-8: #1fff93;
-  --color-green-9: #00bf63;
-  --color-green-10: #008c49;
-  --color-green-11: #007a45;
-  --color-green-12: #064727;
-  --color-azure-1: #fcfcfd;
-  --color-azure-2: #f3f6fa;
-  --color-azure-3: #e4edf6;
-  --color-azure-4: #cfe2f4;
-  --color-azure-5: #b4d5f4;
-  --color-azure-6: #8bc2f6;
-  --color-azure-7: #58acfb;
-  --color-azure-8: #3ca0fd; /* interpolated — see note above */
-  --color-azure-9: #1f93ff;
-  --color-azure-10: #007aeb;
-  --color-azure-11: #0b6fd3;
-  --color-azure-12: #062747;
-  --color-neutral-1: #ffffff;
-  --color-neutral-2: #f6f6f6;
-  --color-neutral-3: #f0f0f0;
-  --color-neutral-4: #eaeaea;
-  --color-neutral-5: #e4e4e4;
-  --color-neutral-6: #dedede;
-  --color-neutral-7: #c5c5c5;
-  --color-neutral-8: #adadad;
-  --color-neutral-9: #959494;
-  --color-neutral-10: #7c7b7b;
-  --color-neutral-11: #646363;
-  --color-neutral-12: #4b4a4a;
-
-  /* Type scale, spacing, radius, shadow, layout — same source. */
-  --font-size-display: 56px;
-  --font-size-h1: 44px;
-  --font-size-h2: 34px;
-  --font-size-h3: 26px;
-  --font-size-title: 20px;
-  --font-size-subtitle: 18px;
-  --font-size-body-lg: 18px;
-  --font-size-body: 16px;
-  --font-size-body-sm: 14px;
-  --font-size-caption: 12px;
-  --font-size-label: 13px;
-  --font-size-button: 15px;
-  --font-size-overline: 11px;
-  --font-size-mono-data: 14px;
-  --space-0: 0px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-24: 96px;
-  --space-32: 128px;
-  /*
-   * --radius-sm/md/lg/xl are intentionally NOT ported under those bare
-   * names: Tailwind's own --radius-sm/md/lg/xl (below, in @theme
-   * inline) are derived from --radius and drive every shadcn
-   * component's rounding already — porting the source's differently-
-   * scaled px values (4/8/12/16) under the same names would shadow
-   * that derivation with a same-named, different-valued, effectively
-   * dead property. --radius-none/pill/full don't collide, so those
-   * are ported directly.
-   */
-  --radius-none: 0px;
-  --radius-pill: 999px;
-  --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.04);
-  --shadow-md: 0 4px 12px rgba(20, 20, 20, 0.06);
-  --shadow-hover: 0 4px 16px rgba(20, 20, 20, 0.08);
-  --container-page: 1200px;
-  --container-reading: 720px;
-  /*
-   * Raw family tokens are ported for reference, but NOT wired into
-   * --font-sans/--font-mono below (@theme inline) in this pass — doing
-   * so needs an actual IBM Plex next/font load in apps/app's layout,
-   * which is out of scope for a design-tokens-file-only change.
-   */
-  --font-family-sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
-  --font-family-mono: "IBM Plex Mono", SFMono-Regular, Consolas, monospace;
-
-  /* shadcn/next-forge semantic tokens, remapped onto the ramps above. */
-  --background: var(--color-neutral-1);
-  --foreground: var(--color-neutral-12);
-  --card: var(--color-neutral-1);
-  --card-foreground: var(--color-neutral-12);
-  --popover: var(--color-neutral-1);
-  --popover-foreground: var(--color-neutral-12);
-  --primary: var(--color-green-9);
-  --primary-foreground: var(--color-neutral-1);
-  --secondary: var(--color-neutral-3);
-  --secondary-foreground: var(--color-neutral-12);
-  --muted: var(--color-neutral-2);
-  --muted-foreground: var(--color-neutral-10);
+  --background: var(--ds-color-background);
+  --foreground: var(--ds-color-text-primary);
+  --card: var(--ds-color-background);
+  --card-foreground: var(--ds-color-text-primary);
+  --popover: var(--ds-color-background);
+  --popover-foreground: var(--ds-color-text-primary);
+  --primary: var(--ds-color-action-primary);
+  --primary-foreground: var(--ds-color-background);
+  --secondary: var(--ds-color-action-secondary);
+  --secondary-foreground: var(--ds-color-text-primary);
+  --muted: var(--ds-color-surface);
+  --muted-foreground: var(--ds-color-text-secondary);
   --accent: var(--color-azure-3);
   --accent-foreground: var(--color-azure-11);
-  /*
-   * No red/error ramp exists in the source file — destructive stays on
-   * the stock oklch red rather than fabricating an EXECUTAR red ramp
-   * that isn't in the Blueprint. Genuine, disclosed gap.
-   */
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --success: var(--color-green-9);
-  --border: var(--color-neutral-5);
-  --input: var(--color-neutral-5);
-  --ring: var(--color-azure-8);
+  --destructive: var(--ds-color-status-error);
+  --destructive-foreground: var(--ds-color-status-error);
+  --success: var(--ds-color-status-success);
+  --border: var(--ds-color-border);
+  --input: var(--ds-color-border);
+  --ring: var(--ds-color-focus);
   --chart-1: var(--color-green-9);
   --chart-2: var(--color-azure-9);
   --chart-3: var(--color-green-7);
   --chart-4: var(--color-azure-7);
   --chart-5: var(--color-neutral-9);
-  --radius: 0.625rem;
-  --sidebar: var(--color-neutral-2);
-  --sidebar-foreground: var(--color-neutral-12);
-  --sidebar-primary: var(--color-green-9);
-  --sidebar-primary-foreground: var(--color-neutral-1);
+  --sidebar: var(--ds-color-surface);
+  --sidebar-foreground: var(--ds-color-text-primary);
+  --sidebar-primary: var(--ds-color-action-primary);
+  --sidebar-primary-foreground: var(--ds-color-background);
   --sidebar-accent: var(--color-azure-3);
   --sidebar-accent-foreground: var(--color-azure-11);
-  --sidebar-border: var(--color-neutral-5);
-  --sidebar-ring: var(--color-azure-8);
+  --sidebar-border: var(--ds-color-border);
+  --sidebar-ring: var(--ds-color-focus);
+
+  /*
+   * Kept for the handful of shadcn-generated components under
+   * components/ui/ (regenerated wholesale by `bun bump-ui`, excluded from
+   * hand-editing per this package's own tsconfig.json) that reference
+   * `var(--radius)` directly rather than a Tailwind `rounded-*` utility —
+   * e.g. input-group.tsx, sonner.tsx. Derived from the same canonical
+   * --ds-radius-lg (12px) the `lg` step of the scale now uses, instead of
+   * the old standalone 0.625rem (10px) value, so there's one radius
+   * source, not two.
+   */
+  --radius: var(--ds-radius-lg);
 
   --font-weight-bold: 700;
 }
 
 .dark {
   /*
-   * The Blueprint source (references/design-system/variables.css)
-   * supplies a single ramp per hue with no dedicated dark-mode values,
-   * and its darkest neutral (--color-neutral-12, #4B4A4A) is a mid
-   * gray, not a usable dark background. Rather than fabricate a dark
-   * ramp the source doesn't provide, dark mode is left on the stock
-   * oklch values — a genuine, disclosed gap, not a silent omission.
+   * @repo/design-tokens/css/variables.css's own `.dark` selector already
+   * redefines every --ds-color-* (and the dark-only --color-dark-neutral-*
+   * ramp) to the real EXECUTAR dark theme (ADR-DS-001 Required Change #6
+   * — see that file and packages/design-tokens/src/themes/dark.ts for the
+   * disclosed rationale). Since the shadcn variables above already
+   * reference --ds-color-*, they repaint automatically under `.dark` —
+   * this block only needs to redo the ramp-direct exceptions (accent,
+   * chart-*) that :root mapped straight onto Green/Azure/Neutral steps,
+   * now against azure/green steps still legible on the dark surfaces.
    */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --success: oklch(50.8% 0.118 165.612);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --accent: var(--color-azure-11);
+  --accent-foreground: var(--color-azure-2);
+  --chart-1: var(--color-green-8);
+  --chart-2: var(--color-azure-7);
+  --chart-3: var(--color-green-6);
+  --chart-4: var(--color-azure-6);
+  --chart-5: var(--color-dark-neutral-9);
+  --sidebar-accent: var(--color-azure-11);
+  --sidebar-accent-foreground: var(--color-azure-2);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /*
+   * IBM Plex Sans/Mono (ADR-DS-001 Required Change #3), loaded once via
+   * next/font in packages/design-system/lib/fonts.ts (web/app/api) and
+   * apps/storybook/.storybook/preview-head.html (Storybook) — both set
+   * --font-ibm-plex-sans/--font-ibm-plex-mono on <html>/<body>, which
+   * these theme keys then expose as the `font-sans`/`font-mono` Tailwind
+   * utilities. Replaces the former Geist variables.
+   */
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-mono: var(--font-ibm-plex-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -234,10 +141,18 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --color-success: var(--success);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /*
+   * Canonical 4/8/12/16px radius scale (ADR-DS-001 Required Change #7),
+   * sourced from @repo/design-tokens/css/variables.css's --ds-radius-*
+   * (see that file's own comment for why the source uses a `ds-` prefix
+   * instead of these bare Tailwind theme-key names). Previously these
+   * were calc()-derived from a single --radius: 0.625rem, giving
+   * 6/8/10/14px instead of the Blueprint's real scale.
+   */
+  --radius-sm: var(--ds-radius-sm);
+  --radius-md: var(--ds-radius-md);
+  --radius-lg: var(--ds-radius-lg);
+  --radius-xl: var(--ds-radius-xl);
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 

@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/expo";
+import { light } from "@repo/design-tokens";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -101,19 +102,23 @@ const styles = StyleSheet.create({
   spinner: { marginTop: 24 },
   center: { padding: 8, gap: 12, alignItems: "flex-start" },
   emptyText: { fontSize: 15, opacity: 0.7 },
-  error: { color: "#c0392b" },
+  error: { color: light.color.status.error },
   retryButton: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  retryButtonText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  retryButtonText: {
+    color: light.color.background,
+    fontWeight: "600",
+    fontSize: 13,
+  },
   list: { gap: 12 },
   card: {
     padding: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: light.color.border,
     borderRadius: 8,
     gap: 6,
   },
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     opacity: 0.7,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: light.color.border,
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,

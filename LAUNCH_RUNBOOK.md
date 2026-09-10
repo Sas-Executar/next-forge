@@ -189,6 +189,7 @@ account + app record; populate `apps/mobile/eas.json`'s empty
 | `VERCEL_PROJECT_ID_WEB` | secret | ✅ `prj_h4tfuhTnIiedTObU16xvBAEWkBWI` |
 | `VERCEL_PROJECT_ID_API` | secret | ✅ `prj_eT3E4NGlkjWnDhv1XmGCnxi0932M` |
 | `EXPO_TOKEN` | secret | 🧑 §8 |
+| `CHROMATIC_PROJECT_TOKEN` | secret | 🧑 ADR-DS-001 §9 — no connector; create a free project at chromatic.com linked to this repo, paste its token. Gates `ci.yml`'s `visual-regression` job (skipped, not failed, while unset). |
 
 (`VERCEL_PROJECT_ID_STORYBOOK` isn't read by `deploy-web.yml`'s matrix today —
 `apps/storybook` deploys via Vercel's own git integration, not that workflow.)

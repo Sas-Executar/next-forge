@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/expo";
+import { light } from "@repo/design-tokens";
 import { dayRange } from "@repo/domain";
 import {
   TASK_STATE_LABEL_PT,
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     opacity: 0.7,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: light.color.border,
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -216,12 +217,12 @@ const styles = StyleSheet.create({
   spinner: { marginTop: 24 },
   center: { padding: 24, gap: 12, alignItems: "flex-start" },
   emptyText: { fontSize: 15, opacity: 0.7 },
-  error: { color: "#c0392b" },
+  error: { color: light.color.status.error },
   card: {
     padding: 16,
     margin: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: light.color.border,
     borderRadius: 8,
     gap: 6,
   },
@@ -230,17 +231,21 @@ const styles = StyleSheet.create({
   cardBody: { fontSize: 14 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
   actionButton: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     alignItems: "center",
   },
-  actionButtonText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  actionButtonText: {
+    color: light.color.background,
+    fontWeight: "600",
+    fontSize: 13,
+  },
   evidenceBox: { width: "100%", gap: 8 },
   evidenceInput: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: light.color.border,
     borderRadius: 8,
     padding: 10,
     fontSize: 14,

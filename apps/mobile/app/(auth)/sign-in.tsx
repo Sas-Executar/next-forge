@@ -1,4 +1,5 @@
 import { useSignIn } from "@clerk/expo/legacy";
+import { light } from "@repo/design-tokens";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -77,7 +78,7 @@ export default function SignInScreen() {
         style={styles.button}
       >
         {isSubmitting ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={light.color.background} />
         ) : (
           <Text style={styles.buttonText}>Entrar</Text>
         )}
@@ -94,18 +95,18 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "700", marginBottom: 24 },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: light.color.border,
     borderRadius: 8,
     padding: 12,
   },
   button: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     padding: 14,
     alignItems: "center",
     marginTop: 8,
   },
-  buttonText: { color: "#fff", fontWeight: "600" },
+  buttonText: { color: light.color.background, fontWeight: "600" },
   link: { textAlign: "center", marginTop: 16, textDecorationLine: "underline" },
-  error: { color: "#c0392b" },
+  error: { color: light.color.status.error },
 });

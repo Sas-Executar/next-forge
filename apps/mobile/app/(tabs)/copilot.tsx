@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/expo";
+import { light } from "@repo/design-tokens";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -66,7 +67,7 @@ export default function CopilotScreen() {
             style={styles.commandButton}
           >
             {running === command.id ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={light.color.background} />
             ) : (
               <Text style={styles.commandButtonText}>{command.label}</Text>
             )}
@@ -115,23 +116,27 @@ const styles = StyleSheet.create({
   disclosure: { fontSize: 12, opacity: 0.6 },
   commands: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   commandButton: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     minWidth: 90,
     alignItems: "center",
   },
-  commandButtonText: { color: "#fff", fontWeight: "600", fontSize: 13 },
-  error: { color: "#c0392b" },
+  commandButtonText: {
+    color: light.color.background,
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  error: { color: light.color.status.error },
   output: {
     padding: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: light.color.border,
     borderRadius: 8,
     gap: 6,
   },
   outputHeadline: { fontSize: 16, fontWeight: "700" },
   outputLine: { fontSize: 14 },
-  warning: { fontSize: 13, color: "#b8860b" },
+  warning: { fontSize: 13, color: light.color.status.warning },
 });

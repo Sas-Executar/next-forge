@@ -1,4 +1,5 @@
 import { useSignUp } from "@clerk/expo/legacy";
+import { light } from "@repo/design-tokens";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -84,7 +85,7 @@ export default function SignUpScreen() {
           style={styles.button}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={light.color.background} />
           ) : (
             <Text style={styles.buttonText}>Confirmar</Text>
           )}
@@ -118,7 +119,7 @@ export default function SignUpScreen() {
         style={styles.button}
       >
         {isSubmitting ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={light.color.background} />
         ) : (
           <Text style={styles.buttonText}>Cadastrar</Text>
         )}
@@ -132,17 +133,17 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: "700", marginBottom: 24 },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: light.color.border,
     borderRadius: 8,
     padding: 12,
   },
   button: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     padding: 14,
     alignItems: "center",
     marginTop: 8,
   },
-  buttonText: { color: "#fff", fontWeight: "600" },
-  error: { color: "#c0392b" },
+  buttonText: { color: light.color.background, fontWeight: "600" },
+  error: { color: light.color.status.error },
 });

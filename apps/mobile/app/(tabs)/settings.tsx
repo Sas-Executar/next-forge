@@ -1,4 +1,5 @@
 import { useAuth, useUser } from "@clerk/expo";
+import { light } from "@repo/design-tokens";
 import { useState } from "react";
 import { ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/themed";
@@ -54,7 +55,7 @@ export default function SettingsScreen() {
         style={styles.button}
       >
         {pushStatus === "registering" ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={light.color.background} />
         ) : (
           <Text style={styles.buttonText}>
             {pushStatus === "registered"
@@ -80,12 +81,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "700" },
   email: { fontSize: 15, opacity: 0.7, marginBottom: 24 },
   button: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     padding: 14,
     alignItems: "center",
   },
-  signOut: { backgroundColor: "#c0392b", marginTop: 24 },
-  buttonText: { color: "#fff", fontWeight: "600" },
-  error: { color: "#c0392b" },
+  signOut: { backgroundColor: light.color.status.error, marginTop: 24 },
+  buttonText: { color: light.color.background, fontWeight: "600" },
+  error: { color: light.color.status.error },
 });

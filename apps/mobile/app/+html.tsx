@@ -1,3 +1,4 @@
+import { dark, light } from "@repo/design-tokens";
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { ReactNode } from "react";
 
@@ -32,12 +33,14 @@ export default function Root({ children }: { children: ReactNode }) {
   );
 }
 
+// ADR-DS-001 Required Change #4/#6: real @repo/design-tokens light/dark
+// backgrounds, replacing the Expo template's hardcoded #fff/#000.
 const responsiveBackground = `
 body {
-  background-color: #fff;
+  background-color: ${light.color.background};
 }
 @media (prefers-color-scheme: dark) {
   body {
-    background-color: #000;
+    background-color: ${dark.color.background};
   }
 }`;

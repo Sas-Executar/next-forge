@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/expo";
+import { light } from "@repo/design-tokens";
 import { INITIAL_LATCH_STATUS, type LatchStatus } from "@repo/scanner";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useEffect, useRef, useState } from "react";
@@ -179,7 +180,7 @@ export default function ScannerScreen() {
           style={styles.button}
         >
           {isDownloadingModel ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={light.color.background} />
           ) : (
             <Text style={styles.buttonText}>Baixar modelo</Text>
           )}
@@ -242,23 +243,29 @@ const styles = StyleSheet.create({
     width: "60%",
     aspectRatio: 1,
     borderWidth: 2,
-    borderColor: "#ffffffaa",
+    // Semi-transparent overlay border — alpha applied to the same
+    // semantic background token rather than a standalone arbitrary hex.
+    borderColor: `${light.color.background}aa`,
     borderRadius: 12,
   },
   statusBar: { padding: 16, gap: 8, alignItems: "center" },
   status: { fontSize: 14, textAlign: "center" },
   button: {
-    backgroundColor: "#111",
+    backgroundColor: light.color.action.primary,
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
   },
   undoButton: {
-    backgroundColor: "#c0392b",
+    backgroundColor: light.color.status.error,
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
   },
-  buttonText: { color: "#fff", fontWeight: "600" },
-  error: { color: "#c0392b", fontSize: 12, textAlign: "center" },
+  buttonText: { color: light.color.background, fontWeight: "600" },
+  error: {
+    color: light.color.status.error,
+    fontSize: 12,
+    textAlign: "center",
+  },
 });

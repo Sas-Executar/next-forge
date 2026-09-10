@@ -68,6 +68,54 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
+  token-drift:
+    name: Design tokens drift (ADR-DS-001)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # packages/design-tokens/css/variables.css is hand-authored to
+      # mirror packages/design-tokens/src/*.ts 1:1 (ADR-DS-001 Required
+      # Change #10) — this script diffs the two and fails the build if
+      # anyone edits one without the other.
+      - name: Check CSS/TS token drift
+        run: bun run packages/design-tokens/scripts/check-drift.ts
+
+  # ADR-DS-001 Required Change #9 — Storybook visual regression. Runs
+  # only once a real CHROMATIC_PROJECT_TOKEN repo secret exists (no
+  # Chromatic connector to provision one automatically here — same
+  # `!= ''` gating pattern deploy-web.yml/preview-db.yml already use for
+  # their own tool-gap secrets/vars); until then this job is skipped, not
+  # failed, so CI stays honest about what it does and doesn't cover.
+  visual-regression:
+    name: Storybook visual regression (Chromatic)
+    runs-on: ubuntu-latest
+    if: ${{ secrets.CHROMATIC_PROJECT_TOKEN != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Publish to Chromatic
+        working-directory: apps/storybook
+        run: bunx chromatic --exit-zero-on-changes
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+
   test:
     name: Unit tests (vitest, every package)
     runs-on: ubuntu-latest
