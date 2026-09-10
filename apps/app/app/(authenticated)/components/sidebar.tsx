@@ -30,6 +30,7 @@ import {
   GaugeIcon,
   LayoutDashboardIcon,
   MapIcon,
+  PlugIcon,
   PrinterIcon,
   RepeatIcon,
   SunIcon,
@@ -46,10 +47,14 @@ interface GlobalSidebarProperties {
 
 /*
  * SPEC-WORKSPACE-001 §1 Route Model, in the order given there. Only
- * routes that exist today (M04 + M05 + M06 + M07 + M10) are linked —
- * /scanner and /projects/:projectId/documents belong to later
+ * routes that exist today (M04 + M05 + M06 + M07 + M10 + M11) are
+ * linked — /scanner and /projects/:projectId/documents belong to later
  * milestones (M08/M09) and aren't real pages yet, so they're
  * deliberately not listed here rather than added as dead links.
+ * /integrations (M11) isn't in SPEC-WORKSPACE-001's route list at all
+ * (the Blueprint has no settings/integrations surface named anywhere)
+ * — a code-owned addition, since PRD-OMNI-001's connections need
+ * somewhere for a human to actually connect/disconnect them.
  */
 const data = {
   user: {
@@ -72,6 +77,7 @@ const data = {
     { title: "Reports", url: "/reports", icon: FileTextIcon },
     { title: "Automações", url: "/automations", icon: RepeatIcon },
     { title: "Workflows", url: "/workflows", icon: WorkflowIcon },
+    { title: "Integrações", url: "/integrations", icon: PlugIcon },
   ],
   navSecondary: [
     {

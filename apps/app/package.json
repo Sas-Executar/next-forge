@@ -22,6 +22,7 @@
     "@repo/design-system": "workspace:*",
     "@repo/domain": "workspace:*",
     "@repo/feature-flags": "workspace:*",
+    "@repo/integrations": "workspace:*",
     "@repo/mapa-os": "workspace:*",
     "@repo/next-config": "workspace:*",
     "@repo/notifications": "workspace:*",

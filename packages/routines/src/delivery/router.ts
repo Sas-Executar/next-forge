@@ -66,6 +66,7 @@ export const routeDelivery = async (
   if (whatsappChannel) {
     if (whatsappChannel.recipient_ref) {
       const result = await sendWhatsAppDelivery({
+        workspaceId,
         recipient_ref: whatsappChannel.recipient_ref,
         text: report.properties.progress,
         report_url: "/reports",

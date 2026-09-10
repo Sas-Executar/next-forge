@@ -2,6 +2,7 @@ import { keys as analytics } from "@repo/analytics/keys";
 import { keys as auth } from "@repo/auth/keys";
 import { keys as database } from "@repo/database/keys";
 import { keys as email } from "@repo/email/keys";
+import { keys as integrations } from "@repo/integrations/keys";
 import { keys as core } from "@repo/next-config/keys";
 import { keys as observability } from "@repo/observability/keys";
 import { keys as payments } from "@repo/payments/keys";
@@ -16,6 +17,7 @@ export const env = createEnv({
     core(),
     database(),
     email(),
+    integrations(),
     observability(),
     payments(),
   ],
@@ -27,9 +29,18 @@ export const env = createEnv({
     // Optional: unset means the check is skipped, same "not configured
     // yet" honesty as every other optional secret in this repo.
     CRON_SECRET: z.string().min(1).optional(),
+
+    // WhatsApp inbound webhook handshake (M11-T01/T06) — the token
+    // Meta's GET verification request must echo back via
+    // hub.verify_token. Distinct from WHATSAPP_APP_SECRET
+    // (@repo/integrations/keys, signs the POST body) and from any
+    // per-workspace credential: this one is the app-level webhook
+    // itself, configured once in the Meta developer console.
+    WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().min(1).optional(),
   },
   client: {},
   runtimeEnv: {
     CRON_SECRET: process.env.CRON_SECRET,
+    WHATSAPP_WEBHOOK_VERIFY_TOKEN: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN,
   },
 });

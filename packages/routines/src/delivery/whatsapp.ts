@@ -1,9 +1,10 @@
-import { keys } from "../../keys";
+import { getConnection, sendWhatsAppMessage } from "@repo/integrations";
 
 export interface WhatsAppDeliveryInput {
   readonly recipient_ref: string;
   readonly report_url: string;
   readonly text: string;
+  readonly workspaceId: string;
 }
 
 export interface WhatsAppDeliveryOutput {
@@ -13,26 +14,47 @@ export interface WhatsAppDeliveryOutput {
 }
 
 /**
- * whatsapp channel (§8), stub behind WHATSAPP_DELIVERY_ENABLED until
- * M11 wires the real Meta Cloud API adapter (plan §4, M11-T01). Never
- * fabricates "sent" — with the flag unset (the default) or set, this
- * always returns a real, honest failure, since no provider exists yet
- * either way.
+ * whatsapp channel (§8) — real adapter (M11-T05, packages/integrations'
+ * Meta Cloud API client), replacing M10's WHATSAPP_DELIVERY_ENABLED
+ * stub now that a real provider exists. Still never fabricates "sent":
+ * a workspace with no CONNECTED WhatsApp IntegrationConnection, or a
+ * Cloud API call that itself fails, both return a real, honest failed
+ * result — the same "no config" degradation pattern as email.ts and
+ * M06's AI router.
+ *
+ * `recipient_ref` is the destination WhatsApp number (E.164, no `+`),
+ * matching the Cloud API's own `to` field — RoutineConfig.delivery
+ * doesn't further qualify the format, so this trusts the config as
+ * authored rather than validating phone numbers here.
  */
-export const sendWhatsAppDelivery = (
-  _input: WhatsAppDeliveryInput
+export const sendWhatsAppDelivery = async (
+  input: WhatsAppDeliveryInput
 ): Promise<WhatsAppDeliveryOutput> => {
-  if (!keys().WHATSAPP_DELIVERY_ENABLED) {
-    return Promise.resolve({
+  const connection = await getConnection(input.workspaceId, "WHATSAPP");
+  if (
+    !(
+      connection &&
+      connection.status === "CONNECTED" &&
+      connection.externalAccountId
+    )
+  ) {
+    return {
       status: "failed",
       provider_message_id: null,
       error:
-        "WhatsApp delivery is disabled (WHATSAPP_DELIVERY_ENABLED unset) — no provider wired yet (M11).",
-    });
+        "No CONNECTED WhatsApp IntegrationConnection for this workspace — nothing to send from.",
+    };
   }
-  return Promise.resolve({
-    status: "failed",
-    provider_message_id: null,
-    error: "WhatsApp delivery is enabled but no provider is wired yet (M11).",
+
+  const result = await sendWhatsAppMessage({
+    phoneNumberId: connection.externalAccountId,
+    to: input.recipient_ref,
+    text: `${input.text}\n${input.report_url}`,
   });
+
+  return {
+    status: result.status,
+    provider_message_id: result.providerMessageId,
+    error: result.error,
+  };
 };

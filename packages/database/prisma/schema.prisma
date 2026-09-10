@@ -611,21 +611,36 @@ model Attachment {
 // concorrente".
 // -----------------------------------------------------------------------
 
+// Credential fields added M11-T01..T04 (PRD-OMNI-001 adapters). Tokens are
+// stored encrypted at rest (packages/integrations/src/crypto.ts, AES-256-GCM
+// under INTEGRATIONS_ENCRYPTION_KEY) — this table has no other secrets
+// protection, and a raw OAuth refresh token is a durable credential, not a
+// value that's safe to keep as plaintext just because the column is
+// workspace-scoped and RLS-protected. webhookSecret is provider-specific:
+// WhatsApp's per-workspace verify token for the GET handshake, or
+// Outlook's clientState shared secret checked on every notification — not
+// used by Gmail (Pub/Sub push authenticates via a Google-signed OIDC token
+// instead, verified at the tokeninfo endpoint, not a shared secret).
 model IntegrationConnection {
-  id                String                      @id @default(cuid())
-  workspaceId       String
-  provider          IntegrationProvider
-  status            IntegrationConnectionStatus @default(PENDING)
-  externalAccountId String?
-  scopes            Json?
-  createdAt         DateTime                    @default(now())
-  updatedAt         DateTime                    @updatedAt
+  id                    String                      @id @default(cuid())
+  workspaceId           String
+  provider              IntegrationProvider
+  status                IntegrationConnectionStatus @default(PENDING)
+  externalAccountId     String?
+  scopes                Json?
+  accessTokenEncrypted  String?
+  refreshTokenEncrypted String?
+  tokenExpiresAt        DateTime?
+  webhookSecret         String?
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
 
   workspace          Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   externalObjectRefs ExternalObjectRef[]
 
   @@unique([workspaceId, provider])
   @@index([workspaceId])
+  @@index([provider, externalAccountId])
 }
 
 model ExternalObjectRef {

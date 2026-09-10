@@ -29,6 +29,7 @@
         "@repo/auth": "workspace:*",
         "@repo/database": "workspace:*",
         "@repo/design-system": "workspace:*",
+        "@repo/integrations": "workspace:*",
         "@repo/next-config": "workspace:*",
         "@repo/observability": "workspace:*",
         "@repo/payments": "workspace:*",
@@ -68,6 +69,7 @@
         "@repo/design-system": "workspace:*",
         "@repo/domain": "workspace:*",
         "@repo/feature-flags": "workspace:*",
+        "@repo/integrations": "workspace:*",
         "@repo/mapa-os": "workspace:*",
         "@repo/next-config": "workspace:*",
         "@repo/notifications": "workspace:*",
@@ -476,6 +478,21 @@
         "next": "16.1.6",
       },
     },
+    "packages/integrations": {
+      "name": "@repo/integrations",
+      "version": "0.0.0",
+      "dependencies": {
+        "@repo/database": "workspace:*",
+        "@t3-oss/env-nextjs": "^0.13.10",
+        "server-only": "^0.0.1",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
+      },
+    },
     "packages/internationalization": {
       "name": "@repo/internationalization",
       "version": "0.0.0",
@@ -610,6 +627,7 @@
         "@repo/database": "workspace:*",
         "@repo/domain": "workspace:*",
         "@repo/email": "workspace:*",
+        "@repo/integrations": "workspace:*",
         "@repo/reports": "workspace:*",
         "@repo/schemas": "workspace:*",
         "@t3-oss/env-nextjs": "^0.13.10",
@@ -1665,6 +1683,8 @@
     "@repo/email": ["@repo/email@workspace:packages/email"],
 
     "@repo/feature-flags": ["@repo/feature-flags@workspace:packages/feature-flags"],
+
+    "@repo/integrations": ["@repo/integrations@workspace:packages/integrations"],
 
     "@repo/internationalization": ["@repo/internationalization@workspace:packages/internationalization"],
 

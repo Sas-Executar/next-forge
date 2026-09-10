@@ -1,5 +1,5 @@
 {
-  "name": "@repo/routines",
+  "name": "@repo/integrations",
   "private": true,
   "version": "0.0.0",
   "scripts": {
@@ -8,15 +8,9 @@
     "test": "NODE_ENV=test vitest run"
   },
   "dependencies": {
-    "@repo/application": "workspace:*",
     "@repo/database": "workspace:*",
-    "@repo/domain": "workspace:*",
-    "@repo/email": "workspace:*",
-    "@repo/integrations": "workspace:*",
-    "@repo/reports": "workspace:*",
-    "@repo/schemas": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.10",
-    "cron-schedule": "^5.0.4",
+    "server-only": "^0.0.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
