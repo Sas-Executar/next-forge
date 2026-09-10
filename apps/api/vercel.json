@@ -9,7 +9,7 @@
     },
     {
       "path": "/cron/routines",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }

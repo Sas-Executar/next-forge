@@ -1,10 +1,22 @@
 import { discoverDueRoutines, runRoutine } from "@repo/routines";
 import { env } from "@/env";
 
-/** Matches apps/api/vercel.json's cron entry for this route. Must be at
+/**
+ * Matches apps/api/vercel.json's cron entry for this route. Must be at
  * least as long as the actual cron interval below, or a routine's due
- * window could close between two polls with nothing ever catching it. */
-const POLL_TOLERANCE_MS = 15 * 60 * 1000;
+ * window could close between two polls with nothing ever catching it.
+ *
+ * M21 — real deploy verified this needs to be daily, not the originally
+ * designed 15 minutes: this team's real Vercel plan is Hobby, which
+ * Vercel rejects any cron more frequent than once/day for ("Hobby
+ * accounts are limited to daily cron jobs" — confirmed by an actual
+ * deployment attempt, not assumed). Once on Vercel Pro, restore the
+ * every-15-minutes schedule in vercel.json and 15 minutes in
+ * milliseconds here to get back the originally intended near-real-time
+ * routine checking — this is a real, disclosed degradation for today's
+ * plan tier, not a design change.
+ */
+const POLL_TOLERANCE_MS = 24 * 60 * 60 * 1000;
 
 interface RoutineRunOutcome {
   readonly routineId: string;

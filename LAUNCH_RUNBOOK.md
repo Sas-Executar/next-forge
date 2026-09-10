@@ -45,7 +45,23 @@ each linked to `Sas-Executar/next-forge` with the matching `rootDirectory`:
 
 Each fired an initial preview deploy against `main` (pre-M21 content, no env
 vars yet) — expected to be broken/incomplete right now; that's diagnostic,
-not a bug to chase. It becomes real once:
+not a bug to chase. Two real, fixed findings from that first deploy:
+- `apps/storybook`'s `vercel.json` was missing an explicit `framework`/
+  `buildCommand`/`outputDirectory` — Vercel auto-detected "Next.js" from
+  a vestigial `next.config.ts`/`next` dependency (unused; the app's real
+  build is `storybook build` → `storybook-static/`) and looked for a
+  `.next` directory that was never produced. Fixed by pinning those 3
+  fields explicitly.
+- `apps/api/vercel.json`'s routines cron was every 15 minutes — this
+  team's real Vercel plan is Hobby, which rejects any cron more frequent
+  than daily. Changed to once/day (`0 6 * * *`) with
+  `apps/api/app/cron/routines/route.ts`'s `POLL_TOLERANCE_MS` updated to
+  match — a real, disclosed degradation (routines get checked once a
+  day, not every 15 minutes) until this Vercel project is upgraded to
+  Pro, not a design change. That file's own comment documents the exact
+  revert.
+
+It becomes fully real once:
 
 🧑 **Populate env vars** — Vercel dashboard → each project → Settings →
 Environment Variables (no MCP tool sets these). Per `INFRASTRUCTURE.md`'s
