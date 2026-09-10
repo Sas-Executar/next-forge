@@ -19,6 +19,7 @@
     "@repo/design-system": "workspace:*",
     "@repo/integrations": "workspace:*",
     "@repo/next-config": "workspace:*",
+    "@repo/notifications": "workspace:*",
     "@repo/observability": "workspace:*",
     "@repo/payments": "workspace:*",
     "@repo/routines": "workspace:*",
