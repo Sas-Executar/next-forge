@@ -1,6 +1,14 @@
 import { analytics } from "@repo/analytics/server";
 import { clerkClient } from "@repo/auth/server";
-import { syncSubscriptionFromStripe } from "@repo/billing";
+import {
+  resolveWorkspaceByStripeCustomerId,
+  type SubscriptionSyncResult,
+  syncSubscriptionFromStripe,
+} from "@repo/billing";
+import {
+  type BusinessEventName,
+  emitBusinessEvent,
+} from "@repo/observability/business-events";
 import { parseError } from "@repo/observability/error";
 import { log } from "@repo/observability/log";
 import type { Stripe } from "@repo/payments";
@@ -62,6 +70,77 @@ const handleSubscriptionScheduleCanceled = async (
   });
 };
 
+/**
+ * M15-T02 — derives which `billing.*` OBS-BIZ-001 event a subscription
+ * transition represents from its real before/after plan+status, rather
+ * than trusting Stripe's event type name (the same `.created`/
+ * `.updated` ambiguity `syncSubscriptionFromStripe`'s own comment
+ * already notes — both can carry any of these transitions).
+ */
+const billingEventForSubscriptionSync = (
+  result: SubscriptionSyncResult
+): BusinessEventName => {
+  if (result.status === "CANCELED") {
+    return "billing.subscription_cancelled";
+  }
+  if (result.previousPlan === "TRIAL" && result.plan !== "TRIAL") {
+    return "billing.trial_converted";
+  }
+  if (result.previousPlan !== result.plan) {
+    return "billing.plan_changed";
+  }
+  if (result.previousStatus !== "ACTIVE" && result.status === "ACTIVE") {
+    return "billing.subscription_started";
+  }
+  return "billing.subscription_renewed";
+};
+
+const handleSubscriptionSyncEvent = async (
+  stripeSubscription: Stripe.Subscription
+) => {
+  const result = await syncSubscriptionFromStripe(stripeSubscription);
+  await emitBusinessEvent(result.workspaceId, {
+    eventName: billingEventForSubscriptionSync(result),
+    component: "webhooks/payments",
+    outcome: "success",
+    metadata: {
+      stripeSubscriptionId: stripeSubscription.id,
+      previousPlan: result.previousPlan,
+      plan: result.plan,
+      previousStatus: result.previousStatus,
+      status: result.status,
+    },
+  });
+};
+
+/** M15-T02 — `invoice.paid`/`invoice.payment_failed` (OBS-BIZ-001 §4). */
+const handleInvoiceEvent = async (
+  invoice: Stripe.Invoice,
+  outcome: "success" | "error"
+) => {
+  if (!invoice.customer) {
+    return;
+  }
+  const customerId =
+    typeof invoice.customer === "string"
+      ? invoice.customer
+      : invoice.customer.id;
+  const workspaceId = await resolveWorkspaceByStripeCustomerId(customerId);
+
+  await emitBusinessEvent(workspaceId, {
+    eventName:
+      outcome === "success" ? "billing.invoice_paid" : "billing.invoice_failed",
+    component: "webhooks/payments",
+    outcome,
+    metadata: {
+      invoiceId: invoice.id,
+      amountPaidCentavos: invoice.amount_paid,
+      amountDueCentavos: invoice.amount_due,
+      currency: invoice.currency,
+    },
+  });
+};
+
 export const POST = async (request: Request): Promise<Response> => {
   if (!(stripe && env.STRIPE_WEBHOOK_SECRET)) {
     return NextResponse.json({ message: "Not configured", ok: false });
@@ -98,10 +177,22 @@ export const POST = async (request: Request): Promise<Response> => {
       // `.created`/`.updated` share one handler since both events carry
       // the subscription's full current state, not a diff — the same
       // upsert-by-current-value shape applies either way.
+      // M15-T02: also emits the matching billing.* business event
+      // (handleSubscriptionSyncEvent, derived from the real before/
+      // after transition, not the Stripe event type name).
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        await syncSubscriptionFromStripe(event.data.object);
+        await handleSubscriptionSyncEvent(event.data.object);
+        break;
+      }
+      // M15-T02 (OBS-BIZ-001 §4).
+      case "invoice.paid": {
+        await handleInvoiceEvent(event.data.object, "success");
+        break;
+      }
+      case "invoice.payment_failed": {
+        await handleInvoiceEvent(event.data.object, "error");
         break;
       }
       default: {

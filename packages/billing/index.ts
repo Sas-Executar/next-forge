@@ -33,6 +33,8 @@ export {
 export { canAddMember, getSeatUsage, type SeatUsage } from "./src/seats";
 export {
   handleSubscriptionDeleted,
+  resolveWorkspaceByStripeCustomerId,
+  type SubscriptionSyncResult,
   syncSubscriptionFromStripe,
   UnresolvedWorkspaceError,
 } from "./src/subscription-sync";

@@ -5,6 +5,7 @@ import {
   WorkspaceNotFoundError,
 } from "@repo/auth/server";
 import { PrismaFitError, populatePrismaA4, prisma7d } from "@repo/mapa-os";
+import { emitBusinessEvent } from "@repo/observability/business-events";
 
 /**
  * Print/export surface for the prisma_7d projection (M07-T05). Returns
@@ -44,6 +45,14 @@ export const GET = async (req: Request) => {
 
   try {
     const html = populatePrismaA4(result.payload);
+    // M15-T02 (OBS-BIZ-001 §4) — fires only once the artifact is
+    // actually produced (past PrismaFitError), not merely requested.
+    await emitBusinessEvent(workspaceId, {
+      eventName: "product.mapa_os_generated",
+      component: "api/mapa-os/print",
+      outcome: "success",
+      metadata: { projectId: projectId ?? null, authorized },
+    });
     return new Response(html, {
       headers: { "content-type": "text/html; charset=utf-8" },
     });

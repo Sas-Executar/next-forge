@@ -3,6 +3,7 @@
 import { requireRole } from "@repo/auth/server";
 import { forWorkspace } from "@repo/database";
 import { canTransitionTask } from "@repo/domain";
+import { emitBusinessEvent } from "@repo/observability/business-events";
 import { taskStateSchema } from "@repo/schemas";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -112,6 +113,18 @@ export const completeAction = async (input: CompleteActionInput) => {
 
   revalidatePath("/now");
   revalidatePath("/projects");
+
+  // M15-T02 (OBS-BIZ-001 §4 "Activation/retention") — only a real DONE
+  // transition counts as a completed core action, not every legal
+  // transition this action can perform.
+  if (toState === "DONE") {
+    await emitBusinessEvent(workspace.id, {
+      eventName: "product.core_action_completed",
+      component: "actions/execution/complete-action",
+      outcome: "success",
+      metadata: { taskId, evidenceGrade: evidence?.grade },
+    });
+  }
 
   return updatedTask;
 };

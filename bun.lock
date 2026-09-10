@@ -650,6 +650,9 @@
       "version": "0.0.0",
       "dependencies": {
         "@logtail/next": "^0.3.1",
+        "@repo/billing": "workspace:*",
+        "@repo/database": "workspace:*",
+        "@repo/schemas": "workspace:*",
         "@sentry/nextjs": "^10.42.0",
         "@t3-oss/env-nextjs": "^0.13.10",
         "react": "19.2.4",
@@ -662,6 +665,7 @@
         "@types/react": "19.2.14",
         "@types/react-dom": "19.2.3",
         "typescript": "^5.9.3",
+        "vitest": "^4.0.18",
       },
     },
     "packages/payments": {
@@ -699,6 +703,7 @@
       "dependencies": {
         "@repo/application": "workspace:*",
         "@repo/database": "workspace:*",
+        "@repo/observability": "workspace:*",
         "zod": "^4.3.6",
       },
       "devDependencies": {
@@ -716,6 +721,7 @@
         "@repo/domain": "workspace:*",
         "@repo/email": "workspace:*",
         "@repo/integrations": "workspace:*",
+        "@repo/observability": "workspace:*",
         "@repo/reports": "workspace:*",
         "@repo/schemas": "workspace:*",
         "@t3-oss/env-nextjs": "^0.13.10",
@@ -734,6 +740,7 @@
       "dependencies": {
         "@repo/database": "workspace:*",
         "@repo/domain": "workspace:*",
+        "@repo/observability": "workspace:*",
         "@repo/schemas": "workspace:*",
         "server-only": "^0.0.1",
         "zod": "^4.3.6",

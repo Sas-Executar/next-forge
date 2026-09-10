@@ -13,6 +13,7 @@
     "@repo/domain": "workspace:*",
     "@repo/email": "workspace:*",
     "@repo/integrations": "workspace:*",
+    "@repo/observability": "workspace:*",
     "@repo/reports": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.10",

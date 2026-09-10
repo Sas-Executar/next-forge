@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { nextAction, rankEligibleTasks } from "@repo/application";
 import { forWorkspace } from "@repo/database";
+import { emitBusinessEvent } from "@repo/observability/business-events";
 import type { StatusReport } from "./status-report-schema";
 
 const RECENT_EVIDENCE_LIMIT = 10;
@@ -94,7 +95,7 @@ export const buildStatusReport = async (
     (e) => e.createdAt >= todayStart
   ).length;
 
-  return {
+  const report: StatusReport = {
     report_id: randomUUID(),
     run_id: null,
     project_id: projectId ?? null,
@@ -153,4 +154,17 @@ export const buildStatusReport = async (
       "now.duration / now.completion_criterion: Task não tem campo de duração nem Definition-of-Done por tarefa.",
     ],
   };
+
+  // M15-T02 (OBS-BIZ-001 §4) — fires for every real report built,
+  // whether from /reports (manual) or packages/routines' pipeline
+  // (which additionally logs its own internal routine.report_created
+  // domain event, D8's separate internal/external event pair).
+  await emitBusinessEvent(workspaceId, {
+    eventName: "product.status_report_generated",
+    component: "reports/builder",
+    outcome: "success",
+    metadata: { reportId: report.report_id, projectId: projectId ?? null },
+  });
+
+  return report;
 };

@@ -197,6 +197,7 @@ model Workspace {
   usageLedgerEntries     UsageLedger[]
   executionCredits       ExecutionCredit[]
   auditEvents            AuditEvent[]
+  telemetryEvents        TelemetryEvent[]
 
   @@index([clerkOrgId])
 }
@@ -714,22 +715,67 @@ model ToolCall {
   @@index([agentRunId])
 }
 
+// M15-T03 (OBS-006 "campos obrigatórios por chamada"): extended with the
+// fields the spec names that the M02 stub didn't yet carry — provider,
+// capabilityId, traceId (OBS-002 correlation), and the native-currency/
+// FX breakdown (providerCostNative/nativeCurrency/fxRateBrl) that
+// costBrl alone doesn't preserve. outcome mirrors OBS-002's envelope
+// outcome field for this one call.
 model AIUsage {
-  id                String   @id @default(cuid())
-  workspaceId       String
-  agentRunId        String?
-  model             String
-  inputTokens       Int
-  outputTokens      Int
-  cachedInputTokens Int?
-  costBrl           Decimal? @db.Decimal(12, 6)
-  createdAt         DateTime @default(now())
+  id                 String   @id @default(cuid())
+  workspaceId        String
+  agentRunId         String?
+  traceId            String?
+  provider           String   @default("openai")
+  model              String
+  capabilityId       String?
+  inputTokens        Int
+  outputTokens       Int
+  cachedInputTokens  Int?
+  providerCostNative Decimal? @db.Decimal(12, 6)
+  nativeCurrency     String?
+  fxRateBrl          Decimal? @db.Decimal(12, 6)
+  costBrl            Decimal? @db.Decimal(12, 6)
+  outcome            String?
+  createdAt          DateTime @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   agentRun  AgentRun? @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId])
   @@index([agentRunId])
+  @@index([traceId])
+}
+
+// M15-T02 (OBS-BIZ-001 business event catalog) — a local, workspace-
+// scoped event log for the dot-namespaced event names OBS-BIZ-001 §4
+// names (billing.*, product.*, ai.*, channel.*, infra.*). This is NOT
+// the "event store/warehouse" OBS-BIZ-001 §11 lists as GAP (no
+// analytics warehouse, no cross-account aggregation pipeline, no
+// reconciliation job) — it's a real, queryable local record of each
+// event as it happens, workspace by workspace, which
+// packages/observability's metrics.ts computes the real formulas over.
+model TelemetryEvent {
+  id          String   @id @default(cuid())
+  workspaceId String
+  traceId     String
+  eventName   String // e.g. "billing.subscription_started", "product.core_action_completed"
+  component   String
+  outcome     String // OBS-002 §2: success|partial|blocked|error
+  costBrl     Decimal? @db.Decimal(12, 6)
+  occurredAt  DateTime @default(now())
+  // Remainder of the OBS-002 envelope this event doesn't get its own
+  // column for (agent_run_id, mutation_id, subscription_id, etc.) —
+  // kept as JSON rather than dozens of nullable columns most events
+  // never populate.
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([eventName])
+  @@index([traceId])
 }
 
 // -----------------------------------------------------------------------

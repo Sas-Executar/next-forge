@@ -21,6 +21,7 @@ import {
   requireRole,
   WorkspaceNotFoundError,
 } from "@repo/auth/server";
+import { recordAiUsage } from "@repo/observability/ai-cost";
 
 const WHITESPACE = /\s/;
 
@@ -108,11 +109,30 @@ export const POST = async (req: Request) => {
   }
 
   const tools = buildCopilotTools(workspaceId, confirmedByActorRef);
+  const model = routeModel("structuring");
+  const modelId = typeof model === "string" ? model : model.modelId;
+
   const result = streamText({
-    model: routeModel("structuring"),
+    model,
     system: COPILOT_SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     tools,
+    // M15-T03 (OBS-006 §3's real per-call cost record) — the only
+    // real model-call site in this codebase today. `totalUsage` is the
+    // AI SDK's own aggregated token count across every step (including
+    // tool-calling loops), so this records one AIUsage row per chat
+    // turn, not per internal step. No live FX source exists here (see
+    // recordAiUsage's own comment) — costBrl stays null, USD cost is
+    // still recorded.
+    onFinish: async ({ totalUsage }) => {
+      await recordAiUsage(workspaceId, {
+        model: modelId,
+        capabilityId: "copilot.chat",
+        inputTokens: totalUsage.inputTokens ?? 0,
+        outputTokens: totalUsage.outputTokens ?? 0,
+        cachedInputTokens: totalUsage.inputTokenDetails.cacheReadTokens,
+      });
+    },
   });
 
   return result.toUIMessageStreamResponse();

@@ -1,6 +1,7 @@
 import "server-only";
 import { forWorkspace } from "@repo/database";
 import { canTransitionTask } from "@repo/domain";
+import { emitBusinessEvent } from "@repo/observability/business-events";
 import type { CommandResult, TaskCompletionMutation } from "./types";
 
 /**
@@ -134,6 +135,16 @@ export const dispatch = async (
     newState: "DONE",
     createdAt: mutationRow.createdAt.toISOString(),
   };
+
+  // M15-T02 (OBS-BIZ-001 §4) — a physical-symbol Done, specifically;
+  // OPEN_CHAT/OPEN_SELECTOR return earlier and never reach here since
+  // they mutate nothing.
+  await emitBusinessEvent(workspaceId, {
+    eventName: "product.scanner_action_completed",
+    component: "scanner/dispatch",
+    outcome: "success",
+    metadata: { symbolId, taskId: task.id, mutationId: mutationRow.id },
+  });
 
   return { status: "OK", symbolId, command: symbol.command, mutation };
 };

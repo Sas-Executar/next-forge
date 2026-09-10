@@ -63,6 +63,14 @@ const planFromStripeSubscription = (
   return null;
 };
 
+export interface SubscriptionSyncResult {
+  readonly plan: SubscriptionPlan;
+  readonly previousPlan: SubscriptionPlan;
+  readonly previousStatus: SubscriptionStatus;
+  readonly status: SubscriptionStatus;
+  readonly workspaceId: string;
+}
+
 /**
  * M13-T04 — `customer.subscription.*` webhook handler. A Stripe webhook
  * arrives with only a Stripe customer/subscription id, no workspaceId —
@@ -72,10 +80,17 @@ const planFromStripeSubscription = (
  * `packages/database/prisma/migrations/*_subscription_billing` adds the
  * matching policy for `Subscription`). The actual write always goes
  * through `forWorkspace(workspaceId)` once resolved — no bypass.
+ *
+ * Returns the before/after plan+status (M15-T02) so the caller can
+ * derive which `billing.*` business event this transition represents
+ * (`packages/observability/business-events.ts`) without packages/billing
+ * itself depending on packages/observability — metrics.ts already
+ * depends on @repo/billing/plans, so the reverse dependency would be
+ * circular.
  */
 export const syncSubscriptionFromStripe = async (
   stripeSubscription: Stripe.Subscription
-): Promise<void> => {
+): Promise<SubscriptionSyncResult> => {
   const customerId =
     typeof stripeSubscription.customer === "string"
       ? stripeSubscription.customer
@@ -103,6 +118,14 @@ export const syncSubscriptionFromStripe = async (
         : null,
     },
   });
+
+  return {
+    workspaceId: existing.workspaceId,
+    previousPlan: existing.plan,
+    plan,
+    previousStatus: existing.status,
+    status,
+  };
 };
 
 /**
@@ -115,3 +138,22 @@ export const syncSubscriptionFromStripe = async (
  * taxonomy 1:1 rather than collapsing them silently.
  */
 export const handleSubscriptionDeleted = syncSubscriptionFromStripe;
+
+/**
+ * M15-T02 — resolves the workspace owning a Stripe customer id, for
+ * webhook events (`invoice.paid`/`invoice.payment_failed`) that carry
+ * no subscription-shaped payload to run through
+ * `syncSubscriptionFromStripe`. Same `forSystemJob()` discovery, same
+ * narrow read-only carve-out — no write happens here.
+ */
+export const resolveWorkspaceByStripeCustomerId = async (
+  customerId: string
+): Promise<string> => {
+  const existing = await forSystemJob().subscription.findUnique({
+    where: { stripeCustomerId: customerId },
+  });
+  if (!existing) {
+    throw new UnresolvedWorkspaceError(customerId);
+  }
+  return existing.workspaceId;
+};

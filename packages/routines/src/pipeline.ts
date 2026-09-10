@@ -1,5 +1,6 @@
 import { nextAction } from "@repo/application";
 import { forWorkspace } from "@repo/database";
+import { emitBusinessEvent } from "@repo/observability/business-events";
 import { buildStatusReport } from "@repo/reports";
 import { evaluateMutationAuthority } from "./authority-gate";
 import { routeDelivery } from "./delivery/router";
@@ -230,6 +231,15 @@ export const runRoutine = async (
   });
   await emitRoutineEvent(workspaceId, "routine.completed", run.id, {
     status: finalStatus,
+  });
+  // M15-T02 (D8's own mapping rule, applied for real): routine.* stays
+  // the internal domain event name (emitRoutineEvent, above); this is
+  // its OBS-BIZ-001 external business-event counterpart.
+  await emitBusinessEvent(workspaceId, {
+    eventName: "product.routine_run_completed",
+    component: "routines/pipeline",
+    outcome: finalStatus === "SUCCESS" ? "success" : "partial",
+    metadata: { routineId, runId: run.id, mutationCount: mutations.length },
   });
 
   return {
