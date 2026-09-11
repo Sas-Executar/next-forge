@@ -3,11 +3,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/scroll-task-prototype/index.html",
+      "src": "public/scroll-task-prototype/*",
       "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/execution-assets/(styles\\.css|app\\.mjs|model\\.mjs)",
+      "dest": "/public/scroll-task-prototype/$1"
+    },
+    {
+      "src": "/(tarefas|foco|configuracoes)/?",
+      "dest": "/public/scroll-task-prototype/index.html"
+    },
     {
       "src": "/",
       "dest": "/public/scroll-task-prototype/index.html"
