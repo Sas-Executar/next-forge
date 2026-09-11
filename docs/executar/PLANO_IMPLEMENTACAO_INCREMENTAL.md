@@ -102,17 +102,61 @@ usuário para aquela fase específica — nunca em lote.
   testar `POST /sessoes` manualmente; `docker build`/`docker run` o
   `Dockerfile` contra um daemon real.
 
-## Fase 4 — Tools, hooks, permissões e Modo Rotina
+## Fase 4 — Tools, hooks, permissões e Modo Rotina — ✅ EXECUTADA (parcialmente)
 
-- **Entrada**: `D9a` (consentimento das 12 tools reais) decidido;
-  `D10` (fuso/retry/notificação) decidido.
-- **Trabalho**: tools MCP in-process com `tenant_id` no closure (não no
-  argumento do modelo); hooks `PreToolUse`/`PostToolUse`/etc.; Modo Rotina
-  como máquina nomeada sobre `packages/routines`.
-- **Aceite (negativos explícitos, como o plano já exige)**:
-  `executar-scanner` não consegue gravar; nenhuma rotina chega a `Ativo`
-  sem `EventoAuditoria` de confirmação humana; `tenant_id` forjado no
-  argumento é ignorado; execução repetida do cron gera **um** `RoutineRun`.
+Executada sem esperar D9a/D10 formalmente fechadas — ambas seguem
+`DECISAO_REQUERIDA`, mas o código não ficava bloqueado por elas (ver
+disclosure abaixo em cada item).
+
+- **Tools MCP com `tenant_id` no closure**: já satisfeito desde a Fase 2
+  (`buildCopilotToolDefinitions`/`buildCopilotMcpServer`) — nada novo
+  aqui, só confirmado.
+- **Hooks**: `apps/copiloto-runtime/src/hooks.ts` — `createAgentRun`/
+  `finishAgentRun` (abre/fecha `AgentRun`, reusando o model já existente
+  desde M06) e `buildAgentHooks(workspaceId, agentRunId)`: `PreToolUse`
+  nega qualquer tool fora da allowlist explícita (`COPILOT_MCP_TOOL_NAMES`)
+  — forma genérica e mais forte do "executar-scanner não consegue
+  gravar" do plano original, já que não existe hoje uma tool de scanner
+  para negar especificamente (isso é Fase 8); `PostToolUse`/
+  `PostToolUseFailure` gravam `ToolCall` + `AuditEvent` para toda
+  chamada, sucesso ou falha — mesmo padrão de auditoria que
+  `packages/mcp/src/server.ts` já usa. Fiado em `apps/copiloto-runtime/
+  src/server.ts`.
+- **Modo Rotina como máquina nomeada**: `packages/schemas/src/
+  modo-rotina.ts` (`rotinaNormativaStatusSchema`: PROPOSTO→CONFIRMADO→
+  ATIVO⇄PAUSADO, ATIVO→REVISAO→ATIVO — exatamente a máquina do plano
+  §5.1) + `rotinaPropostaSchema` (10 campos) + `rotinasPropostasLoteSchema`
+  (cardinalidade EXATA de 3). `packages/domain/src/modo-rotina-state.ts`
+  (`canTransitionRotinaNormativa`). **Disclosure**: os 10 campos exatos
+  não existem em nenhuma fonte acessível a esta sessão (mesma lacuna do
+  nome "Modo Rotina" em si, já registrada na Fase 0) — são uma proposta
+  autorada nesta fase, documentada como tal no próprio arquivo, e não
+  fecham D10. Deliberadamente uma máquina/enum SEPARADOS de
+  `RoutineStatus` (packages/schemas/src/routine.ts) — ver o comentário do
+  arquivo para por que as duas não foram fundidas.
+- **Aceite (negativos explícitos)**:
+  - ✅ `tenant_id` forjado no argumento é ignorado — verdadeiro por
+    construção desde a Fase 2 (nenhuma tool MCP tem `workspaceId` no seu
+    schema de input; vem só do closure). Não há teste novo além do que
+    a Fase 2 já cobre, porque não há caminho de código que aceitaria um
+    `workspaceId` de argumento para negar.
+  - ✅ Execução repetida do cron gera **um** `RoutineRun` — já garantido
+    desde M10 pelo `@@unique` em `RoutineRun.runKey`
+    (`packages/database/prisma/schema.prisma`); confirmado nesta fase,
+    não implementado agora.
+  - ⚠️ `executar-scanner não consegue gravar` — não testável literalmente
+    (a tool não existe); testado na forma mais forte "nenhuma tool fora
+    da allowlist executa" (`__tests__/hooks.test.ts`).
+  - ⚠️ "Nenhuma rotina chega a Ativo sem confirmação humana" — a máquina
+    normativa (`canTransitionRotinaNormativa`) é uma estrutura pura, sem
+    dimensão de `actor` (ver o comentário do próprio arquivo: a
+    confirmação é responsabilidade de quem chama, não desta função) —
+    **não há ainda um caller real** (isso nasce só na Fase 5, quando o
+    orquestrador determinístico existir) para testar esse negativo
+    ponta a ponta. Registrado como pendente, não fabricado.
+  - Todos os testes novos de hooks (`PreToolUse`) são testes puros sobre
+    o `HookCallback` — não verificados contra uma sessão real do Agent
+    SDK nesta sessão sandbox (mesma limitação disclosurada na Fase 3).
 
 ## Fase 5 — Jornada de ativação e 1º entregável
 

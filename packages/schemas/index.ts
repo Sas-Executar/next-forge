@@ -4,6 +4,7 @@ export * from "./src/authority";
 export * from "./src/authority-decision";
 export * from "./src/billing";
 export * from "./src/evidence";
+export * from "./src/modo-rotina";
 export * from "./src/routine";
 export * from "./src/scanner";
 export * from "./src/task-state";

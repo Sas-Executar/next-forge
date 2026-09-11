@@ -5,6 +5,7 @@ import {
 } from "@repo/agent-runtime";
 import { z } from "zod";
 import { env } from "../env";
+import { buildAgentHooks, createAgentRun, finishAgentRun } from "./hooks";
 import { createPostgresSessionStore } from "./session-store";
 import { buildTenantQueryOptions } from "./tenant";
 
@@ -54,6 +55,13 @@ class RuntimeConfigError extends Error {}
  * POST /sessoes and POST /sessoes/:id/mensagens — the only difference
  * between "start" and "continue" is whether `resume` is set.
  */
+// Placeholder phase until Fase 5's Camada 1 orchestrator assigns a real
+// FaseAtivacao/AGENT_FLOW_PHASES value per call — today every session
+// through this route is a free-standing query(), not yet slotted into
+// either machine, so AgentRun.phase records that honestly instead of
+// guessing one of the two enums.
+const UNASSIGNED_PHASE = "SESSAO_LIVRE";
+
 const runQuery = async (
   parsed: z.infer<typeof sessionRequestSchema>,
   resume?: string
@@ -66,6 +74,10 @@ const runQuery = async (
   const tenantOptions = buildTenantQueryOptions(workspaceId);
   const sessionStore = createPostgresSessionStore(workspaceId);
   const mcpServer = buildCopilotMcpServer(workspaceId, actorRef);
+  const agentRunId = await createAgentRun(workspaceId, UNASSIGNED_PHASE, {
+    prompt,
+    resume: resume ?? null,
+  });
 
   let sessionId: string | undefined;
   let result: string | undefined;
@@ -81,6 +93,7 @@ const runQuery = async (
         maxTurns,
         mcpServers: { "executar-copiloto": mcpServer },
         allowedTools: [...COPILOT_MCP_TOOL_NAMES],
+        hooks: buildAgentHooks(workspaceId, agentRunId),
       },
     })) {
       if (message.type === "result") {
@@ -97,9 +110,19 @@ const runQuery = async (
     // (doc's own documented pattern, mirrored here). Re-throw only if no
     // result message was ever seen (a connection/process failure).
     if (sessionId === undefined) {
+      await finishAgentRun(workspaceId, agentRunId, "FAILED", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
+
+  await finishAgentRun(
+    workspaceId,
+    agentRunId,
+    subtype === "success" ? "SUCCESS" : "FAILED",
+    { subtype, result }
+  );
 
   return { sessionId, subtype, result };
 };
@@ -185,7 +208,12 @@ const handleStream = (url: URL, sessionId: string): Response => {
   const stream = new ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
+      let agentRunId: string | undefined;
       try {
+        agentRunId = await createAgentRun(workspaceId, UNASSIGNED_PHASE, {
+          prompt,
+          resume: sessionId,
+        });
         for await (const message of query({
           prompt,
           options: {
@@ -194,13 +222,22 @@ const handleStream = (url: URL, sessionId: string): Response => {
             sessionStore,
             mcpServers: { "executar-copiloto": mcpServer },
             allowedTools: [...COPILOT_MCP_TOOL_NAMES],
+            hooks: buildAgentHooks(workspaceId, agentRunId),
           },
         })) {
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify(message)}\n\n`)
           );
         }
+        if (agentRunId) {
+          await finishAgentRun(workspaceId, agentRunId, "SUCCESS", null);
+        }
       } catch (error) {
+        if (agentRunId) {
+          await finishAgentRun(workspaceId, agentRunId, "FAILED", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
         controller.enqueue(
           encoder.encode(
             `event: error\ndata: ${JSON.stringify({
