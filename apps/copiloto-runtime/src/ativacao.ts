@@ -24,6 +24,27 @@ import { createPostgresSessionStore } from "./session-store";
 import { buildTenantQueryOptions } from "./tenant";
 
 /**
+ * Fase 6 (D5, plano §6.4) — "carregado via opção `plugins` (caminho
+ * local) — não via `settingSources`, para permitir `settingSources: []`
+ * (isolamento multi-tenant)." `packages/copiloto-skills` tem o manifesto
+ * `.claude-plugin/plugin.json` + `skills/executar-.../SKILL.md` exigidos
+ * por essa opção. Caminho resolvido a partir deste arquivo, não do
+ * `cwd` do processo (que é per-tenant e não contém as skills — ver
+ * tenant.ts).
+ *
+ * Disclosure: o formato exato de `.claude-plugin/plugin.json`
+ * (campos aceitos além de name/version/description) não foi verificado
+ * contra a documentação oficial nesta fase — só o campo `path` de
+ * `SdkPluginConfig` foi conferido diretamente em sdk.d.ts. Se o plugin
+ * não carregar em uma sessão real, revisar o manifesto contra
+ * code.claude.com/docs/en/agent-sdk primeiro.
+ */
+const COPILOTO_SKILLS_PLUGIN_PATH = new URL(
+  "../../../packages/copiloto-skills",
+  import.meta.url
+).pathname;
+
+/**
  * Fase 5 (plano §6.2/§7) — "a Camada 1 é sequência fixa ⇒ orquestração
  * determinística em código, com o Agent SDK atuando *dentro* de cada
  * etapa." Esta é a peça que conecta o orquestrador puro
@@ -114,6 +135,7 @@ export const runFaseAtivacao = async (
         allowedTools: [...COPILOT_MCP_TOOL_NAMES],
         hooks: buildAgentHooks(workspaceId, agentRunId),
         outputFormat: { type: "json_schema", schema: outputSchema },
+        plugins: [{ type: "local", path: COPILOTO_SKILLS_PLUGIN_PATH }],
       },
     })) {
       if (message.type === "result") {

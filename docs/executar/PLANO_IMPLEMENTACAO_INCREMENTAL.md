@@ -198,15 +198,76 @@ disclosure abaixo em cada item).
   anteriores à chamada real do SDK são testados —
   `apps/copiloto-runtime/__tests__/ativacao.test.ts`).
 
-## Fase 6 — Skills pt-BR, rotas e UI
+## Fase 6 — Skills pt-BR, rotas e UI — ✅ EXECUTADA (escopo reduzido, disclosurado)
 
-- **Entrada**: `D7` (status report canônico) decidido — senão
-  `executar-status-report` não tem o que traduzir.
-- **Trabalho**: `packages/copiloto-skills` (fork/tradução de
-  Productivity/Operations); renomear rotas pt-BR (C15) com mapa
-  `anterior→novo` + redirects.
-- **Aceite**: fluxo completo operável por usuário autenticado; nenhuma
-  rota pública com placeholder.
+Executada sem esperar D7 (segue `DECISAO_REQUERIDA`) — ver disclosure
+abaixo sobre por que isso não bloqueou o trabalho real desta fase.
+
+- **Descoberta real desta fase**: os plugins `productivity` (v1.3.1) e
+  `operations` (v1.3.0) citados no plano existem de fato — confirmados
+  via `SearchPlugins` nesta própria sessão, com as versões batendo
+  exatamente com o que o plano já citava. Mas **esta sessão não tem
+  nenhuma ferramenta que leia o conteúdo completo (SKILL.md) desses
+  plugins** — `SearchPlugins`/`ListPlugins` só devolvem metadados (nome,
+  descrição, lista de nomes de skill: `productivity:start`,
+  `productivity:task-management`, `operations:status-report`, etc.).
+  Portanto **D5 ("forkar e traduzir") não pôde ser executado
+  literalmente** — não há texto-fonte para traduzir a partir desta
+  sessão.
+- **O que foi feito em vez disso**: `packages/copiloto-skills/`
+  (`.claude-plugin/plugin.json` + `skills/executar-{onboarding,scanner,
+  backlog,modelo-operacional,modo-rotina,primeiro-entregavel}/SKILL.md`)
+  — 6 skills em pt-BR, **conteúdo original desta implementação**, cada
+  uma grounded no domínio real já construído nas Fases 1-5
+  (`packages/schemas/src/ativacao.ts`, `modo-rotina.ts`,
+  `packages/domain`), não uma tradução do plugin Anthropic. Cada
+  SKILL.md disclosura essa limitação explicitamente no próprio arquivo,
+  primeira seção. Conectadas ao runtime real via
+  `apps/copiloto-runtime/src/ativacao.ts`'s `plugins: [{type:'local',
+  path: ...}]` (a opção que o plano já pedia, "não via settingSources").
+- **D7 não bloqueou porque**: nenhuma das 3 candidatas a
+  `executar-status-report` (base/Business Pack/operations) está
+  acessível para comparação nesta sessão de qualquer forma — a skill
+  `executar-status-report` simplesmente não foi criada nesta fase
+  (não está na lista acima), em vez de ser criada às cegas contra uma
+  fonte inacessível. Registrar como trabalho pendente, não fabricado.
+- **C15 (rotas pt-BR)**: `/copilot` → `/copiloto` renomeado de verdade
+  — `git mv` do diretório de rota, link do sidebar atualizado, redirect
+  308→ em `apps/app/next.config.ts` (`/copilot` → `/copiloto`,
+  `permanent: false`). Só esta uma rota, deliberadamente — renomear as
+  ~10 restantes (`/now`, `/reports`, `/projects`, `/automations`,
+  `/workflows`, `/integrations`, `/sprint`, `/roadmap`, `/calendar`,
+  `/overview`) na mesma sessão sem tempo de verificar cada uma
+  individualmente teria sido mais risco que valor. Mapa completo
+  `anterior → novo` fica como próximo passo real, não uma lista
+  inventada:
+
+  | Rota atual (inglês) | Rota pt-BR proposta |
+  |---|---|
+  | `/copilot` | `/copiloto` ✅ feito nesta fase |
+  | `/now` | `/agora` |
+  | `/reports` | `/relatorios` |
+  | `/projects` | `/projetos` |
+  | `/automations` | `/automacoes` |
+  | `/workflows` | `/fluxos` |
+  | `/integrations` | `/integracoes` |
+  | `/sprint` | `/sprint` (sem tradução natural — manter) |
+  | `/roadmap` | `/roadmap` (idem) |
+  | `/calendar` | `/calendario` |
+  | `/overview` | `/visao-geral` |
+  | `/today`, `/tomorrow`, `/yesterday` | `/hoje`, `/amanha`, `/ontem` |
+
+- **UI da ativação (apps/app e apps/mobile)**: **não feita nesta fase**
+  — não há ainda nenhuma tela consumindo `POST /ativacao/avancar`
+  (Fase 5). Construir essa UI antes de haver um backend real testado
+  contra Postgres/ANTHROPIC_API_KEY reais arriscaria UI sem contrato
+  verificado por trás. Registrado como trabalho da próxima sessão.
+- **Aceite do plano ("fluxo completo operável", "nenhuma rota pública
+  com placeholder")**: **não alcançado integralmente** — disclosurado,
+  não maquiado. O que está feito: a rota renomeada funciona (typecheck
+  + lint verdes); os 12 pacotes de teste seguem verdes. O que falta:
+  UI de ativação, as ~10 rotas restantes, e a skill
+  `executar-status-report` (bloqueada por D7 real, não por preguiça).
 
 ## Fase 7 — Scroll Task (`APP-SCR-001`)
 

@@ -79,7 +79,7 @@ const data = {
     { title: "Visão Geral", url: "/overview", icon: LayoutDashboardIcon },
     { title: "Roadmap", url: "/roadmap", icon: MapIcon },
     { title: "Calendário", url: "/calendar", icon: CalendarIcon },
-    { title: "Copiloto", url: "/copilot", icon: BotIcon },
+    { title: "Copiloto", url: "/copiloto", icon: BotIcon },
     { title: "Mapa-OS", url: "/mapa-os", icon: PrinterIcon },
     { title: "Reports", url: "/reports", icon: FileTextIcon },
     { title: "Automações", url: "/automations", icon: RepeatIcon },

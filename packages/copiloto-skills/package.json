@@ -1,0 +1,6 @@
+{
+  "name": "@repo/copiloto-skills",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Fase 6 (D5) — skills pt-BR da Camada 1 do Executar Copiloto, carregadas via a opção `plugins` (caminho local) do Claude Agent SDK. Sem código TypeScript — só .claude-plugin/plugin.json e skills/*/SKILL.md."
+}
