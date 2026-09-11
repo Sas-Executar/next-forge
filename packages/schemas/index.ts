@@ -1,4 +1,5 @@
 export * from "./src/actor";
+export * from "./src/ativacao";
 export * from "./src/authority";
 export * from "./src/authority-decision";
 export * from "./src/billing";
