@@ -2,7 +2,12 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
   "javascript": {
-    "globals": ["Liveblocks"]
+    // "Bun": apps/copiloto-runtime/src/server.ts (Fase 3) is the first
+    // package in this repo that runs as a standalone Bun process
+    // instead of through Next.js/Vercel — every other app/package only
+    // uses Bun as the package manager/test runner, never the `Bun.*`
+    // runtime global.
+    "globals": ["Liveblocks", "Bun"]
   },
   "linter": {
     "rules": {

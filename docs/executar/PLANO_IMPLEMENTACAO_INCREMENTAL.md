@@ -53,21 +53,54 @@ usuário para aquela fase específica — nunca em lote.
 - **Rollback**: reverter o commit desta fase (aditivo — `mcp-tools.ts` +
   `mcp-tools.test.ts` + 1 linha em `package.json`/`index.ts`).
 
-## Fase 3 — Runtime containerizado (risco alto, muda topologia)
+## Fase 3 — Runtime containerizado (risco alto, muda topologia) — ✅ EXECUTADA (parcialmente verificável)
 
 - **Entrada**: Fase 2 aceita e estável.
-- **Trabalho**: novo `apps/copiloto-runtime` (Dockerfile, `POST /sessoes`,
-  SSE, `SessionStore`→Postgres); `apps/api/app/copilot/command/route.ts`
-  passa de chamada in-process para proxy HTTP pré-autenticado — **esta é a
-  mudança de topologia identificada em `GRAFO_DEPENDENCIAS.md` §2/§3**.
-- **Risco**: alto — muda o comportamento de uma rota já em produção
-  (mesmo que só testada, não deployada).
-- **Aceite**: `query()` ponta a ponta contra o container; reiniciar o
-  container e `resume` da mesma sessão preserva contexto (prova real do
-  `SessionStore`, não assumida); `copilot-command.test.ts` adaptado (não
-  apenas mantido — a topologia mudou, então o teste precisa mockar a nova
-  chamada HTTP, e isso deve ser declarado explicitamente no PR, não
-  silenciado).
+- **Trabalho real**: novo `apps/copiloto-runtime` — `POST /sessoes`,
+  `POST /sessoes/:id/mensagens`, `GET /sessoes/:id/stream` (SSE),
+  `GET /health`; `src/tenant.ts` (isolamento multi-tenant: `cwd`,
+  `settingSources: []`, `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_DISABLE_AUTO_MEMORY`
+  por workspace); `src/session-store.ts` (`SessionStore` real sobre Postgres,
+  novos models `AgentSessionEntry`/`AgentSessionSummary` em
+  `packages/database/prisma/schema.prisma` + migration
+  `20260911190000_agent_session_store`); `Dockerfile`.
+- **Correção em relação à hipótese original**: `apps/api/app/copilot/
+  command/route.ts` **NÃO foi mudado para proxy**. Motivo: essa rota serve
+  os 4 comandos 100% determinísticos (confirmado na Fase 2 — nunca chamam
+  um LLM), que não precisam do container. A mudança de topologia real
+  ("apps/api → copiloto-runtime") só se aplica ao dia em que uma decisão
+  futura mover o chat livre (`apps/app/api/chat`) ou os agentes da Camada 1
+  (Fase 5) para o runtime containerizado — nenhum dos dois é esta Fase 3.
+  `copilot-command.test.ts` continua exatamente como estava, sem mock novo
+  — não há topologia nova para essa rota mockar.
+- **Risco real**: baixo para o código existente (nada em `apps/api`/
+  `apps/app` foi tocado); alto para o código novo em si, que **não pôde
+  ser verificado ponta a ponta nesta sessão**:
+  - Sem `ANTHROPIC_API_KEY` real neste sandbox → nenhuma chamada `query()`
+    real foi executada. `runQuery()`/`handleStream()` são código real,
+    typechecked, com a lógica de roteamento/validação testada (mockando
+    `@repo/database`/`@repo/agent-runtime`, mesmo padrão de
+    `apps/api/__tests__/*.test.ts`) — mas o caminho que efetivamente invoca
+    o SDK nunca rodou aqui.
+  - Sem Postgres real neste sandbox → `session-store.ts` está com 8 testes
+    reais escritos (`describe.skipIf(DATABASE_URL)`, mesmo padrão de
+    `commands.test.ts`), **todos pulados** nesta sessão.
+  - Sem daemon Docker neste sandbox (`docker version` alcança o CLI, não
+    o socket) → o `Dockerfile` nunca foi buildado nem rodado.
+  - **Consequência direta**: o aceite original da Fase 3 ("query() ponta a
+    ponta contra o container; reiniciar o container e resume da mesma
+    sessão preserva contexto") **não está verificado** — está
+    implementado e typechecked, não mais que isso, pela escada de
+    maturidade do próprio `AGENTS.md`.
+- **O que está de fato verificado**: `bun run typecheck` 38/38 pacotes;
+  `bunx ultracite check .` 0 erros; `bun run test` 19/19 pacotes com
+  sucesso — 16 novos testes passando em `copiloto-runtime` (rotas +
+  isolamento de tenant), 8 nomeados mas pulados (`session-store.test.ts`).
+- **Antes de confiar nesta fase como "verificada"**: rodar
+  `DATABASE_URL=... bun run test` em `apps/copiloto-runtime` contra um
+  Postgres real com a migration aplicada; setar `ANTHROPIC_API_KEY` e
+  testar `POST /sessoes` manualmente; `docker build`/`docker run` o
+  `Dockerfile` contra um daemon real.
 
 ## Fase 4 — Tools, hooks, permissões e Modo Rotina
 

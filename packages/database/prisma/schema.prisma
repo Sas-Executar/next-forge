@@ -198,6 +198,8 @@ model Workspace {
   executionCredits       ExecutionCredit[]
   auditEvents            AuditEvent[]
   telemetryEvents        TelemetryEvent[]
+  agentSessionEntries    AgentSessionEntry[]
+  agentSessionSummaries  AgentSessionSummary[]
 
   @@index([clerkOrgId])
 }
@@ -819,9 +821,9 @@ model Subscription {
   // table). Meaningless for Solo/Pro (single-executor plans) — always 0
   // there. Not itself the seat *limit*; packages/billing/src/seats.ts
   // computes total capacity as includedSeats(plan) + purchasedSeats.
-  purchasedSeats Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  purchasedSeats       Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
@@ -882,4 +884,71 @@ model AuditEvent {
 
   @@index([workspaceId])
   @@index([objectType, objectId])
+}
+
+// Fase 3 (D2/ADR-004) — backing store for apps/copiloto-runtime's
+// SessionStore adapter (docs.claude.com/en/agent-sdk/session-storage).
+// One row per transcript entry the Agent SDK's `append(key, entries)`
+// mirrors from local disk — an append-only log, never updated in place
+// ("load must return entries deep-equal to what was appended", "backends
+// like Postgres jsonb that reorder object keys are fine"). `workspaceId`
+// is NOT part of the SDK's own SessionKey — it comes from the closure of
+// whichever createPostgresSessionStore(workspaceId) instance is handling
+// the request (same pattern as packages/mcp's McpToolContext and
+// packages/agent-runtime's buildCopilotToolDefinitions: tenant_id from
+// the server's closure, never parsed out of SDK-controlled data).
+model AgentSessionEntry {
+  id          BigInt   @id @default(autoincrement())
+  workspaceId String
+  projectKey  String
+  sessionId   String
+  // NULL = the main transcript. Non-null = a subagent transcript or
+  // sidecar file, opaque per the SDK's own doc ("treat subpath as an
+  // opaque key suffix").
+  subpath     String?
+  // Extracted from entry.uuid (when present) purely so the unique
+  // constraint below can dedup via `createMany({ skipDuplicates: true })`
+  // — the SDK's own doc: "treat uuid as an idempotency key ... so that
+  // retries ... do not create duplicate rows". NULL for entries with no
+  // uuid (title/tag/mode markers); Postgres treats every NULL as
+  // distinct for uniqueness purposes, so those are never deduped against
+  // each other — matching the doc's explicit carve-out ("Entries without
+  // a uuid ... should be appended without dedup").
+  entryUuid   String?
+  // The SessionStoreEntry itself — "opaque JSON-safe values", per the
+  // SDK's own doc: this store must not interpret or reshape it.
+  entry       Json
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Composite covers both append's ordered replay (load()) and the
+  // per-session/per-subpath scan listSubkeys() needs.
+  @@unique([workspaceId, projectKey, sessionId, subpath, entryUuid])
+  @@index([workspaceId, projectKey, sessionId, subpath, id])
+}
+
+// One row per (workspace, projectKey, sessionId) — the SDK's
+// foldSessionSummary() output, persisted verbatim ("data is opaque
+// SDK-owned state; persist it verbatim without interpreting it").
+// Primary-keyed (not just indexed) because listSessionSummaries() reads
+// and append() upserts this row every batch — a natural fit for
+// Postgres's ON CONFLICT, not just an index on an append-only log like
+// AgentSessionEntry above.
+model AgentSessionSummary {
+  workspaceId String
+  projectKey  String
+  sessionId   String
+  // Storage write time (this row's, not the SDK's) — "must share a
+  // clock source with the mtime values listSessions returns" (the SDK
+  // doc's own requirement); stamped by the adapter at persist time, per
+  // the doc's explicit instruction ("the fold never sets mtime").
+  mtime       BigInt
+  data        Json
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, projectKey, sessionId])
+  @@index([workspaceId, projectKey])
 }
