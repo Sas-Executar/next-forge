@@ -61,6 +61,53 @@ isolar qual das duas introduziu uma eventual quebra.
 
 ## Status de ratificação
 
-Candidato — pendente de aprovação do usuário. É o ADR de maior risco desta
-Fase 0 (ver `PLANO_IMPLEMENTACAO_INCREMENTAL.md` e `GRAFO_DEPENDENCIAS.md`
-§3).
+Aceito e executado na Fase 2 (2026-09-11), com uma correção real em
+relação ao que este ADR previa na Fase 0 — registrada abaixo, não
+silenciada.
+
+## Correção pós-execução (Fase 2)
+
+A leitura direta de `tools.ts` durante a Fase 2 mostrou algo que a Fase 0
+não tinha inspecionado: **os 5 comandos (`bomdia`/`agora`/`estado`/
+`fechardia`/`replanejamento`) nunca chamam um LLM — são 100%
+determinísticos, apenas leem/escrevem Postgres via Prisma.** O único uso
+real de `ai` dentro de `packages/agent-runtime` é `tools.ts`, que envolve
+esses mesmos comandos como `tool()` do Vercel AI SDK para
+`apps/app/app/api/chat`'s `streamText()` — a rota de chat livre que este
+próprio ADR já havia disclosurado como fora de escopo.
+
+Consequência: **`ai` NÃO foi removido de `package.json`**, ao contrário do
+que a seção "Consequências" original previa. Ele continua sendo o único
+SDK que `tools.ts`/`apps/app/api/chat` sabem consumir, e migrá-lo
+quebraria essa rota — exatamente o "não assumir isso implicitamente" que
+este ADR já registrava.
+
+O que foi feito em vez disso:
+- `@anthropic-ai/claude-agent-sdk@0.3.268` foi ADICIONADO como
+  dependência (coexiste com `ai`, não o substitui).
+- Novo arquivo `packages/agent-runtime/src/mcp-tools.ts`:
+  `buildCopilotToolDefinitions()`/`buildCopilotMcpServer()`, a mesma
+  superfície de 6 comandos que `tools.ts` expõe, mas usando `tool()` +
+  `createSdkMcpServer()` do Agent SDK — é isso que `apps/copiloto-runtime`
+  (Fase 3) vai passar para `query({ options: { mcpServers } })`.
+- `tools.ts` permanece 100% intocado — continua sendo o que
+  `apps/app/api/chat` consome.
+- `commands/*`, `phases.ts`, `output-schema.ts`, `format.ts`,
+  `evals/graders.ts` também permanecem intocados — nunca dependeram de
+  `ai` para começar, então "preservar a superfície pública + suíte de
+  testes existente sem reescrita" foi trivialmente satisfeito: **zero
+  linhas desses arquivos mudaram.**
+- 28 novos testes (`mcp-tools.test.ts`), seguindo o mesmo padrão
+  `describe.skipIf(!process.env.DATABASE_URL)` + import dinâmico de
+  `commands.test.ts` — não verificados contra um Postgres real nesta
+  sessão (sandbox sem `DATABASE_URL`), mesma limitação que já valia para
+  `commands.test.ts` antes desta fase.
+
+Isso não é scope creep silencioso: é a mesma decisão (D2) executada de
+forma mais precisa que a hipótese original, porque só ao ler o código se
+descobriu que não havia, de fato, nenhuma chamada de modelo dentro do
+núcleo determinístico a migrar — só um adaptador de exposição para o chat
+livre, que já estava fora de escopo. Se uma decisão futura decidir migrar
+também `apps/app/api/chat` para o runtime containerizado (Fase 3), a
+migração de `tools.ts`/remoção de `ai` vira trabalho dessa decisão, não
+uma reabertura deste ADR.

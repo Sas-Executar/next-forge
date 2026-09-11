@@ -25,21 +25,33 @@ usuário para aquela fase específica — nunca em lote.
 - **Aceite**: Vitest cobre transições válidas/inválidas; `bun run check`
   verde; **nenhum arquivo de `@repo/agent-runtime` tocado**.
 
-## Fase 2 — Migração para o Claude Agent SDK (risco alto, isolar)
+## Fase 2 — Migração para o Claude Agent SDK (risco alto, isolar) — ✅ EXECUTADA
 
 - **Entrada**: `ADR-004` ratificado.
-- **Trabalho**: só dentro de `packages/agent-runtime`. Trocar
-  `ai@^6.0.116` por `@anthropic-ai/claude-agent-sdk@0.3.268`. **Não tocar
-  fase 1 nem fase 3 no mesmo commit.**
-- **Risco**: alto — é o único pacote consumido por `apps/api` em produção
-  (rota `/copilot/command`, 3 testes hoje verdes).
-- **Aceite**: suíte de `agent-runtime` (hoje 33 passando/4 pulando)
-  continua no mesmo número **sem reescrita de teste**; `ai@^6` removido de
-  `package.json`; `apps/api/__tests__/copilot-command.test.ts` (3 testes)
-  continua verde sem alteração de topologia (ainda in-process — a mudança
-  de topologia é Fase 3, não esta).
-- **Rollback**: reverter o commit único desta fase — como é isolada, não
-  deve haver mistura com Fase 1/3 para complicar o revert.
+- **Trabalho real** (corrigido em relação à hipótese original — ver a
+  seção "Correção pós-execução" em `ADR-004`): a leitura de `tools.ts`
+  mostrou que os 5 comandos nunca chamam um LLM — são determinísticos,
+  só Prisma. `ai` continua em `package.json` porque `tools.ts` é o único
+  consumidor real de `packages/agent-runtime` que fala Vercel AI SDK
+  (para `apps/app/api/chat`, já fora de escopo por este mesmo ADR).
+  `@anthropic-ai/claude-agent-sdk@0.3.268` foi ADICIONADO (coexiste, não
+  substitui) e um novo arquivo `src/mcp-tools.ts`
+  (`buildCopilotToolDefinitions`/`buildCopilotMcpServer`) expõe os mesmos
+  6 comandos via `tool()`/`createSdkMcpServer()` do Agent SDK, para a
+  Fase 3 consumir.
+- **Risco**: baixo na prática — `commands/*`, `phases.ts`,
+  `output-schema.ts`, `format.ts`, `evals/graders.ts` (o que
+  `apps/api/copilot/command` de fato consome) não foram tocados; só
+  arquivo novo + `tools.ts` intocado.
+- **Aceite**: suíte de `agent-runtime` (33 passando/4 pulando) continua
+  **idêntica, zero linhas alteradas** nos arquivos que a compõem; 28
+  novos testes em `mcp-tools.test.ts` (mesmo padrão skipIf/DATABASE_URL,
+  não verificados contra Postgres real nesta sessão sandbox);
+  `apps/api/__tests__/copilot-command.test.ts` (3 testes) segue verde,
+  sem alteração de topologia. `bun run typecheck` 37/37, lint 0 erros,
+  `bun run test` 18/18 pacotes com sucesso.
+- **Rollback**: reverter o commit desta fase (aditivo — `mcp-tools.ts` +
+  `mcp-tools.test.ts` + 1 linha em `package.json`/`index.ts`).
 
 ## Fase 3 — Runtime containerizado (risco alto, muda topologia)
 

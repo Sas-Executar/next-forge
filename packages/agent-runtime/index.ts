@@ -12,6 +12,11 @@ export {
 } from "./src/evals/types";
 export { formatOrchestratorOutputText } from "./src/format";
 export {
+  buildCopilotMcpServer,
+  buildCopilotToolDefinitions,
+  COPILOT_MCP_TOOL_NAMES,
+} from "./src/mcp-tools";
+export {
   type OrchestratorOutput,
   orchestratorOutputSchema,
   orchestratorRouteModuleSchema,
