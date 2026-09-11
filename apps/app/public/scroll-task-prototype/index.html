@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Executar — Scroll Task Prototype</title>
+<style>
+:root{--bg:#f3f2ed;--panel:#ffffff;--ink:#11120f;--muted:#71736d;--line:#d9d9d2;--accent:#d7ff4b;--accent-ink:#11120f;--soft:#f7f7f2;--danger:#b3261e;--radius:24px}
+*{box-sizing:border-box} html{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif} body{margin:0;min-height:100%;padding:24px} button,select,textarea{font:inherit;color:inherit} button{cursor:pointer} button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #111;outline-offset:2px}
+.shell{max-width:430px;margin:0 auto}.meta{display:flex;justify-content:space-between;gap:16px;align-items:center;margin:0 4px 12px;color:var(--muted);font-size:12px}.phone{position:relative;min-height:700px;background:var(--panel);border:1px solid var(--line);border-radius:34px;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.08)}
+.topbar{position:absolute;left:0;right:0;top:0;z-index:5;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 14px 12px}.toprow{display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center}.iconbtn{width:46px;height:46px;border:1px solid var(--line);border-radius:14px;background:var(--soft);font-size:23px;line-height:1}.project strong{display:block;font-size:14px}.project span{display:block;font-size:11px;color:var(--muted);margin-top:3px}.count{min-width:58px;border:1px solid var(--line);border-radius:14px;padding:8px 10px;text-align:center}.count b{display:block;font-size:18px}.count small{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.menu{display:none;margin-top:10px;padding:8px;background:var(--soft);border:1px solid var(--line);border-radius:14px}.menu.open{display:grid;grid-template-columns:1fr 1fr;gap:6px}.menu button{border:0;background:transparent;text-align:left;padding:10px;border-radius:9px}.menu button.active,.menu button:hover{background:#fff}
+.viewport{position:absolute;top:86px;bottom:0;left:0;right:0;display:grid;grid-template-rows:1fr 1.15fr 1fr;user-select:none;touch-action:pan-y}.zone{display:flex;align-items:center;justify-content:center;padding:18px}.zone.hint{font-size:11px;color:var(--muted);align-items:flex-end}.zone.bottom{align-items:flex-start;flex-direction:column;justify-content:flex-start;gap:18px}.actionWrap{width:100%;text-align:center}.index{font-size:12px;color:var(--muted);margin-bottom:8px}.actionCard{width:100%;min-height:180px;border:1px solid var(--line);background:#fff;border-radius:28px;padding:28px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center}.actionTitle{font-size:30px;font-weight:730;letter-spacing:-.04em;line-height:1.05}.gestureHint{margin-top:12px;font-size:11px;color:var(--muted)}.detail{display:none;margin-top:10px;text-align:left;border:1px solid var(--line);background:var(--soft);border-radius:18px;padding:14px}.detail.open{display:block}.detail p{font-size:13px;line-height:1.4;margin:0}.detail label{display:block;font-size:11px;color:var(--muted);margin-top:12px}.detail textarea{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;resize:vertical;min-height:70px}
+.actions{width:100%;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.btn{min-height:44px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:0 15px}.btn.primary{background:var(--accent);border-color:var(--accent);font-weight:700}.btn.ghost{background:var(--soft)}
+.controls{margin-top:12px;border:1px solid var(--line);background:var(--panel);border-radius:22px;padding:14px}.controlgrid{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}.controls label{font-size:11px;color:var(--muted)}.controls select{display:block;width:100%;min-height:44px;margin-top:5px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 10px}.timer{text-align:right}.timer b{font:700 28px/1 ui-monospace,SFMono-Regular,Menlo,monospace}.timer span{display:block;font-size:11px;color:var(--muted);margin-top:6px}.controlBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.switch{display:flex;align-items:center;gap:8px;min-height:44px;border:1px solid var(--line);border-radius:13px;padding:0 12px;font-size:13px;color:var(--ink)!important}.switch input{width:18px;height:18px}.notice{font-size:10px;line-height:1.4;color:var(--muted);margin:10px 2px 0}.statusbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:0 4px;color:var(--muted);font-size:11px}.completed{opacity:.48}.completed .actionTitle{text-decoration:line-through}.pulse{animation:pulse .7s ease}@keyframes pulse{0%{transform:scale(.985)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}} @media(max-width:390px){body{padding:10px}.phone{min-height:650px;border-radius:26px}.actionTitle{font-size:27px}.topbar{padding-left:10px;padding-right:10px}}
+</style>
+</head>
+<body>
+<main class="shell" id="app">
+  <div class="meta"><span>Executar · Scroll Task</span><span id="modeLabel">Ação por ação</span></div>
+  <section class="phone" id="phone" tabindex="0" aria-label="Modo Scroll Task">
+    <header class="topbar">
+      <div class="toprow">
+        <button class="iconbtn" id="menuBtn" type="button" aria-label="Escolher granularidade" aria-expanded="false">⋮</button>
+        <div class="project"><strong id="projectName">Projeto X</strong><span id="progress">1 de 5 ações</span></div>
+        <div class="count"><b id="pending">5</b><small>pendentes</small></div>
+      </div>
+      <div class="menu" id="menu" role="menu">
+        <button type="button" data-mode="actions" class="active">Ação por ação</button>
+        <button type="button" data-mode="tasks">Tarefa por tarefa</button>
+        <button type="button" data-mode="phases">Fase por fase</button>
+        <button type="button" data-mode="workflows">Workflow por workflow</button>
+      </div>
+    </header>
+
+    <div class="viewport" id="viewport">
+      <div class="zone hint">↑ anterior</div>
+      <div class="zone">
+        <div class="actionWrap">
+          <div class="index" id="itemIndex">01</div>
+          <button class="actionCard" id="actionCard" type="button" aria-describedby="gestureHint">
+            <span class="actionTitle" id="actionTitle">Abrir documento</span>
+            <span class="gestureHint" id="gestureHint">duplo toque para contexto</span>
+          </button>
+          <div class="detail" id="detail">
+            <p id="context">Abra o documento principal do projeto e valide a última versão.</p>
+            <label for="note">Nota rápida</label>
+            <textarea id="note" placeholder="Adicionar contexto..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="zone bottom">
+        <div class="hint" style="width:100%;text-align:center">próxima ↓</div>
+        <div class="actions">
+          <button class="btn ghost" id="prev" type="button">Anterior</button>
+          <button class="btn" id="toggleContext" type="button">Contexto</button>
+          <button class="btn primary" id="complete" type="button">Concluir</button>
+          <button class="btn" id="next" type="button">Próxima</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="controls" aria-label="Controles do timer">
+    <div class="controlgrid">
+      <label>Tempo previsto
+        <select id="duration">
+          <option value="900">15 minutos</option>
+          <option value="1800" selected>30 minutos</option>
+          <option value="2700">45 minutos</option>
+          <option value="10">10 segundos · demo</option>
+        </select>
+      </label>
+      <div class="timer"><b id="timer">30:00</b><span id="timerStatus" aria-live="polite">pronto</span></div>
+    </div>
+    <div class="controlBtns">
+      <button class="btn primary" id="start" type="button">Iniciar</button>
+      <button class="btn" id="reset" type="button">Reiniciar</button>
+      <label class="switch"><input id="autoScroll" type="checkbox" /> Auto-scroll</label>
+    </div>
+    <p class="notice">O timer representa uma estimativa. O término do tempo não conclui a execução automaticamente. Com Auto-scroll ativo, a visualização avança e mantém o status da ação.</p>
+  </section>
+  <div class="statusbar"><span>Swipe forte / roda / ↑ ↓</span><span id="stateText">READY</span></div>
+</main>
+<script>
+(() => {
+  const root = document.getElementById('app');
+  const $ = id => document.getElementById(id);
+  const data = {
+    actions:[
+      {title:'Abrir documento',context:'Abra o documento principal do projeto e valide a última versão.'},
+      {title:'Revisar escopo',context:'Compare o escopo atual com os entregáveis previstos.'},
+      {title:'Validar dependência',context:'Confirme a dependência crítica antes de avançar.'},
+      {title:'Enviar aprovação',context:'Envie o material para aprovação do responsável.'},
+      {title:'Registrar decisão',context:'Registre a decisão e o próximo passo do ciclo.'}
+    ],
+    tasks:[
+      {title:'Preparar briefing',context:'Consolide objetivo, contexto, restrições e entregáveis.'},
+      {title:'Produzir entrega',context:'Execute o conjunto de ações previstas para a tarefa.'},
+      {title:'Validar resultado',context:'Revise critérios de aceite e registre pendências.'}
+    ],
+    phases:[
+      {title:'Planejar execução',context:'Valide escopo, dependências e sequência desta fase.'},
+      {title:'Executar ciclo',context:'Percorra as tarefas previstas para concluir a fase.'}
+    ],
+    workflows:[
+      {title:'Workflow produção',context:'Execute preparação, produção e validação.'},
+      {title:'Workflow aprovação',context:'Submeta, acompanhe e registre a aprovação final.'}
+    ]
+  };
+  const labels={actions:'Ação por ação',tasks:'Tarefa por tarefa',phases:'Fase por fase',workflows:'Workflow por workflow'};
+  const nouns={actions:'ações',tasks:'tarefas',phases:'fases',workflows:'workflows'};
+  let mode='actions', index=0, remaining=1800, running=false, ticker=null, pointerY=null, lastWheel=0, completed=new Set();
+
+  function itemKey(){ return mode+':'+index; }
+  function render(){
+    const items=data[mode], item=items[index];
+    $('modeLabel').textContent=labels[mode]; $('actionTitle').textContent=item.title; $('context').textContent=item.context;
+    $('itemIndex').textContent=String(index+1).padStart(2,'0'); $('progress').textContent=`${index+1} de ${items.length} ${nouns[mode]}`;
+    $('pending').textContent=String(items.length-[...completed].filter(k=>k.startsWith(mode+':')).length);
+    $('actionCard').classList.toggle('completed',completed.has(itemKey()));
+    $('note').value=item.note||''; $('detail').classList.remove('open');
+    $('actionCard').classList.remove('pulse'); requestAnimationFrame(()=>$('actionCard').classList.add('pulse'));
+  }
+  function move(step){ const max=data[mode].length-1; index=Math.max(0,Math.min(max,index+step)); render(); }
+  function toggleContext(){ $('detail').classList.toggle('open'); }
+  function complete(){ const key=itemKey(); completed.has(key)?completed.delete(key):completed.add(key); render(); }
+  function fmt(sec){ sec=Math.max(0,Math.round(sec)); return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`; }
+  function renderTimer(){ $('timer').textContent=fmt(remaining); }
+  function stop(status='pausado'){ running=false; if(ticker){clearInterval(ticker);ticker=null;} $('start').textContent='Iniciar'; $('timerStatus').textContent=status; $('stateText').textContent=status==='pronto'?'READY':'PAUSED'; }
+  function reset(status='pronto'){ stop(status); remaining=Number($('duration').value)||1800; renderTimer(); $('stateText').textContent='READY'; }
+  function start(){
+    if(running){stop();return;} if(remaining<=0) remaining=Number($('duration').value)||1800;
+    running=true; $('start').textContent='Pausar'; $('timerStatus').textContent='executando'; $('stateText').textContent='RUNNING';
+    let prev=Date.now(); ticker=setInterval(()=>{ const now=Date.now(); remaining-=Math.max(0,(now-prev)/1000); prev=now;
+      if(remaining<=0){ remaining=0; renderTimer(); if($('autoScroll').checked){ if(index<data[mode].length-1) move(1); remaining=Number($('duration').value)||1800; $('timerStatus').textContent='auto-scroll → próximo'; $('stateText').textContent='AUTO_SCROLL'; } else { stop('tempo concluído'); $('stateText').textContent='TIME_UP'; } }
+      renderTimer();
+    },250);
+  }
+
+  $('menuBtn').addEventListener('click',()=>{ const open=$('menu').classList.toggle('open'); $('menuBtn').setAttribute('aria-expanded',String(open)); });
+  document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{ mode=btn.dataset.mode; index=0; document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b===btn)); $('menu').classList.remove('open'); $('menuBtn').setAttribute('aria-expanded','false'); reset(); render(); }));
+  $('prev').addEventListener('click',()=>move(-1)); $('next').addEventListener('click',()=>move(1)); $('toggleContext').addEventListener('click',toggleContext); $('complete').addEventListener('click',complete);
+  $('actionCard').addEventListener('dblclick',toggleContext); $('note').addEventListener('input',e=>{data[mode][index].note=e.target.value}); $('duration').addEventListener('change',()=>reset()); $('start').addEventListener('click',start); $('reset').addEventListener('click',()=>reset());
+  const vp=$('viewport'); vp.addEventListener('pointerdown',e=>{pointerY=e.clientY}); vp.addEventListener('pointerup',e=>{ if(pointerY===null)return; const dy=e.clientY-pointerY; pointerY=null; if(Math.abs(dy)>60) move(dy<0?1:-1); });
+  vp.addEventListener('wheel',e=>{ if(Math.abs(e.deltaY)<40)return; const now=Date.now(); if(now-lastWheel<450)return; lastWheel=now; e.preventDefault(); move(e.deltaY>0?1:-1); },{passive:false});
+  $('phone').addEventListener('keydown',e=>{ if(['TEXTAREA','SELECT','INPUT'].includes(e.target.tagName))return; if(e.key==='ArrowDown'){e.preventDefault();move(1)} if(e.key==='ArrowUp'){e.preventDefault();move(-1)} if(e.key==='Enter'){e.preventDefault();complete()} });
+  render(); renderTimer();
+})();
+</script>
+</body>
+</html>
