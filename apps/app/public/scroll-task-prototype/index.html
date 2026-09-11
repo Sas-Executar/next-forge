@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f6f8">
+  <title>EXECUTAR · Tarefas</title>
+  <link rel="stylesheet" href="/execution-assets/styles.css">
+  <script type="module" src="/execution-assets/app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#content">Ir para o conteúdo</a>
+  <aside class="sidebar" aria-label="Navegação principal"><div class="wordmark">EXECUTAR</div><div data-navigation></div><p class="sidebarFoot" id="sidebarProgress"></p></aside>
+  <div class="workspace">
+    <header class="header">
+      <div class="headerLine"><button class="iconButton mobileMenu" id="openNavigation" aria-label="Abrir navegação" aria-controls="navigationDialog" aria-haspopup="dialog" data-icon="menu"></button><span class="projectPath">Lançamento do MVP</span><div class="headerActions"><button class="quietButton" id="viewToggle">Foco</button><button class="iconButton" id="more" aria-label="Opções de visualização" aria-expanded="false" aria-controls="viewOptions" data-icon="more"></button></div></div>
+      <div class="titleLine"><div><h1 id="pageTitle">Tarefas</h1><p id="pageSummary" class="secondary"></p></div><div class="focusTools" id="focusTools"><button class="quietButton timer" id="timerToggle" aria-label="Iniciar timer">30:00</button><button class="quietButton" id="autoToggle" aria-pressed="false">Auto</button></div></div>
+      <div id="viewOptions" class="popover" hidden><label><input type="checkbox" id="showDetails">Mostrar detalhes</label><label><input type="checkbox" id="hideDone">Ocultar concluídas</label><a href="/configuracoes" data-route="settings">Configurações</a></div>
+    </header>
+    <main id="content" tabindex="-1"><div id="scroller" class="scroller" tabindex="0" aria-label="Tarefas"></div><section id="settings" class="settings" hidden>
+      <h2>Visualização</h2><div class="settingsGroup"><label class="setting"><span>Aparência</span><select id="theme"><option value="system">Usar sistema</option><option value="light">Clara</option><option value="dark">Escura</option></select></label><label class="setting"><span>Modo de execução</span><select id="preferredView"><option value="list">Lista</option><option value="scroll">Foco · scroll</option></select></label><label class="setting"><span>Detalhes na lista</span><input type="checkbox" id="settingDetails"></label><label class="setting"><span>Ocultar concluídas na lista</span><input type="checkbox" id="settingHide"></label></div>
+      <h2>Foco</h2><div class="settingsGroup"><label class="setting"><span>Duração do timer</span><select id="duration"><option value="900">15 minutos</option><option value="1800">30 minutos</option><option value="2700">45 minutos</option><option value="10">10 segundos · demo</option></select></label><label class="setting"><span>Auto Mode<small>Avança quando o tempo termina, sem concluir a tarefa.</small></span><input type="checkbox" id="settingAuto"></label><label class="setting"><span>Concluir ao avançar<small>Somente no Foco, ao rolar manualmente para a próxima ação ou tarefa. Na lista, a conclusão é sempre pelo checkbox.</small></span><input type="checkbox" id="completeOnScroll"></label><button class="setting textButton" id="resetTimer">Reiniciar timer</button></div>
+      <h2>Progresso</h2><div class="settingsGroup"><button class="setting textButton danger" id="resetProgress">Limpar conclusões</button></div>
+    </section></main>
+    <footer id="focusFooter" class="focusFooter"><button class="iconButton" id="previousUnit" aria-label="Unidade anterior" data-icon="up"></button><button class="primaryButton" id="completeCurrent">Concluir tarefa</button><button class="iconButton" id="nextUnit" aria-label="Próxima unidade" data-icon="down"></button></footer>
+  </div>
+  <dialog id="navigationDialog" class="navigationDialog" aria-labelledby="navigationTitle"><div class="dialogHeading"><h2 id="navigationTitle">EXECUTAR</h2><button class="iconButton" id="closeNavigation" aria-label="Fechar navegação" data-icon="close"></button></div><div data-navigation></div></dialog>
+  <dialog id="taskDialog" class="taskDialog" aria-labelledby="taskTitle"><div class="dialogHeading"><span class="secondary">Detalhes</span><button class="iconButton" id="closeTask" aria-label="Fechar detalhes" data-icon="close"></button></div><h2 id="taskTitle"></h2><p class="secondary" id="taskHierarchy"></p><p id="taskContext"></p><label class="noteLabel" for="taskNote">Notas</label><textarea id="taskNote" placeholder="Adicionar uma nota…"></textarea><div class="taskDialogActions"><button class="quietButton" id="focusTask">Abrir no Foco</button><button class="primaryButton" id="completeTask">Concluir</button></div></dialog>
+  <dialog id="resetDialog" class="confirmDialog" aria-labelledby="resetTitle"><h2 id="resetTitle">Limpar conclusões?</h2><p>As tarefas voltarão a ficar pendentes. Suas notas serão mantidas.</p><div class="taskDialogActions"><button class="quietButton" id="cancelReset">Cancelar</button><button class="primaryButton" id="confirmReset">Limpar</button></div></dialog>
+  <div id="status" class="srOnly" role="status" aria-live="polite" aria-atomic="true"></div><div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
