@@ -22,6 +22,18 @@ reverificado nesta sessão** (sandbox sem acesso a esse MCP/credencial);
 tratado como fonte confiável por ter sido verificado com `get_database_tables`
 na sessão que o produziu.
 
+> **Correção (Fase 3, 2026-09-11):** a afirmação original deste
+> documento — "`prisma/migrations/` está vazio no código-fonte deste
+> branch" (§3, abaixo) — **estava errada**. Foi escrita sem rodar `ls`
+> antes de afirmar. `packages/database/prisma/migrations/` contém, de
+> fato, os 8 diretórios de migration reais (`20260909145747_init` até
+> `20260910120500_integration_system_job_discovery`), incluindo
+> `20260909173722_enable_rls` com as políticas RLS completas. Não há
+> divergência a resolver: os arquivos estão commitados, coerentes com o
+> que `LAUNCH_RUNBOOK.md` diz ter sido aplicado. A "Regra a seguir" e a
+> "Recomendação" da seção 3 (abaixo) não se aplicam mais — mantidas
+> riscadas, não apagadas, para não esconder o erro original.
+
 ## 2. O que a Fase 1 precisa adicionar (sem migração ainda)
 
 Tipos Zod em `packages/schemas` (TypeScript puro, sem tocar o Prisma
@@ -41,7 +53,7 @@ Fase 1).
 | 5 | Modelo(s) para `PerfilOperacional`, `FonteAutorizada` consolidados, se decidido que a Camada 1 precisa de persistência própria em vez de reusar `IntegrationConnection`/`Workspace` | Depende do desenho da Fase 5 |
 | 8 | Nenhuma — `VisualSymbol`/`ScannerMutation` já existem | REC-006 é sobre execução do modelo ONNX, não sobre schema |
 
-**Regra a seguir em todas**: "primeira migration do repositório" —
+~~**Regra a seguir em todas**: "primeira migration do repositório" —
 `prisma/migrations/` está vazio no código-fonte deste branch (as 8
 migrations de `LAUNCH_RUNBOOK.md` foram aplicadas diretamente contra o
 banco real via MCP, não commitadas como arquivos `prisma/migrations/*` no
@@ -50,7 +62,11 @@ aplicada sem arquivo commitado quebra `prisma migrate deploy` em qualquer
 ambiente novo. Recomendação: a próxima sessão deve rodar `prisma migrate
 diff`/`prisma db pull` contra o schema atual para gerar os arquivos de
 migration retroativamente, ou confirmar com o usuário se isso já foi
-feito fora deste branch.
+feito fora deste branch.~~ **Errado — ver a correção no topo desta
+seção.** Os 8 diretórios de migration existem no repositório; a regra
+real (já seguida por todas as 8) é simplesmente: toda mudança de schema
+ganha seu próprio `prisma/migrations/<timestamp>_<nome>/migration.sql`,
+nunca aplicada diretamente sem arquivo commitado.
 
 ## 4. `Page` (stub)
 
