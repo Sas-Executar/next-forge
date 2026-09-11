@@ -158,13 +158,45 @@ disclosure abaixo em cada item).
     o `HookCallback` — não verificados contra uma sessão real do Agent
     SDK nesta sessão sandbox (mesma limitação disclosurada na Fase 3).
 
-## Fase 5 — Jornada de ativação e 1º entregável
+## Fase 5 — Jornada de ativação e 1º entregável — ✅ EXECUTADA (parcialmente verificável)
 
 - **Entrada**: Fases 1 e 3 aceitas (contratos + runtime real disponíveis).
-- **Trabalho**: orquestrador determinístico da Camada 1,
-  `outputFormat: {type:'json_schema'}` por etapa.
-- **Aceite**: Operations não inicia sem saída válida de Productivity
-  (teste negativo); entregável valida contra schema oficial único.
+- **Trabalho real**: `packages/domain/src/ativacao-orchestrator.ts`
+  (`advanceFaseAtivacao`) — o orquestrador puro, determinístico, sem I/O:
+  valida a transição estrutural (`canTransitionFaseAtivacao`, Fase 1) e o
+  payload da fase de origem contra o schema daquela fase.
+  `apps/copiloto-runtime/src/ativacao.ts` (`runFaseAtivacao`) conecta esse
+  orquestrador a uma chamada real de `query()` com
+  `outputFormat: {type:'json_schema', schema: z.toJSONSchema(...)}` por
+  etapa, e ao `POST /ativacao/avancar` em `server.ts`. Dois schemas novos
+  em `packages/schemas/src/ativacao.ts` para completar as 6 fases não
+  terminais: `backlogInicialSchema` (saída de PRODUCTIVITY) e
+  `primeiroEntregavelSchema` (saída de PRIMEIRO_ENTREGAVEL).
+- **Disclosure sobre o "template oficial único"**: o template real do
+  Blueprint não está acessível a esta sessão (mesma limitação da Fase 0).
+  `primeiroEntregavelSchema` é uma reconstrução a partir da própria frase
+  do plano ("consolida onboarding + scanner + backlog + configuração
+  operacional + status + 3 rotinas + próximos passos"), documentada como
+  tal no arquivo — não uma cópia do template real. Se o template real
+  existir em outro lugar, este schema deve ser substituído, não ajustado
+  ao redor dele.
+- **Aceite — "Operations não inicia sem saída válida de Productivity"**:
+  ✅ verificado com teste real, sem mock, no orquestrador puro
+  (`packages/domain/__tests__/ativacao-orchestrator.test.ts`): um handoff
+  `PRODUCTIVITY→OPERATIONS` com `payload` inválido é rejeitado por
+  `advanceFaseAtivacao` antes de qualquer chamada ao SDK. Este é o
+  aceite mais forte possível sem depender de infraestrutura externa —
+  a mesma função que `runFaseAtivacao` chama depois de uma `query()`
+  real.
+- **Aceite — "entregável valida contra schema oficial único"**: ✅
+  verificado estruturalmente (`packages/schemas/__tests__/
+  primeiro-entregavel.test.ts`) contra o schema autorado nesta fase —
+  não contra o template real do Blueprint, pela limitação já disclosurada.
+- **Não verificado nesta sessão sandbox**: a integração ponta a ponta
+  `runFaseAtivacao` → `query()` real → `structured_output` → 
+  `advanceFaseAtivacao` (sem `ANTHROPIC_API_KEY`, só os caminhos de erro
+  anteriores à chamada real do SDK são testados —
+  `apps/copiloto-runtime/__tests__/ativacao.test.ts`).
 
 ## Fase 6 — Skills pt-BR, rotas e UI
 

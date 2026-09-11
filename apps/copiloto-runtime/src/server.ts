@@ -3,8 +3,10 @@ import {
   buildCopilotMcpServer,
   COPILOT_MCP_TOOL_NAMES,
 } from "@repo/agent-runtime";
+import { faseAtivacaoSchema } from "@repo/schemas";
 import { z } from "zod";
 import { env } from "../env";
+import { runFaseAtivacao } from "./ativacao";
 import { buildAgentHooks, createAgentRun, finishAgentRun } from "./hooks";
 import { createPostgresSessionStore } from "./session-store";
 import { buildTenantQueryOptions } from "./tenant";
@@ -158,6 +160,41 @@ const parseSessionRequest = async (
 
 const handleHealth = (): Response => jsonResponse({ status: "ok" });
 
+const avancarFaseRequestSchema = z.object({
+  workspaceId: z.string().min(1),
+  faseOrigem: faseAtivacaoSchema,
+  faseDestino: faseAtivacaoSchema,
+  prompt: z.string().min(1),
+  actorRef: z.string().min(1).default("copiloto-runtime"),
+});
+
+/**
+ * Fase 5 — POST /ativacao/avancar: executa uma etapa da Camada 1 via
+ * runFaseAtivacao() e devolve o HandoffEnvelope validado, ou o motivo
+ * da rejeição (transição estrutural ilegal ou payload inválido da fase
+ * de origem — o aceite "Operations não inicia sem saída válida de
+ * Productivity").
+ */
+const handleAvancarFase = async (request: Request): Promise<Response> => {
+  const parsed = avancarFaseRequestSchema.safeParse(await request.json());
+  if (!parsed.success) {
+    return jsonResponse({ error: parsed.error.flatten() }, { status: 400 });
+  }
+  const { workspaceId, faseOrigem, faseDestino, prompt, actorRef } =
+    parsed.data;
+  const outcome = await runFaseAtivacao(
+    workspaceId,
+    faseOrigem,
+    faseDestino,
+    prompt,
+    actorRef
+  );
+  if (!outcome.ok) {
+    return jsonResponse(outcome, { status: 422 });
+  }
+  return jsonResponse(outcome);
+};
+
 const handleCreateSession = async (request: Request): Promise<Response> => {
   const parsed = await parseSessionRequest(request);
   if (!parsed.ok) {
@@ -269,6 +306,10 @@ export const handleRequest = async (request: Request): Promise<Response> => {
 
   if (request.method === "POST" && url.pathname === "/sessoes") {
     return await handleCreateSession(request);
+  }
+
+  if (request.method === "POST" && url.pathname === "/ativacao/avancar") {
+    return await handleAvancarFase(request);
   }
 
   const resumeMatch = url.pathname.match(MENSAGENS_ROUTE_PATTERN);

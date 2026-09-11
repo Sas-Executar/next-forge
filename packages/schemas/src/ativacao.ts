@@ -155,3 +155,51 @@ export const modeloOperacionalSchema = z.object({
   rotinasPropostas: z.array(z.string().min(1)).max(3),
 });
 export type ModeloOperacional = z.infer<typeof modeloOperacionalSchema>;
+
+/**
+ * Saída da fase PRODUCTIVITY: o backlog inicial priorizado, o insumo
+ * direto que a fase OPERATIONS consome (plano §5.1: "Productivity
+ * obrigatoriamente antes de Operations"). Cada item referencia um
+ * identificador de item de trabalho — não um `Task` completo do Prisma
+ * (que exige `workspaceId`/`deliverableId` reais já persistidos); a
+ * criação do `Task` de fato é responsabilidade do orquestrador
+ * (`packages/domain/src/ativacao-orchestrator.ts`), não deste contrato.
+ */
+export const backlogInicialSchema = z.object({
+  workspaceId: z.string().min(1),
+  itens: z
+    .array(
+      z.object({
+        titulo: z.string().min(1),
+        prioridade: z.enum(["ALTA", "MEDIA", "BAIXA"]),
+      })
+    )
+    .min(1),
+  modoDeTrabalho: z.string().min(1),
+  capacidade: z.string().min(1),
+});
+export type BacklogInicial = z.infer<typeof backlogInicialSchema>;
+
+/**
+ * Saída da fase PRIMEIRO_ENTREGAVEL — "template oficial único, sem
+ * alternativas" (plano §7 Fase 5). O template oficial em si (do
+ * Blueprint) não está acessível a esta sessão (mesma limitação
+ * registrada em docs/executar/DIAGNOSTICO_REPOSITORIO.md §0); este
+ * schema consolida os elementos que o próprio texto do plano enumera
+ * como conteúdo do entregável ("consolida onboarding + scanner +
+ * backlog + configuração operacional + status + 3 rotinas + próximos
+ * passos") — é uma reconstrução a partir dessa frase, não uma cópia do
+ * template real. Se o template oficial existir em outro lugar, este
+ * schema deve ser substituído por ele, não ajustado ao redor dele.
+ */
+export const primeiroEntregavelSchema = z.object({
+  workspaceId: z.string().min(1),
+  perfilOperacional: perfilOperacionalSchema,
+  fontesAutorizadas: z.array(fonteAutorizadaSchema),
+  backlogInicial: backlogInicialSchema,
+  modeloOperacional: modeloOperacionalSchema,
+  rotinasConfirmadas: z.array(z.string().min(1)).length(3),
+  proximosPassos: z.array(z.string().min(1)).min(1),
+  geradoEm: z.string().datetime(),
+});
+export type PrimeiroEntregavel = z.infer<typeof primeiroEntregavelSchema>;
