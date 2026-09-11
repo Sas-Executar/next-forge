@@ -1,7 +1,20 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "bunVersion": "1.x",
-  "ignoreCommand": "node scripts/skip-ci.js",
-  "buildCommand": "mkdir -p dist/scroll-task-prototype && cp public/scroll-task-prototype/index.html dist/scroll-task-prototype/index.html",
-  "outputDirectory": "dist"
+  "version": 2,
+  "builds": [
+    {
+      "src": "public/scroll-task-prototype/index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/public/scroll-task-prototype/index.html"
+    },
+    {
+      "src": "/scroll-task-prototype/?",
+      "dest": "/public/scroll-task-prototype/index.html"
+    }
+  ]
 }
