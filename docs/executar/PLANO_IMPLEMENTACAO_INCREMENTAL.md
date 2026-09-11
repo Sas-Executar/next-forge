@@ -391,7 +391,7 @@ abaixo sobre por que isso não bloqueou o trabalho real desta fase.
   não havia lacuna de implementação para fechar, só a lacuna de
   medição já conhecida.
 
-## Fase 9 — Observabilidade, evals, rollout, fecha `REC-005`
+## Fase 9 — Observabilidade, evals, rollout, fecha `REC-005` — ✅ EXECUTADA (parcialmente — `REC-005` continua ação humana)
 
 - **Entrada**: Fases 3–4 estáveis (precisa do container rodando para OTEL
   fazer sentido).
@@ -399,6 +399,77 @@ abaixo sobre por que isso não bloqueou o trabalho real desta fase.
   ação humana, listada em `LAUNCH_RUNBOOK.md` §2), feature flag
   `showCopiloto`.
 - **Rollback**: desligar a flag; nenhuma migration é revertida.
+
+- **`mirror_error` (lacuna real deixada em aberto na Fase 3, agora
+  fechada)**: `apps/copiloto-runtime/src/session-store.ts`'s `append()`
+  nunca tinha tratamento de erro — uma falha na gravação (o "mirror" do
+  transcript da sessão do Agent SDK) simplesmente propagava sem nenhum
+  sinal greppable/alertável. Agora envolvido em `try/catch`:
+  `console.error("mirror_error", {workspaceId, projectKey, sessionId,
+  subpath, error})` antes de relançar — este container é um app Bun
+  puro, não Next.js, então `@repo/observability`'s `error.ts`/`log.ts`
+  (que dependem de `@sentry/nextjs`/`@logtail/next`) não são a escolha
+  certa aqui; `console.error` para o stdout/stderr do próprio container
+  é o substrato de alerta real e sem dependência nova que este app
+  já tem hoje. Testado com um novo `__tests__/mirror-error.test.ts`
+  (mock de `@repo/database`, sem depender de Postgres real): confirma
+  que a falha é logada com a tag e que a rejeição original ainda
+  propaga, e que um batch vazio nunca toca o DB nem alerta.
+- **OTEL — exposto, não verificado**: `apps/copiloto-runtime/env.ts`
+  ganhou `CLAUDE_CODE_ENABLE_TELEMETRY`/`OTEL_METRICS_EXPORTER`/
+  `OTEL_LOGS_EXPORTER`/`OTEL_EXPORTER_OTLP_{PROTOCOL,ENDPOINT,HEADERS}`
+  como config validada e tipada — todos opcionais, nada habilitado por
+  padrão. Essas variáveis são lidas diretamente pelo subprocesso da CLI
+  do Claude Code, não pelo código deste app; `src/tenant.ts`'s
+  `env: {...process.env, ...}` já as encaminha para toda chamada
+  `query()` sem nenhuma mudança de código adicional — o que esta fase
+  de fato adicionou foi um lugar único, documentado e validado por
+  schema para essa superfície de configuração, não a canalização em si
+  (que já existia). **Não verificado nesta sessão**: nenhum coletor
+  OTLP real existe neste sandbox para confirmar que um span de verdade
+  chega a algum lugar — isso só é verificável com um coletor real em um
+  deploy real.
+- **Evals ampliados**: os 3 arquivos (`evals/{datasets/golden,
+  regression/regression,adversarial/adversarial}.jsonl`) cobriam só o
+  contrato `orchestratorOutputSchema` (Camada 2). `gradeSchema`
+  (`packages/agent-runtime/src/evals/graders.ts`) agora despacha por
+  prefixo de `capability` — `ativacao.*` → `handoffEnvelopeSchema`,
+  `modo_rotina.*` → `rotinasPropostasLoteSchema`, `scroll_task.*` →
+  `scrollTaskUnitSchema`, qualquer outro prefixo mantém
+  `orchestratorOutputSchema` (sem mudança de comportamento para os 18
+  casos pré-existentes). 7 casos novos, um por combinação
+  golden/regression/adversarial × contrato onde fazia sentido: um
+  handoff legal (golden) vs. um que pula fase (`ONBOARDING→OPERATIONS`,
+  adversarial) vs. `producedAt` não-ISO (regression); um lote de
+  exatamente 3 `RotinaProposta` (golden) vs. um lote de 1 (regression)
+  vs. um lote de 4 injetando uma quarta automação (adversarial); uma
+  `ScrollTaskUnit` válida (golden). `bunx vitest run evals` (`packages/
+  agent-runtime`): 25 passando (18 originais + 7 novos), 1 pulado
+  (o caso `LIVE-ADV-001` já existente, `describe.skipIf(DATABASE_URL)`).
+- **`showCopiloto` — rollout tenant a tenant real**: `export const
+  showCopiloto = createFlag("showCopiloto")` (`packages/feature-flags/
+  index.ts`), o mesmo `createFlag()` (PostHog `isFeatureEnabled(key,
+  userId)`, padrão já usado por `showBetaFeature`) — rollout por
+  usuário real via o dashboard do PostHog, não um boolean fixo no
+  código. Fecha duas portas, não uma: `components/sidebar.tsx` filtra o
+  item "Copiloto" do menu quando a flag está desligada (`GlobalSidebar`
+  ganhou a prop `copilotoEnabled`, resolvida server-side em
+  `layout.tsx`), e `copiloto/page.tsx` chama `notFound()` (mesma
+  convenção já usada por `webhooks/page.tsx`) quando a flag está
+  desligada — só esconder o link no menu não impediria acesso direto
+  pela URL. Default `false` (o default do próprio `createFlag`): a
+  feature não vaza para ninguém até ser explicitamente ligada por
+  tenant.
+- **`REC-005` (env vars Vercel) — continua ação humana, não fechado
+  nesta fase**: confirmado por leitura direta de `LAUNCH_RUNBOOK.md`
+  §2 ("Vercel projects — DONE (env vars still 🧑 manual)") que a lacuna
+  é exatamente a mesma da Fase 0 — populaar as env vars no dashboard
+  Vercel é uma ação que exige credenciais reais de um humano com acesso
+  à conta Vercel, não algo que uma sessão de código pode ou deve tentar
+  fazer. Nenhuma tentativa de simular ou contornar isso foi feita.
+- **Verificação real**: `bunx ultracite check .` 0 erros; `bun run
+  typecheck` 38/38 pacotes; `bun run test` 19/19 pacotes — incluindo os
+  2 testes novos de `mirror-error.test.ts` e os 7 casos de eval novos.
 
 ## Ordem recomendada vs. ordem obrigatória
 

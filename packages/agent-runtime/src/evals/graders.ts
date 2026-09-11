@@ -1,3 +1,9 @@
+import {
+  handoffEnvelopeSchema,
+  rotinasPropostasLoteSchema,
+  scrollTaskUnitSchema,
+} from "@repo/schemas";
+import type { ZodType } from "zod";
 import { orchestratorOutputSchema } from "../output-schema";
 import type { EvalCase } from "./types";
 
@@ -7,15 +13,45 @@ export interface GradeResult {
 }
 
 /**
- * "schema" grader — runs `input` through the real, production
- * `orchestratorOutputSchema` (M06-T02, the same contract every Copiloto
- * command and the chat route validates against before acting on or
- * returning a result). `expected` must be the literal string `"valid"`
- * or `"invalid"`: pass iff whether parsing actually succeeded matches
- * what the case claims it should do. A golden case proves a real,
- * well-formed output round-trips; an adversarial/regression case proves
- * a malformed or dangerous shape is actually rejected, not just
- * assumed to be.
+ * Fase 9 — `gradeSchema` originally only ever validated against
+ * `orchestratorOutputSchema` (the Camada 2 command output contract),
+ * because that was the only schema this eval harness had a case for.
+ * Camada 1 (Fases 1/4/5/7) added three more real, tested contracts with
+ * their own dedicated pass/fail semantics — `HandoffEnvelope` (illegal
+ * fase transitions must fail), the exactly-3 `RotinaProposta` batch, and
+ * `ScrollTaskUnit`. Dispatching by a `capability` prefix lets new golden/
+ * regression/adversarial cases target those contracts without a case
+ * accidentally validating against the wrong schema and passing for the
+ * wrong reason. Any capability not matching one of these three prefixes
+ * keeps validating against `orchestratorOutputSchema`, unchanged — this
+ * is additive, not a behavior change for the 18 pre-existing cases.
+ */
+const SCHEMA_BY_CAPABILITY_PREFIX: ReadonlyArray<
+  readonly [prefix: string, schema: ZodType]
+> = [
+  ["ativacao.", handoffEnvelopeSchema],
+  ["modo_rotina.", rotinasPropostasLoteSchema],
+  ["scroll_task.", scrollTaskUnitSchema],
+];
+
+const resolveSchemaForCapability = (capability: string): ZodType => {
+  const match = SCHEMA_BY_CAPABILITY_PREFIX.find(([prefix]) =>
+    capability.startsWith(prefix)
+  );
+  return match ? match[1] : orchestratorOutputSchema;
+};
+
+/**
+ * "schema" grader — runs `input` through the real, production schema
+ * matching this case's `capability` (see `resolveSchemaForCapability`
+ * above; defaults to `orchestratorOutputSchema`, M06-T02, the contract
+ * every Copiloto command and the chat route validates against before
+ * acting on or returning a result). `expected` must be the literal
+ * string `"valid"` or `"invalid"`: pass iff whether parsing actually
+ * succeeded matches what the case claims it should do. A golden case
+ * proves a real, well-formed output round-trips; an adversarial/
+ * regression case proves a malformed or dangerous shape is actually
+ * rejected, not just assumed to be.
  */
 const gradeSchema = (evalCase: EvalCase): GradeResult => {
   if (evalCase.expected !== "valid" && evalCase.expected !== "invalid") {
@@ -25,7 +61,8 @@ const gradeSchema = (evalCase: EvalCase): GradeResult => {
     };
   }
 
-  const result = orchestratorOutputSchema.safeParse(evalCase.input);
+  const schema = resolveSchemaForCapability(evalCase.capability);
+  const result = schema.safeParse(evalCase.input);
   const actual = result.success ? "valid" : "invalid";
   if (actual === evalCase.expected) {
     return { pass: true, detail: `parsed as ${actual}, as expected` };

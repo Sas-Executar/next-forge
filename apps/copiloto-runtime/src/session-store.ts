@@ -97,28 +97,60 @@ export const createPostgresSessionStore = (
         return;
       }
 
-      // Idempotency per the SDK's own guidance ("treat uuid as an
-      // idempotency key ... so that retries ... do not create duplicate
-      // rows"): entryUuid + the unique constraint on schema.prisma's
-      // AgentSessionEntry let skipDuplicates do this as a single
-      // ON CONFLICT DO NOTHING, rather than a separate read-before-write.
-      // Entries without a uuid get entryUuid: null, and Postgres treats
-      // every NULL as distinct for uniqueness — so those are never
-      // deduped against each other, matching the doc's own carve-out
-      // ("Entries without a uuid ... should be appended without dedup").
-      await db.agentSessionEntry.createMany({
-        data: entries.map((entry) => ({
+      try {
+        // Idempotency per the SDK's own guidance ("treat uuid as an
+        // idempotency key ... so that retries ... do not create duplicate
+        // rows"): entryUuid + the unique constraint on schema.prisma's
+        // AgentSessionEntry let skipDuplicates do this as a single
+        // ON CONFLICT DO NOTHING, rather than a separate read-before-write.
+        // Entries without a uuid get entryUuid: null, and Postgres treats
+        // every NULL as distinct for uniqueness — so those are never
+        // deduped against each other, matching the doc's own carve-out
+        // ("Entries without a uuid ... should be appended without dedup").
+        await db.agentSessionEntry.createMany({
+          data: entries.map((entry) => ({
+            workspaceId,
+            projectKey: key.projectKey,
+            sessionId: key.sessionId,
+            subpath: key.subpath ?? null,
+            entryUuid: entry.uuid ?? null,
+            entry: entry as unknown as Prisma.InputJsonValue,
+          })),
+          skipDuplicates: true,
+        });
+
+        await upsertSummary(key, entries);
+      } catch (error) {
+        // Fase 9 (PLANO_OBSERVABILIDADE_OPERACAO.md's own Fase 3 row:
+        // "alerta em mirror_error se a gravação falhar"), implemented
+        // here rather than in Fase 3 because Fase 3 never actually
+        // wired it — disclosed at the time as a real gap, not silently
+        // left out. A failed append() means the SDK's own transcript
+        // mirror for this session is now incomplete — the SDK doc's own
+        // words are that losing the SessionStore write loses the
+        // transcript with it, so this is the one failure mode in this
+        // whole container worth a dedicated, greppable/alertable tag
+        // rather than a generic catch. This is a plain Bun app, not a
+        // Next.js one — @repo/observability's error.ts/log.ts pull in
+        // @sentry/nextjs and @logtail/next, so importing them here
+        // would add an unverified Next.js-coupled dependency to a
+        // container that isn't Next.js, for no real gain until this
+        // container has its own OTEL/Sentry wiring (a separate, still-
+        // open gap). console.error to the container's own stdout/stderr
+        // is the one real, dependency-free alerting substrate this app
+        // actually has right now — a real log line an operator's log
+        // pipeline can already alert on. Re-thrown after logging: the
+        // SDK still needs to know the append failed, not just see it
+        // logged.
+        console.error("mirror_error", {
           workspaceId,
           projectKey: key.projectKey,
           sessionId: key.sessionId,
           subpath: key.subpath ?? null,
-          entryUuid: entry.uuid ?? null,
-          entry: entry as unknown as Prisma.InputJsonValue,
-        })),
-        skipDuplicates: true,
-      });
-
-      await upsertSummary(key, entries);
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
     },
 
     load: async (key) => {

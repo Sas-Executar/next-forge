@@ -46,6 +46,8 @@ import { Search } from "./search";
 
 interface GlobalSidebarProperties {
   readonly children: ReactNode;
+  /** Fase 9 — `showCopiloto` feature flag (@repo/feature-flags), resolved server-side by the layout. Hides the "Copiloto" entry for a tenant that isn't rolled out yet; the /copiloto route itself is gated independently (copiloto/page.tsx), so this is defense-in-depth against a stray link, not the only gate. */
+  readonly copilotoEnabled: boolean;
 }
 
 /*
@@ -106,8 +108,14 @@ const data = {
   ],
 };
 
-export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
+export const GlobalSidebar = ({
+  children,
+  copilotoEnabled,
+}: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
+  const navMain = data.navMain.filter(
+    (item) => item.url !== "/copiloto" || copilotoEnabled
+  );
 
   return (
     <>
@@ -134,7 +142,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
           <SidebarGroup>
             <SidebarGroupLabel>Workspace</SidebarGroupLabel>
             <SidebarMenu>
-              {data.navMain.map((item) => (
+              {navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <Link href={item.url}>

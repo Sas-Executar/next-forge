@@ -32,11 +32,37 @@ export const env = createEnv({
       .string()
       .min(1)
       .default("/work/claude-config"),
+    // Fase 9 (PLANO_OBSERVABILIDADE_OPERACAO.md's own Fase 9 row: "OTEL
+    // real no container, CLAUDE_CODE_ENABLE_TELEMETRY=1, exporters
+    // OTLP") — these are read directly by the Claude Code CLI
+    // subprocess itself (docs.claude.com/en/docs/claude-code/monitoring-usage),
+    // not by this app's own code; tenant.ts's `env: { ...process.env,
+    // ... }` already forwards whatever is set here into every query()
+    // call without further wiring. Validating and typing them here is
+    // what actually changes: a real, documented, single place naming
+    // this runtime's telemetry config surface, and a schema that fails
+    // fast on a typo'd value instead of the subprocess silently not
+    // exporting anything. All optional and unset by default — this
+    // sandbox has no real OTLP collector to verify export against, so
+    // nothing here enables telemetry on its own; an operator opts in by
+    // actually setting these at deploy time.
+    CLAUDE_CODE_ENABLE_TELEMETRY: z.enum(["0", "1"]).optional(),
+    OTEL_METRICS_EXPORTER: z.string().min(1).optional(),
+    OTEL_LOGS_EXPORTER: z.string().min(1).optional(),
+    OTEL_EXPORTER_OTLP_PROTOCOL: z.string().min(1).optional(),
+    OTEL_EXPORTER_OTLP_ENDPOINT: z.string().min(1).optional(),
+    OTEL_EXPORTER_OTLP_HEADERS: z.string().min(1).optional(),
   },
   runtimeEnv: {
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     COPILOTO_RUNTIME_PORT: process.env.COPILOTO_RUNTIME_PORT,
     COPILOTO_RUNTIME_WORK_DIR: process.env.COPILOTO_RUNTIME_WORK_DIR,
     COPILOTO_RUNTIME_CONFIG_DIR: process.env.COPILOTO_RUNTIME_CONFIG_DIR,
+    CLAUDE_CODE_ENABLE_TELEMETRY: process.env.CLAUDE_CODE_ENABLE_TELEMETRY,
+    OTEL_METRICS_EXPORTER: process.env.OTEL_METRICS_EXPORTER,
+    OTEL_LOGS_EXPORTER: process.env.OTEL_LOGS_EXPORTER,
+    OTEL_EXPORTER_OTLP_PROTOCOL: process.env.OTEL_EXPORTER_OTLP_PROTOCOL,
+    OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
   },
 });
