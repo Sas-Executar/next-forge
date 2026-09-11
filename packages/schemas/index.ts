@@ -7,4 +7,5 @@ export * from "./src/evidence";
 export * from "./src/modo-rotina";
 export * from "./src/routine";
 export * from "./src/scanner";
+export * from "./src/scroll-task";
 export * from "./src/task-state";

@@ -269,7 +269,7 @@ abaixo sobre por que isso não bloqueou o trabalho real desta fase.
   UI de ativação, as ~10 rotas restantes, e a skill
   `executar-status-report` (bloqueada por D7 real, não por preguiça).
 
-## Fase 7 — Scroll Task (`APP-SCR-001`)
+## Fase 7 — Scroll Task (`APP-SCR-001`) — ✅ EXECUTADA
 
 - **Entrada**: nenhuma dependência das fases anteriores além de
   `@repo/application` (já existe e testado).
@@ -282,6 +282,58 @@ abaixo sobre por que isso não bloqueou o trabalho real desta fase.
   entrega de UI sobre migração de SDK. Não é a ordem recomendada pelo
   plano original, mas é uma opção real dado que não há aresta de
   dependência.
+
+- **Camada pura (schema + domain)**: `packages/schemas/src/scroll-task.ts`
+  (`scrollTaskScopeSchema`, `scrollTaskStateSchema`,
+  `scrollTaskTimerMinutesSchema` limitado a `15|30|45`,
+  `scrollTaskUnitSchema`, `SCROLL_TASK_TRANSITIONS`) e
+  `packages/domain/src/scroll-task-state.ts`
+  (`canTransitionScrollTask`, `onTimerElapsed`) — mesmo padrão de
+  máquina de estado pura já usado em `ativacao-state.ts` e
+  `modo-rotina-state.ts`. 8 + 18 testes, todos verdes.
+- **Regra "auto-scroll nunca marca conclusão automaticamente"**: não dá
+  para expressar isso só como restrição na tabela de transição —
+  estruturalmente `timer_elapsed → completed` É legal, porque o
+  *usuário* pode concluir depois que o timer estourou. A regra real é
+  sobre quem chama a transição: `onTimerElapsed` existe justamente para
+  o cronômetro em si só poder produzir `timer_elapsed`, nunca chamar
+  `completed` diretamente. Isso está testado tanto no nível de domínio
+  (`scroll-task-state.test.ts`, describe dedicado a essa garantia)
+  quanto no componente (`scroll-task-view.test.tsx`: o único caminho de
+  código que produz `completed` é o clique explícito em "Concluir").
+- **UI real**: `apps/app/app/(authenticated)/scroll/page.tsx` (server
+  component, busca tarefas elegíveis via `rankEligibleTasks` —
+  **a mesma fonte de dados real que `/now` e `/sprint` já usam**, não
+  um mock) + `scroll-task-view.tsx` (client component com o layout
+  33/33/33, cronômetro, duplo toque para expandir, botões
+  Concluir/Adiar). "Inicia execução em ≤2 interações" verificado
+  literalmente: idle → running é 1 clique no botão "Iniciar".
+- **Teste do componente**: `apps/app/__tests__/scroll-task-view.test.tsx`
+  (7 testes com `@testing-library/react`) cobre: layout com unidade
+  ativa central, estado vazio, "Iniciar" em 1 clique, conclusão avança
+  para a próxima unidade, adiar idem, duplo clique expande (só depois
+  de iniciado — de `idle` não há transição direta pra `expanded`, então
+  o teste inicia primeiro), e nenhum botão "Concluir" visível em estado
+  `idle`. Descoberta ao escrever este teste: `apps/app/vitest.config.ts`
+  não habilita `test.globals`, então o auto-cleanup do
+  `@testing-library/react` (que depende de detectar um `afterEach`
+  global) não disparava sozinho — DOM de um teste vazava pro próximo.
+  Corrigido com `afterEach(cleanup)` explícito no arquivo de teste; não
+  é uma mudança de config global, só o teste novo se protegendo.
+- **Verificação real**: `bunx ultracite check .` limpo (0 erros);
+  `bun run typecheck` — 38/38 tasks; `bun run test` — 19/19 tasks (as 3
+  suítes de `apps/app` incluindo a nova, 9/9 testes; repo inteiro sem
+  regressão).
+- **Fora de escopo v1 (disclosurado no próprio JSDoc do componente, não
+  escondido)**: timer adaptativo por IA, reordenação completa das
+  unidades por prioridade dinâmica, e qualquer conclusão automática por
+  tempo — nenhum dos três está implementado, de propósito, e nenhum
+  estava no aceite desta fase.
+- **Não verificado nesta sessão**: comportamento em navegador real
+  (E2E/Playwright) — só verificado via jsdom (`@testing-library/react`).
+  A regra de negócio ("nunca completa sozinho") está testada tanto no
+  domínio quanto no componente, mas isso não substitui um teste E2E
+  real; registrar como próximo passo se a UI for para produção.
 
 ## Fase 8 — Scanner Visual (`APP-VIS-001`), fecha `REC-006`
 
