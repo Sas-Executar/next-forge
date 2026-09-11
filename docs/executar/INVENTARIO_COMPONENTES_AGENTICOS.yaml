@@ -1,0 +1,218 @@
+# INVENTARIO_COMPONENTES_AGENTICOS.yaml
+# Fase 0 — Auditoria e reconciliação. Gerado por inspeção direta do
+# código em claude/lucid-galileo-3jnpad (= PR #1 + HANDOFF.md + plano),
+# não por recordação do handoff. Cada item cita o(s) arquivo(s) fonte.
+# Escada de maturidade aplicada por item: documentado / implementado /
+# testado / verificado / deployed / released — nunca "verificado" sem
+# evidência de execução real nesta sessão.
+
+id: INVENTARIO-COMPONENTES-AGENTICOS-001
+gerado_em: "2026-09-11"
+branch_auditada: claude/lucid-galileo-3jnpad
+commit_auditado: 20a47f4
+observacao_metodologica: >
+  O corpus original (Executar-app-Blueprint: 02_BACKLOG_REQUISITOS_CANDIDATOS.yaml,
+  NOTAS_AGENT_SDK.md, schema_bundle.yaml, PRD-MCP.md etc.) não está clonado
+  nesta sessão nem em next-forge — é um repositório separado (AGENTS.md:
+  "Executar-app-Blueprint ... READ / REQUIREMENTS / SOT"), fora do escopo
+  GitHub desta sessão. Este inventário usa como fonte de requisitos o que
+  PLANO_EXECUTAR_COPILOTO.md já extraiu desse corpus (citado com "fonte:
+  plano, não corpus direto") mais inspeção direta do código real. Onde o
+  plano e o código divergem, ambos são citados.
+
+runtime_agentico:
+  sdk_em_uso:
+    pacote: "ai@^6.0.116 (Vercel AI SDK)"
+    evidencia: packages/agent-runtime/package.json
+    claude_agent_sdk_presente: false
+    evidencia_ausencia: >
+      grep recursivo por "claude-agent-sdk"/"@anthropic-ai/claude-agent-sdk"
+      em *.json/*.ts/*.tsx no repo inteiro: zero ocorrências.
+    decisao_aplicavel: D2 (migrar tudo para Claude Agent SDK) — NÃO INICIADA.
+
+  agent_runtime:
+    pacote: "@repo/agent-runtime"
+    arquivos:
+      - packages/agent-runtime/src/phases.ts        # AGENT_FLOW_PHASES, REPLAN_RETURNS_TO
+      - packages/agent-runtime/src/commands/{bomdia,agora,estado,fechardia,replanejamento}.ts
+      - packages/agent-runtime/src/output-schema.ts # orchestratorOutputSchema
+      - packages/agent-runtime/src/format.ts
+      - packages/agent-runtime/src/prompts/system.ts # COPILOT_SYSTEM_PROMPT (pt-BR)
+      - packages/agent-runtime/src/tools.ts
+      - packages/agent-runtime/src/evals/{graders,load-cases,types}.ts
+    fases_implementadas: [SYNC, UNDERSTAND, STRUCTURE, VISUALIZE, PRE_APPROVE,
+                           DECOMPOSE, EXECUTE, RECONCILE, REPORT, REPLAN]
+    gate_estrutural_codificado: "REPLAN_RETURNS_TO = VISUALIZE"
+    comandos_deterministicos:
+      - id: bomdia
+      - id: agora
+      - id: estado
+      - id: fechardia
+      - id: replanejamento   # único de 2 passos (propose/confirm); não exposto no mobile
+    rota_livre_ai: "apps/app/app/api/chat — usa @repo/ai (streamText), não os 5 comandos"
+    maturidade: implementado, testado (suíte vitest própria) — não verificado
+      end-to-end com OPENAI_API_KEY real nesta sessão.
+
+  domain_state_machines:
+    pacote: "@repo/domain"
+    arquivos: [packages/domain/src/task-state.ts, packages/domain/src/routine-state.ts,
+               packages/domain/src/day-range.ts]
+    estados_task: [BACKLOG_VALIDATED, READY, DOING, VERIFY, DONE, BLOCKED]
+    maturidade: implementado, testado.
+
+  schemas:
+    pacote: "@repo/schemas"
+    arquivos: [actor, authority, authority-decision, billing, evidence, routine,
+               scanner, task-state].ts
+    contratos_camada1_ausentes: [HandoffEnvelope, FaseAtivacao, PerfilOperacional,
+      FonteAutorizada, ModeloOperacional]  # Fase 1 do plano, não Fase 0
+    maturidade: implementado (camada 2), ausente (camada 1 — Visão Normativa).
+
+  application:
+    pacote: "@repo/application"
+    arquivos: [eligibility.ts, next-action.ts, rank-eligible-tasks.ts]
+    maturidade: implementado, testado.
+
+mcp:
+  pacote: "@repo/mcp"
+  transporte: "apps/api/app/mcp/route.ts (stateless, um McpServer por request)"
+  tools_registradas_12:
+    - projects.list / projects.get / projects.create
+    - tasks.list / tasks.get / tasks.create / tasks.update
+    - actions.get_next / actions.complete
+    - evidence.create
+    - state.get
+    - routines.list / routines.run
+    - reports.generate
+    - mapa.generate
+  catalogo_157_tools_prd_mcp: "NÃO incorporado — evidência: comentário do próprio
+    packages/mcp/src/server.ts, linha ~99-104: 'NOT the 157-tool PRD-MCP.md
+    catalog ... registered_reference / GATE PENDENTE'."
+  gate_qst03_credencial_por_usuario_final: "bloqueia 70/157 tools (fonte: plano,
+    não verificável nesta sessão — o PRD-MCP.md do Blueprint não está
+    acessível aqui). D9 — decisão aberta."
+  auditoria: "logToolCall() grava AuditEvent para toda chamada, sucesso ou falha
+    (packages/mcp/src/server.ts)."
+  bypass_de_autoridade: "Nenhum — mutações passam pelos mesmos guards de domínio
+    (canTransitionTask etc.) com actor:AGENT; DOING/VERIFY/DONE retornam
+    HUMAN_REQUIRED para todo chamador MCP (comentário do arquivo)."
+  maturidade: implementado, testado (suítes com skipIf ausência de DATABASE_URL).
+
+routines_modo_rotina:
+  pacote: "@repo/routines"
+  arquivos: [authority-gate.ts, idempotency.ts, pipeline.ts, scheduler.ts, events.ts,
+             delivery/{app-reports,email,router,whatsapp}.ts]
+  maquina_normativa_esperada: "Proposto → Confirmado → Ativo ⇄ Pausado, Ativo → Revisao → Ativo"
+  maquina_implementada: "authority-gate.ts + idempotency.ts existem; máquina de
+    estados nomeada 'Modo Rotina' com a semântica acima NÃO está codificada —
+    routine-state.ts (packages/domain) usa RoutineStatus do Prisma, cujos
+    valores precisam ser confrontados 1:1 com a máquina normativa na Fase 1."
+  campos_obrigatorios_10: "não localizados como conjunto nomeado no código —
+    LACUNA confirmada (plano §5.4: 'zero ocorrências no corpus')."
+  cron: "apps/api/app/cron/routines/route.ts — 1x/dia (Vercel Hobby plan;
+    degradação disclosed no próprio arquivo, revert documentado)."
+  maturidade: parcialmente implementado (pipeline/idempotência), ausente
+    (máquina normativa nomeada, 10 campos, política de fuso/retry — D10).
+
+scanner:
+  pacote: "@repo/scanner (lógica pura) + apps/mobile/src/features/scanner (on-device)"
+  arquivos_pure: [dispatch, embedding-codec, event-latch, preprocess, recognize,
+                  registry, roi, similarity, telemetry, types].ts
+  arquivo_onnx: apps/mobile/src/features/scanner/vision/dinov2-encoder.ts
+  simbolos_seed_v1: "3 símbolos (SYM-CHAT-001, SYM-SELECTOR-001, SYM-DONE-001—
+    conferir nomes exatos em registry.ts na Fase 8, não confirmado letra-por-
+    letra nesta auditoria)"
+  session_run_executado_com_modelo_real: false
+  evidencia: >
+    dinov2-encoder.ts linha ~90: comentário do próprio arquivo diz que
+    session.run() "never run against a real model file — everything
+    upstream ... is packages/scanner's already-tested pure math;
+    session.run() itself [não testado]". Confirma REC-006 (HIGH), ainda
+    aberto — bloqueia Fase 8 (APP-VIS-001) e a alegação "Scanner VERIFICADO".
+  maturidade: implementado (lógica pura, testada) / não testado (integração ONNX real).
+
+mapa_os:
+  pacote: "@repo/mapa-os"
+  arquivos: [populate.ts, projections/{agora-proximo-depois,mapa-operacional,
+             prisma-7d,status-terminal}.ts]
+  papel: "projeção visual — nunca fonte de verdade (regra confirmada, plano §5.1)"
+  geometria_prisma: "3 candidatos incompatíveis não resolvidos nesta auditoria —
+    D8. Nenhuma constante de geometria (mm/placeholders) encontrada nos
+    arquivos de projeção listados; a resolução exige leitura do Blueprint
+    (fora de escopo desta sessão) ou decisão direta do usuário."
+  maturidade: implementado, testado — geometria física AINDA NÃO decidida (D8).
+
+reports:
+  pacote: "@repo/reports"
+  papel: "StatusReport 3P+N builder (conferir arquivos na Fase 0 seguinte se
+    necessário — não priorizado nesta rodada por não ser bloqueador de D2/D3)"
+  status_report_canonico: "3 candidatos concorrentes (base / Business Pack 75
+    templates / operations) — D7, aberto. Nenhum dos três está identificável
+    dentro de next-forge (skills executar-* ainda não existem — ver abaixo);
+    a resolução depende de decisão do usuário, não de mais inspeção de código."
+
+integrations:
+  pacote: "@repo/integrations"
+  adapters_reais: [gmail, outlook (calendar + client + webhook), whatsapp,
+                    google-calendar]
+  normalizacao: normalize.ts → ExternalObjectRef (Prisma)
+  consentimento_por_conector: "IntegrationConnection existe no schema; modelo
+    de consentimento por tenant explícito (D9) não codificado como política —
+    apenas o registro de conexão."
+  maturidade: implementado, testado — consentimento/gate MCP QST-03: D9 aberto.
+
+billing:
+  pacote: "@repo/billing"
+  arquivos: [checkout, credits, entitlements, products, seats, subscription-sync,
+             workspace-entitlements].ts
+  fora_do_escopo_camada1_2: true  # não é componente agêntico central; incluído por completude
+
+design_tokens:
+  pacote: "@repo/design-tokens"
+  observacao: "ADR-DS-001 já implementado e testado (fonte única de tokens,
+    CI de drift). Não é objeto desta migração (D1-D6); citado por completude
+    do inventário de packages novos do PR #1."
+
+banco_de_dados:
+  schema: packages/database/prisma/schema.prisma
+  modelos_reais: 30   # inclui o stub Page herdado de `main`; PRODUCT_AUDIT.md
+                       # cita "28 workspace-scoped" — os 2 restantes são Page
+                       # (stub) e um modelo de sistema; não reconciliado nesta
+                       # rodada, ver DECISOES_TECNICAS_PENDENTES.md
+  enums: 16
+  migrations_aplicadas_localmente: "prisma/migrations/ não verificado nesta
+    rodada (fora do escopo de Fase 0 código-fonte estático) — LAUNCH_RUNBOOK.md
+    §1 afirma 8 migrations aplicadas via MCP Neon contra o banco de produção
+    real (snowy-dawn-65785764), não neste ambiente sandbox."
+  relationMode: foreignKeys   # desvio documentado do default next-forge (AGENTS.md)
+
+apps_api_rotas: 20   # contagem por find apps/api/app -name route.ts
+apps_app_paginas_autenticadas: 23   # find apps/app/app/(authenticated) -name page.tsx
+apps_mobile_telas_tabs: 6   # (tabs): index, copilot, mapa-os, projects, reports, scanner
+
+skills_plugins_claude_code:
+  diretorio_claude_no_repo: "AUSENTE — nenhum .claude/ encontrado em next-forge"
+  packages_copiloto_skills: "AUSENTE — packages/copiloto-skills não existe (Fase 6, não iniciada)"
+  apps_copiloto_runtime: "AUSENTE — apps/copiloto-runtime não existe (Fase 3, não iniciada)"
+  skills_locais_existentes: "skills/next-forge/SKILL.md — documentação do
+    template Next Forge em si, não skills executar-* do produto."
+  conclusao: "D5 (forkar/traduzir Productivity e Operations como executar-*)
+    e a topologia de agentes/skills/hooks da seção 6.5 do plano são 100%
+    NÃO INICIADAS — confirma que Fases 1-9 não começaram, consistente com
+    docs/executar/README.md."
+
+evals:
+  arquivos: [evals/datasets/golden.jsonl, evals/regression/regression.jsonl,
+             evals/adversarial/adversarial.jsonl]
+  casos_contados_por_linha: 17   # 6 + 5 + 6; HANDOFF.md/QUALITY_GATES.md citam
+                                  # "18 cases" — divergência de 1, não investigada
+                                  # nesta rodada (baixo risco, registrar e seguir)
+  graders: "packages/agent-runtime/src/evals/graders.ts — schema, forbidden_absent
+    (binários, sem tolerância ponderada — QUALITY_GATES.md confirma)"
+
+ci_cd:
+  workflows: [ci.yml, deploy-mobile.yml, deploy-web.yml, preview-db.yml, security.yml]
+  gates_bloqueantes: [lint, typecheck, test, security-secrets]
+  gates_nao_bloqueantes: [dependency-audit (continue-on-error), token-drift (bloqueante,
+    mas escopo design-tokens), visual-regression (skip sem CHROMATIC_PROJECT_TOKEN)]
+  build_gate: ausente (M19, não M17) — apps/web quebra sem BASEHUB_TOKEN real.
