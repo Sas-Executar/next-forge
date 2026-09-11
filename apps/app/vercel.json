@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "bunVersion": "1.x",
-  "ignoreCommand": "node scripts/skip-ci.js"
+  "ignoreCommand": "node scripts/skip-ci.js",
+  "installCommand": "echo 'Scroll Task prototype: no dependency install required'",
+  "buildCommand": "mkdir -p dist/scroll-task-prototype && cp public/scroll-task-prototype/index.html dist/scroll-task-prototype/index.html",
+  "outputDirectory": "dist"
 }
