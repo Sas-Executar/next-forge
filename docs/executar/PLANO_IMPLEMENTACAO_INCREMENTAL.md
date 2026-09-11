@@ -335,7 +335,7 @@ abaixo sobre por que isso não bloqueou o trabalho real desta fase.
   domínio quanto no componente, mas isso não substitui um teste E2E
   real; registrar como próximo passo se a UI for para produção.
 
-## Fase 8 — Scanner Visual (`APP-VIS-001`), fecha `REC-006`
+## Fase 8 — Scanner Visual (`APP-VIS-001`), fecha `REC-006` — ⚠️ NÃO ATINGIDA (reclassificada, conforme o próprio aceite da fase)
 
 - **Entrada**: acesso a um device físico (ou simulador com ONNX runtime
   real) — não disponível nesta sessão sandbox.
@@ -345,6 +345,51 @@ abaixo sobre por que isso não bloqueou o trabalho real desta fase.
   reclassificada como não atingida — nunca declarada verificada sem
   medição real (regra já no plano, reforçada aqui porque `dinov2-encoder.ts`
   já documenta essa lacuna em comentário próprio).
+
+- **Auditoria real feita nesta fase**: leitura direta de todo o pipeline
+  (`packages/scanner/src/{types,registry,recognize,event-latch,dispatch,
+  telemetry}.ts`, `apps/mobile/src/features/scanner/vision/{dinov2-
+  encoder,model-store,scanner-pipeline}.ts`,
+  `apps/mobile/app/(tabs)/scanner.tsx`, `apps/mobile/scripts/fetch-
+  model.ts`, `apps/api/app/scanner/{dispatch,undo,symbols}/route.ts`).
+  Confirmado: **todo o trabalho determinístico do Scanner Visual já
+  estava implementado antes desta sessão** (PR base, não trabalho das
+  Fases 1-7) — os 3 símbolos seed
+  (`SYM-CHAT-001→OPEN_CHAT`, `SYM-SELECTOR-001→OPEN_SELECTOR`,
+  `SYM-DONE-001→COMPLETE_LATEST_OPEN_TASK`), o latch edge-triggered
+  (`ABSENT→ENTER→FIRED→PRESENT`, sem tela de confirmação),
+  `dispatch()`/`undo(mutationId)` com transação real (`Task` +
+  `Evidence` + `AuditEvent` + `ScannerMutation`), e a tela real do
+  scanner no mobile já ligando câmera → `runScanTick` → dispatch →
+  undo. `bunx turbo run test --filter=@repo/scanner`: 41 testes
+  passando, 8 pulados (mesma convenção `describe.skipIf(!DATABASE_URL)`
+  das demais fases) — idêntico ao número já citado em
+  `MATRIZ_FONTE_REQUISITO_CODIGO.csv` na Fase 0, ou seja, **sem
+  regressão e sem trabalho novo necessário nessa camada**.
+- **O único item real em aberto**: `session.run()` contra o
+  `dinov2-vits14.onnx` de verdade, com benchmark p95 `scan→action` em
+  device. Bloqueado por uma cadeia de dependências externas que esta
+  sessão não pode criar: (1) nenhuma URL/SHA-256 real do modelo existe
+  em nenhum lugar do corpus ou desta sandbox (`scripts/fetch-model.ts`
+  e `model-store.ts` já documentam isso em comentário próprio,
+  confirmado por leitura direta nesta fase, não repetido às cegas);
+  (2) mesmo com o arquivo em mãos, rodar `onnxruntime-react-native`
+  exige um device físico ou simulador com runtime nativo — este
+  ambiente é um container Linux sandbox sem Expo/React Native runtime
+  nem câmera.
+- **Decisão desta fase**: em vez de fabricar um número de latência ou
+  simular `session.run()` com um "modelo" falso (o que violaria
+  diretamente a regra de proveniência deste projeto — nunca declarar
+  algo verificado sem medição real), **a meta de benchmark é
+  explicitamente reclassificada como não atingida**, exatamente como o
+  próprio aceite da fase previa como resultado legítimo. Isso fecha a
+  auditoria de Fase 8 nesta sessão sem fechar `REC-006` — `REC-006`
+  continua aberto e agora tem um dono claro: obtenção de um release
+  real do modelo (URL + SHA-256) e execução em device físico/simulador
+  com ONNX real, ambos fora do alcance de uma sessão sandbox.
+- **Nenhum código foi alterado nesta fase** — a auditoria confirmou que
+  não havia lacuna de implementação para fechar, só a lacuna de
+  medição já conhecida.
 
 ## Fase 9 — Observabilidade, evals, rollout, fecha `REC-005`
 
