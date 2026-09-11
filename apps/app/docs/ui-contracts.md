@@ -33,3 +33,11 @@ Escopo: public/scroll-task-prototype/index.html, servido pelas rotas / e /scroll
 3. Navegar por Tab, Enter, Espaço e Escape; conferir os anúncios de posição e conclusão no leitor de tela.
 4. Concluir por scroll manual, voltar, desligar a opção, ativar Auto Mode e selecionar fase/workflow; conferir que somente o avanço manual elegível conclui.
 5. Conferir tema escuro, maior contraste, redução de movimento e RTL.
+
+## Decisão permanente e extensão de navegação
+
+A referência normativa aprovada é [ADR-EXEC-UI-001](adr/ADR-EXEC-UI-001.md).
+
+O botão Lista alterna a apresentação, preservando o estado. Cada linha oferece seleção, conclusão/reabertura e contexto. Rolar a lista nunca conclui unidades.
+
+Navegar abre um diálogo nativo com níveis existentes, seleção direta e anterior/próxima. A URL mantém apresentação, nível e unidade, permitindo Voltar/Avançar sem alterar conclusões. A navegação permanece restrita às funcionalidades efetivas do deploy atual.
