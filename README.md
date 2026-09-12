@@ -138,3 +138,15 @@ Made with [contrib.rocks](https://contrib.rocks).
 ## License
 
 MIT
+
+
+## SAS · EXECUTAR ecosystem transition
+
+This repository is the implementation and release layer of the SAS · EXECUTAR ecosystem; target name: `sas-executar-ecosystem`.
+
+- Governance controls authority, IDs, evidence, decisions, risks and gates.
+- Blueprints defines product, domain, contracts and target mappings.
+- Maestro provides operational agent capabilities.
+- Ecosystem implements, tests, verifies and releases.
+
+See [ecosystem migration documentation](docs/ecosystem/README.md). Repository renaming remains pending controlled cutover and link validation.
