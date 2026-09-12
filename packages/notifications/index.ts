@@ -1,16 +1,37 @@
 import { Knock } from "@knocklabs/node";
 import { keys } from "./keys";
 
-const key = keys().KNOCK_SECRET_API_KEY;
-
-export const notifications = new Knock({ apiKey: key });
-
 export class PushChannelNotConfiguredError extends Error {
   constructor() {
     super("KNOCK_PUSH_CHANNEL_ID is not configured.");
     this.name = "PushChannelNotConfiguredError";
   }
 }
+
+export class KnockNotConfiguredError extends Error {
+  constructor() {
+    super("KNOCK_SECRET_API_KEY is not configured.");
+    this.name = "KnockNotConfiguredError";
+  }
+}
+
+let client: Knock | undefined;
+
+// Constructed lazily, on first real use, rather than at module load —
+// the Knock SDK throws on an empty apiKey, and this module is imported
+// by build-time page-data collection (Next statically evaluates route
+// modules), which must succeed even when KNOCK_SECRET_API_KEY is
+// legitimately unset (it's `.optional()` in ./keys).
+export const notifications = (): Knock => {
+  if (!client) {
+    const key = keys().KNOCK_SECRET_API_KEY;
+    if (!key) {
+      throw new KnockNotConfiguredError();
+    }
+    client = new Knock({ apiKey: key });
+  }
+  return client;
+};
 
 /**
  * Registers a device's Expo push token against Knock's push channel
@@ -32,7 +53,7 @@ export const registerPushToken = async (
   if (!channelId) {
     throw new PushChannelNotConfiguredError();
   }
-  await notifications.users.setChannelData(userId, channelId, {
+  await notifications().users.setChannelData(userId, channelId, {
     data: { tokens: [expoPushToken] },
   });
 };

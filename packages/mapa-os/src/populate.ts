@@ -1,18 +1,33 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { PrismaA4Payload } from "./types";
 
-const TEMPLATE_PATH = path.join(
-  import.meta.dirname,
-  "../templates/status-report-prisma-a4-v4.html"
-);
-const TEMPLATE_HTML = readFileSync(TEMPLATE_PATH, "utf-8");
+// `import.meta.dirname` isn't reliably populated for this module inside
+// Next's Turbopack server bundle (any route importing @repo/mapa-os pulls
+// it in, including during build-time page data collection) — derive the
+// directory from `import.meta.url` instead, which bundlers do rewrite.
+// Read lazily, on first real use, so a route that never calls into this
+// still never touches the filesystem during build.
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+let templateHtml: string | undefined;
+
+const getTemplateHtml = (): string => {
+  if (templateHtml === undefined) {
+    const templatePath = path.join(
+      moduleDir,
+      "../templates/status-report-prisma-a4-v4.html"
+    );
+    templateHtml = readFileSync(templatePath, "utf-8");
+  }
+  return templateHtml;
+};
 
 const PLACEHOLDER_PATTERN = /\{\{([A-Z0-9_]+)\}\}/g;
 
 const templateKeys = (): string[] => {
   const keys = new Set<string>();
-  for (const match of TEMPLATE_HTML.matchAll(PLACEHOLDER_PATTERN)) {
+  for (const match of getTemplateHtml().matchAll(PLACEHOLDER_PATTERN)) {
     keys.add(match[1]);
   }
   return [...keys];
@@ -159,7 +174,7 @@ export const populatePrismaA4 = (payload: PrismaA4Payload): string => {
     throw new PrismaFitError(issues);
   }
 
-  let html = TEMPLATE_HTML;
+  let html = getTemplateHtml();
   for (const [key, value] of Object.entries(map)) {
     html = html.replaceAll(`{{${key}}}`, escapeHtml(value));
   }

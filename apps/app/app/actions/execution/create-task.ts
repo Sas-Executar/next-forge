@@ -5,6 +5,7 @@ import { forWorkspace } from "@repo/database";
 import { canTransitionTask } from "@repo/domain";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { IllegalInitialStateError } from "./create-task-errors";
 
 const createTaskSchema = z.object({
   projectId: z.string().min(1).optional(),
@@ -17,13 +18,6 @@ const createTaskSchema = z.object({
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
-
-export class IllegalInitialStateError extends Error {
-  constructor(decision: string) {
-    super(`Task creation was not authorized (AuthorityGate: ${decision}).`);
-    this.name = "IllegalInitialStateError";
-  }
-}
 
 export const createTask = async (input: CreateTaskInput) => {
   const {

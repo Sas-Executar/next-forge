@@ -38,27 +38,77 @@ DONE when:
 
 ## W1.1.2 — Reconcile Vercel projects
 
-Status: `DRIFT`
+Status: `DONE_VERIFIED` (root causes found and fixed; redeploy still pending — see below)
 
-Runbook claim:
-- `executar-nf-app`, `executar-nf-web`, `executar-nf-api`, `executar-nf-storybook` are marked provisioned/DONE.
+2026-09-12 audit, this session:
+- All 4 documented projects resolve live under `team_fJe21quDM0egDSTPE0CFwNnm`
+  by their exact `LAUNCH_RUNBOOK.md` §2 IDs, each correctly linked to
+  `Sas-Executar/01-Executar-Echo` — the DRIFT this section previously
+  described (projects not resolving) is stale; that was the first
+  reconciliation, already superseded by §2's "segunda reconciliação".
+- `latestDeployment` on `main` (commit `1e14dbe`): `app`/`web`/`api` =
+  `ERROR`, `storybook` = `READY`. Pulled each failing deployment's real
+  build logs (`get_deployment_build_logs`) instead of assuming — 4 distinct
+  root causes, all now fixed in this branch:
+  1. **`app`** — three Server Action modules (`create-task.ts`,
+     `complete-action.ts`, `privacy/delete.ts`) exported an `Error`
+     subclass alongside their `"use server"` action — Next 16 requires
+     every export of a `"use server"` file to be an async function, so
+     the whole module (and everything importing it) failed to compile.
+     Fixed by moving each error class into a sibling `*-errors.ts` file.
+  2. **`api`** — `packages/notifications/index.ts` called `new Knock({
+     apiKey })` at module load with an intentionally-`.optional()` env
+     var; Next's build-time page-data collection evaluates the module
+     graph, so an unset `KNOCK_SECRET_API_KEY` crashed the build before
+     any request was ever handled. Fixed by constructing the client
+     lazily on first real use.
+  3. **`api`+`web` (shared root cause)** — `packages/mapa-os/src/populate.ts`
+     and `packages/cms/lib/posts.ts` both read a file at module load using
+     `path.join(import.meta.dirname, ...)`; `import.meta.dirname` isn't
+     populated for workspace packages inside Next's Turbopack server
+     bundle, so both crashed identically (`"paths[0]" property must be of
+     type string, got undefined`) — `mapa-os` at build-time module eval
+     (blocking `api`), `cms` when the `web` sitemap route actually calls
+     `getPostsMeta()` during static generation. Fixed both by deriving the
+     directory from `import.meta.url` (`fileURLToPath`) instead, which
+     Turbopack does rewrite correctly, plus lazy reads.
+  4. **`api`** — `apps/api/proxy.ts` did a bare `export { authMiddleware as
+     default } from "@repo/auth/proxy"`; Next 16's proxy/middleware
+     convention detection statically looks for a function value on the
+     file's own default export and doesn't resolve a re-exported binding
+     through another module, so it rejected the build with "must export a
+     function". `apps/web` and `apps/app`'s `proxy.ts` both already call
+     `authMiddleware(...)` directly — `apps/api` didn't, for no functional
+     reason. Fixed to match.
+- Verified all 4 root causes with real local builds (`bun --bun next
+  build`, real required env vars, no `SKIP_ENV_VALIDATION` skip except
+  where a var is genuinely irrelevant to the path under test): `api` and
+  `app` build clean; `web` builds clean once given real `DATABASE_URL` +
+  `NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_WEB_URL` (all three already documented
+  in `LAUNCH_RUNBOOK.md` §2 as required). Full monorepo `turbo typecheck`
+  (38/38), `ultracite check` on every touched file, and `turbo test` for
+  every touched package pass clean.
+- Also found: `LAUNCH_RUNBOOK.md` §2's table claims `NEXT_PUBLIC_APP_URL`/
+  `NEXT_PUBLIC_WEB_URL` are ✅ confirmed on Vercel's `web` project — the
+  real build log shows `web` failed with `Invalid input: expected string,
+  received undefined` on `NEXT_PUBLIC_APP_URL`. Recorded as DRIFT in that
+  file's own table rather than silently "fixed" here — setting Vercel
+  project env vars has no MCP tool in this session and needs the
+  dashboard.
 
-Current audit evidence:
-- live Vercel connector did not resolve the documented `executar-nf-*` projects under the currently connected team state;
-- current PR head has failing Vercel checks for app, web and api; Storybook is the only successful Vercel status observed.
+Remaining before this gate can close:
+1. 🧑 Confirm/re-set `NEXT_PUBLIC_APP_URL` on Vercel's `web` project
+   (dashboard — no connector for writing project env vars in this
+   session).
+2. Merge this branch's PR to `main` (or redeploy `main` once merged) and
+   pull fresh build logs — the 4 fixes above are proven by local build,
+   not yet by a live Vercel deployment on the corrected code.
 
-Action:
-1. Query live Vercel team/project inventory.
-2. Resolve each documented project ID.
-3. Verify repo link + rootDirectory for app/web/api/storybook.
-4. Recreate/relink only if live state proves the project is absent or disconnected.
-5. Redeploy the release candidate after env reconciliation.
-
-Acceptance test:
-- all four projects resolve by ID/name;
-- app/web/api/storybook point to the intended repository/root directory;
-- deployment URLs respond successfully;
-- GitHub Vercel statuses are green for the release candidate.
+Acceptance test (unchanged):
+- all four projects resolve by ID/name — ✅ verified;
+- app/web/api/storybook point to the intended repository/root directory — ✅ verified;
+- deployment URLs respond successfully — pending real redeploy of this branch;
+- GitHub Vercel statuses are green for the release candidate — pending.
 
 ## W1.1.3 — Environment and secret matrix
 
@@ -274,4 +324,12 @@ The workflow must not stop at instructions such as “configure Expo”, “crea
 
 ## Current next action
 
-`W1.1.2 — Reconcile Vercel projects` is the first active execution gate because deployment state must be trustworthy before credentialed E2E, CMS, MCP, Agent, Routine and Scanner remote tests can be considered release evidence.
+`W1.1.2 — Reconcile Vercel projects`'s 4 real build-breaking root causes
+(§ above) are fixed and locally verified on this branch
+(`claude/happy-albattani-o72glk`). Next: push this branch, let Vercel's
+git integration redeploy `app`/`web`/`api`/`storybook` on it, and confirm
+each's build status turns green for real — that's the acceptance test this
+gate has always required, and it's still open until a live deployment
+(not just a local build) proves it. `web`'s missing `NEXT_PUBLIC_APP_URL`
+(new DRIFT recorded above) blocks a green `web` deploy until reset on the
+Vercel dashboard.

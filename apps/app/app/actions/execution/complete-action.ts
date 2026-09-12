@@ -7,6 +7,11 @@ import { emitBusinessEvent } from "@repo/observability/business-events";
 import { taskStateSchema } from "@repo/schemas";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import {
+  IllegalTransitionError,
+  MissingEvidenceError,
+  TaskNotFoundError,
+} from "./complete-action-errors";
 
 const completeActionSchema = z.object({
   taskId: z.string().min(1),
@@ -27,29 +32,6 @@ const completeActionSchema = z.object({
 });
 
 export type CompleteActionInput = z.infer<typeof completeActionSchema>;
-
-export class TaskNotFoundError extends Error {
-  constructor(taskId: string) {
-    super(`Task ${taskId} not found in this workspace.`);
-    this.name = "TaskNotFoundError";
-  }
-}
-
-export class IllegalTransitionError extends Error {
-  constructor(from: string, to: string, decision: string) {
-    super(`${from} -> ${to} was not authorized (AuthorityGate: ${decision}).`);
-    this.name = "IllegalTransitionError";
-  }
-}
-
-export class MissingEvidenceError extends Error {
-  constructor(taskId: string) {
-    super(
-      `Task ${taskId}: DONE requires evidence — "feito" não substitui evidência.`
-    );
-    this.name = "MissingEvidenceError";
-  }
-}
 
 /**
  * Advances one task's state (M04-T03), the write side of the vertical
