@@ -31,21 +31,43 @@ tool mints this. Once you have it:
   add `NEON_API_KEY`.
 - Same page → **Variables**: add `NEON_PROJECT_ID` = `snowy-dawn-65785764`.
 
-## 2. 🤖 Vercel projects — DONE (env vars still 🧑 manual)
+## 2. 🤖 Vercel projects — RECRIADOS (repo foi renomeado; env vars ainda 🧑 manual)
 
-Team: `Sas_Executar` (`team_fJe21quDM0egDSTPE0CFwNnm`), 4 real projects,
-each linked to `Sas-Executar/next-forge` with the matching `rootDirectory`:
+**2026-09-12 — reconciliação:** o PR #1 foi mergeado em `main`. Nesse meio-tempo,
+outra sessão/processo renomeou o repositório (`Sas-Executar/next-forge` →
+`Sas-Executar/01-Executar-Echo`, o GitHub redireciona a URL antiga) e os 4
+projetos Vercel originais abaixo **deixaram de existir** (o time passou a
+listar 3 projetos completamente diferentes, ligados a outros repositórios).
+O GitHub App do Vercel também precisou ser reinstalado manualmente
+(`https://github.com/apps/vercel`) antes de recriar os projetos — a
+integração anterior não sobreviveu à renomeação. Os 4 projetos foram
+recriados com os mesmos nomes/`rootDirectory`, novos IDs:
 
-| App | Project | Project ID | URL |
-|---|---|---|---|
-| `apps/app` | `executar-nf-app` | `prj_MkAbPkEyQRJboeX6xTKiLFoviPdl` | executar-nf-app-sas-executar1.vercel.app |
-| `apps/web` | `executar-nf-web` | `prj_h4tfuhTnIiedTObU16xvBAEWkBWI` | executar-nf-web-sas-executar1.vercel.app |
-| `apps/api` | `executar-nf-api` | `prj_eT3E4NGlkjWnDhv1XmGCnxi0932M` | executar-nf-api-sas-executar1.vercel.app |
-| `apps/storybook` | `executar-nf-storybook` | `prj_ZaRfOZdchptCOpjViZj4RubN4I4C` | executar-nf-storybook-sas-executar1.vercel.app |
+Team: `Sas_Executar` (`team_fJe21quDM0egDSTPE0CFwNnm`), 4 projetos reais,
+cada um ligado a `Sas-Executar/01-Executar-Echo` (ainda respondendo por
+`Sas-Executar/next-forge`) com o `rootDirectory` correspondente:
 
-Each fired an initial preview deploy against `main` (pre-M21 content, no env
-vars yet) — expected to be broken/incomplete right now; that's diagnostic,
-not a bug to chase. Two real, fixed findings from that first deploy:
+| App | Project | Project ID |
+|---|---|---|
+| `apps/app` | `executar-nf-app` | `prj_tjzeAZAoitSeuYf0RNEhmyakMiMo` |
+| `apps/web` | `executar-nf-web` | `prj_pa8ihwg7ReAncAAhZMBHdKTLMZr1` |
+| `apps/api` | `executar-nf-api` | `prj_Ui40tk9orjhk5wq5tG90F5z65kiD` |
+| `apps/storybook` | `executar-nf-storybook` | `prj_AgAOTg4tmiNRlgHViJnqy6SAtKSn` |
+
+O usuário conectou, pelo próprio dashboard da Vercel, uma integração de
+Storage/Database aos projetos — ainda não verificado nesta sessão se ela
+injeta um `DATABASE_URL` equivalente ao do Neon `executar-production`
+(seção 1) ou aponta para um banco novo/vazio. Isso será confirmado pelo
+primeiro deploy real (commit que gerou este parágrafo) + smoke test da
+seção 10; se apontar para um banco vazio, as 8 migrations precisam rodar
+contra ele antes de qualquer teste de RLS fazer sentido.
+
+Antigos IDs (não usar mais, projetos não existem): `prj_MkAbPkEyQRJboeX6xTKiLFoviPdl`
+(app), `prj_h4tfuhTnIiedTObU16xvBAEWkBWI` (web), `prj_eT3E4NGlkjWnDhv1XmGCnxi0932M`
+(api), `prj_ZaRfOZdchptCOpjViZj4RubN4I4C` (storybook).
+
+Histórico da primeira rodada de deploys (projetos antigos, achados que
+seguem válidos e já corrigidos no código, `apps/*/vercel.json`):
 - `apps/storybook`'s `vercel.json` was missing an explicit `framework`/
   `buildCommand`/`outputDirectory` — Vercel auto-detected "Next.js" from
   a vestigial `next.config.ts`/`next` dependency (unused; the app's real
