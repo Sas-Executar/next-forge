@@ -88,7 +88,7 @@ dashboard, confirmada nesta sessão via `get_database_tables`):
 
 | Var | `app` | `web` | `api` | Status |
 |---|---|---|---|---|
-| `DATABASE_URL` / `POSTGRES_*` | ✅ | — | ✅ | 🤖 confirmado — aponta para `executar-production` (Neon), 30 tabelas reais, migrations aplicadas |
+| `DATABASE_URL` | ✅ | — | ✅ | 🤖 sobrescrito pelo usuário via Edit (não Add — a variável era `Sensitive`, write-only) com o valor confirmado de `executar-production` (Neon), 30 tabelas reais, migrations aplicadas |
 | `OPENAI_API_KEY` | ✅ | — | — | 🤖 chave real da OpenAI configurada |
 | `STRIPE_SECRET_KEY` | ✅ | — | ✅ | 🤖 configurada (test-mode, `sk_test_51UEAHq...`) |
 | `STRIPE_WEBHOOK_SECRET` | — | — | 🧑 | ainda pendente — §5 abaixo |
