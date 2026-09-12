@@ -92,7 +92,8 @@ dashboard, confirmada nesta sessão via `get_database_tables`):
 | `OPENAI_API_KEY` | ✅ | — | — | 🤖 chave real da OpenAI configurada |
 | `STRIPE_SECRET_KEY` | ✅ | — | ✅ | 🤖 configurada (test-mode, `sk_test_51UEAHq...`) |
 | `STRIPE_WEBHOOK_SECRET` | — | — | 🧑 | ainda pendente — §5 abaixo |
-| `CLERK_SECRET_KEY` / `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_WEBHOOK_SECRET` | 🧑 | — | 🧑 | ainda pendente — §4 abaixo |
+| `NEXT_PUBLIC_APP_URL` / `NEXT_PUBLIC_WEB_URL` | ✅ | ✅ | ✅ | 🤖 confirmado pelo usuário nos 3 projetos (`packages/next-config/keys.ts` exige `z.url()` sem `.optional()` — bloqueava `next build` com "Invalid environment variables" antes disso) |
+| `CLERK_SECRET_KEY` / `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_WEBHOOK_SECRET` | 🧑 | — | 🧑 | ainda pendente — §4 abaixo (todas opcionais no schema, não bloqueiam build) |
 | `INTEGRATIONS_ENCRYPTION_KEY` / `WHATSAPP_*` / `GMAIL_*` / `OUTLOOK_*` | 🧑 | — | 🧑 | §7 abaixo |
 | `RESEND_FROM` / `RESEND_TOKEN` | 🧑 | 🧑 | 🧑 | §6 abaixo |
 | Inventário completo restante | — | — | — | `INFRASTRUCTURE.md` — inalterado |
