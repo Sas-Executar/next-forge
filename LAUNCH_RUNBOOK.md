@@ -83,22 +83,19 @@ seguem válidos e já corrigidos no código, `apps/*/vercel.json`):
   Pro, not a design change. That file's own comment documents the exact
   revert.
 
-It becomes fully real once:
+Estado em 2026-09-12 (segunda reconciliação, feita pelo usuário direto no
+dashboard, confirmada nesta sessão via `get_database_tables`):
 
-🧑 **Populate env vars** — Vercel dashboard → each project → Settings →
-Environment Variables (no MCP tool sets these). Per `INFRASTRUCTURE.md`'s
-matrix:
-
-| Var | `app` | `web` | `api` | Value source |
+| Var | `app` | `web` | `api` | Status |
 |---|---|---|---|---|
-| `DATABASE_URL` | ✅ | — | ✅ | 🔑 §1 above |
-| `CLERK_SECRET_KEY` / `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_WEBHOOK_SECRET` | ✅ | — | ✅ (webhook secret: `api` only) | §4 below |
-| `STRIPE_SECRET_KEY` | ✅ | — | ✅ | Stripe dashboard → Developers → API keys (test mode; this session only got price/webhook write access, not the secret key itself) |
-| `STRIPE_WEBHOOK_SECRET` | — | — | ✅ | 🔑 §5 below (`we_1UEB5OQ7o5IHoh4HmGA3hBwM`'s signing secret) |
-| `OPENAI_API_KEY` | ✅ | — | — | platform.openai.com |
-| `INTEGRATIONS_ENCRYPTION_KEY` / `WHATSAPP_*` / `GMAIL_*` / `OUTLOOK_*` | ✅ | — | ✅ | §7 below |
-| `RESEND_FROM` / `RESEND_TOKEN` | ✅ | ✅ | ✅ | §6 below |
-| Full remaining inventory | — | — | — | `INFRASTRUCTURE.md`'s own table — unchanged |
+| `DATABASE_URL` / `POSTGRES_*` | ✅ | — | ✅ | 🤖 confirmado — aponta para `executar-production` (Neon), 30 tabelas reais, migrations aplicadas |
+| `OPENAI_API_KEY` | ✅ | — | — | 🤖 chave real da OpenAI configurada |
+| `STRIPE_SECRET_KEY` | ✅ | — | ✅ | 🤖 configurada (test-mode, `sk_test_51UEAHq...`) |
+| `STRIPE_WEBHOOK_SECRET` | — | — | 🧑 | ainda pendente — §5 abaixo |
+| `CLERK_SECRET_KEY` / `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_WEBHOOK_SECRET` | 🧑 | — | 🧑 | ainda pendente — §4 abaixo |
+| `INTEGRATIONS_ENCRYPTION_KEY` / `WHATSAPP_*` / `GMAIL_*` / `OUTLOOK_*` | 🧑 | — | 🧑 | §7 abaixo |
+| `RESEND_FROM` / `RESEND_TOKEN` | 🧑 | 🧑 | 🧑 | §6 abaixo |
+| Inventário completo restante | — | — | — | `INFRASTRUCTURE.md` — inalterado |
 
 🧑 **Custom domains** — once §3 buys one, attach it in each project's
 Settings → Domains.
