@@ -96,7 +96,6 @@ matrix:
 | `STRIPE_SECRET_KEY` | ✅ | — | ✅ | Stripe dashboard → Developers → API keys (test mode; this session only got price/webhook write access, not the secret key itself) |
 | `STRIPE_WEBHOOK_SECRET` | — | — | ✅ | 🔑 §5 below (`we_1UEB5OQ7o5IHoh4HmGA3hBwM`'s signing secret) |
 | `OPENAI_API_KEY` | ✅ | — | — | platform.openai.com |
-| `BASEHUB_TOKEN` | — | ✅ | — | BaseHub dashboard |
 | `INTEGRATIONS_ENCRYPTION_KEY` / `WHATSAPP_*` / `GMAIL_*` / `OUTLOOK_*` | ✅ | — | ✅ | §7 below |
 | `RESEND_FROM` / `RESEND_TOKEN` | ✅ | ✅ | ✅ | §6 below |
 | Full remaining inventory | — | — | — | `INFRASTRUCTURE.md`'s own table — unchanged |
@@ -166,12 +165,19 @@ activated, this session re-runs the same product + webhook creation against
 connector's own "warn before switching test/live" rule) and hands you the
 new live `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` to swap in.
 
-## 6. 🧑 OpenAI / BaseHub / Resend / Knock / BetterStack / Arcjet / Svix / Liveblocks / Upstash / Vercel Blob / PostHog
+## 6. 🧑 OpenAI / Resend / Knock / BetterStack / Arcjet / Svix / Liveblocks / Upstash / Vercel Blob / PostHog
 
 No connector for any of these — real signup + key generation per provider,
 exact var names in `INFRASTRUCTURE.md`'s existing inventory table (unchanged
-here). **BaseHub also needs real Privacy Policy/Terms content authored** —
-the CMS holds no content yet; this is a legal/content task, not code.
+here).
+
+**BaseHub — 🤖 fechado, sem conta externa.** O blog e as páginas legais do
+`apps/web` deixaram de depender do BaseHub: o conteúdo agora é MDX local em
+`packages/cms/content/{blog,legal}`, editado direto no repo via PR normal.
+`BASEHUB_TOKEN` não existe mais em nenhum `.env.example`. **Os textos de
+Termos/Privacidade em `packages/cms/content/legal/` são rascunhos-placeholder
+— precisam de revisão jurídica real antes do lançamento** (CONTENT_GAP,
+não ACCOUNT_GAP).
 
 ## 7. 🧑 WhatsApp / Gmail / Outlook
 
