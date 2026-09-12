@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
 import type { ReactElement } from "react";
@@ -28,10 +29,16 @@ interface Frontmatter {
 }
 
 const MDX_EXTENSION = /\.mdx$/;
-const contentRoot = path.join(import.meta.dirname, "..", "content");
+
+// `import.meta.dirname` isn't populated for this module inside Next's
+// Turbopack server bundle (sitemap generation calls into this at build
+// time), but `import.meta.url` reliably is — derive the directory from
+// that instead.
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const getContentRoot = (): string => path.join(moduleDir, "..", "content");
 
 const readSlugs = (type: ContentType): string[] => {
-  const dir = path.join(contentRoot, type);
+  const dir = path.join(getContentRoot(), type);
 
   if (!fs.existsSync(dir)) {
     return [];
@@ -49,7 +56,7 @@ const readRaw = (type: ContentType, slug: string): string | null => {
     return null;
   }
 
-  const filePath = path.join(contentRoot, type, `${slug}.mdx`);
+  const filePath = path.join(getContentRoot(), type, `${slug}.mdx`);
 
   if (!fs.existsSync(filePath)) {
     return null;

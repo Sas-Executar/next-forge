@@ -7,10 +7,16 @@
  * session token in the Authorization header, and clerkMiddleware() is
  * what makes auth() resolve that Bearer token for a native/non-browser
  * request (Clerk's own documented behavior for native clients, not
- * just cookie-based browser sessions) — `export default clerkMiddleware`
- * with no callback is Clerk's own simplest documented form.
+ * just cookie-based browser sessions) — `authMiddleware()` with no
+ * callback is Clerk's own simplest documented form. Called directly
+ * (not a bare `export { authMiddleware as default }` re-export) —
+ * Next's proxy convention detection statically looks for a function
+ * value on the default export and doesn't resolve a re-exported
+ * binding through another module.
  */
-export { authMiddleware as default } from "@repo/auth/proxy";
+import { authMiddleware } from "@repo/auth/proxy";
+
+export default authMiddleware();
 
 export const config = {
   matcher: [

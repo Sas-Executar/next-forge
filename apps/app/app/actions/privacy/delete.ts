@@ -4,19 +4,11 @@ import { requireRole } from "@repo/auth/server";
 import { forWorkspace } from "@repo/database";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { ConfirmationMismatchError } from "./delete-errors";
 
 const deleteWorkspaceSchema = z.object({
   confirmWorkspaceName: z.string().min(1),
 });
-
-export class ConfirmationMismatchError extends Error {
-  constructor() {
-    super(
-      "Confirmation text does not match the workspace name — nothing was deleted."
-    );
-    this.name = "ConfirmationMismatchError";
-  }
-}
 
 /**
  * M16-T03 — LGPD data deletion ("eliminação"). OWNER-gated, and requires
