@@ -24,8 +24,8 @@ export const Footer = async () => {
       title: "Legal",
       description: "Terms, privacy, and data handling.",
       items: legalPages.map((post) => ({
-        title: post._title,
-        href: `/legal/${post._slug}`,
+        title: post.title,
+        href: `/legal/${post.slug}`,
       })),
     },
   ];
