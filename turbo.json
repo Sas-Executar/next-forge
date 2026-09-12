@@ -4,8 +4,12 @@
   "ui": "tui",
   "envMode": "loose",
   "tasks": {
+    "generate": {
+      "cache": true,
+      "outputs": ["generated/**"]
+    },
     "build": {
-      "dependsOn": ["^build", "test"],
+      "dependsOn": ["^build", "generate", "test"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
@@ -15,10 +19,10 @@
       ]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^typecheck", "generate"]
     },
     "test": {
-      "dependsOn": ["^test"]
+      "dependsOn": ["^test", "generate"]
     },
     "e2e": {
       "cache": false
