@@ -38,7 +38,20 @@ DONE when:
 
 ## W1.1.2 — Reconcile Vercel projects
 
-Status: `DONE_VERIFIED` (root causes found and fixed; redeploy still pending — see below)
+Status: `DRIFT` (4 code root causes found and fixed and locally verified; live Preview redeploy on PR #12 surfaced a 5th, separate, environment-config gap — see below)
+
+2026-09-12, PR #12's Preview deploy on all 3 projects (`app`/`web`/`api`)
+failed identically with a missing required env var
+(`DATABASE_URL` for `app`/`api`, `NEXT_PUBLIC_APP_URL` for `web`) — the
+exact same vars `LAUNCH_RUNBOOK.md` §2 confirms are set. This session's
+Vercel MCP access has no per-environment env-var read/write tool, but the
+pattern (works on `main`'s Production builds per §2's own history, fails
+identically on every Preview build regardless of which of these 3 fixes
+landed) points to those vars being scoped to Production only, not
+Preview, on all 3 projects. Recorded here rather than assumed fixed —
+needs the dashboard (Settings → Environment Variables → per-var
+environment checkboxes) to confirm/fix, then a fresh Preview push to
+verify. Commented the specifics on PR #12 as each failure landed.
 
 2026-09-12 audit, this session:
 - All 4 documented projects resolve live under `team_fJe21quDM0egDSTPE0CFwNnm`
