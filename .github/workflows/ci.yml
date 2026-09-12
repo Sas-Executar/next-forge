@@ -1,0 +1,147 @@
+# M17-T04 — the first real lint/typecheck/test gate on every PR. Before
+# this, the repo's only workflows were release.yml (publishes the
+# next-forge CLI to npm on push to main) and security.yml (M16,
+# secrets/dependency scanning) — nothing ran on a pull request at all.
+# `build` is deliberately not a job here yet: `apps/web` hard-crashes on
+# every route without a real BASEHUB_TOKEN (its shared [locale] layout
+# fetches CMS content — confirmed by actually starting it, see
+# apps/web/e2e/README.md) and `apps/app` needs a live Postgres + Clerk
+# keys neither this workflow nor this repo's CI secrets currently carry.
+# A real build/deploy gate is M19's job (CD Web/Mobile), not this one's.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint (ultracite/biome)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bunx ultracite check .
+
+  typecheck:
+    name: Typecheck (tsc, every package)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # packages/database/generated is gitignored (Prisma-generated) —
+      # without this, @repo/database's own exports don't resolve and
+      # typecheck fails on every package that imports it. Confirmed by
+      # actually deleting the directory and re-running typecheck, not
+      # assumed. Must run from packages/database (matches its own
+      # `build` script, root package.json's `migrate` script) — running
+      # `bunx prisma` from the repo root resolves a different, unrelated
+      # top-level `prisma` package instead and silently mutates
+      # bun.lock; also confirmed by actually trying it, not assumed.
+      - name: Generate Prisma client
+        working-directory: packages/database
+        run: bunx prisma generate --no-hints --schema=./prisma/schema.prisma
+
+      - name: Typecheck
+        run: bun run typecheck
+
+  token-drift:
+    name: Design tokens drift (ADR-DS-001)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # packages/design-tokens/css/variables.css is hand-authored to
+      # mirror packages/design-tokens/src/*.ts 1:1 (ADR-DS-001 Required
+      # Change #10) — this script diffs the two and fails the build if
+      # anyone edits one without the other.
+      - name: Check CSS/TS token drift
+        run: bun run packages/design-tokens/scripts/check-drift.ts
+
+  # ADR-DS-001 Required Change #9 — Storybook visual regression. Runs
+  # only once a real CHROMATIC_PROJECT_TOKEN repo secret exists (no
+  # Chromatic connector to provision one automatically here — same
+  # `!= ''` gating pattern deploy-web.yml/preview-db.yml already use for
+  # their own tool-gap secrets/vars); until then this job is skipped, not
+  # failed, so CI stays honest about what it does and doesn't cover.
+  visual-regression:
+    name: Storybook visual regression (Chromatic)
+    runs-on: ubuntu-latest
+    if: ${{ secrets.CHROMATIC_PROJECT_TOKEN != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Publish to Chromatic
+        working-directory: apps/storybook
+        run: bunx chromatic --exit-zero-on-changes
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+
+  test:
+    name: Unit tests (vitest, every package)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        working-directory: packages/database
+        run: bunx prisma generate --no-hints --schema=./prisma/schema.prisma
+
+      # No DATABASE_URL/OPENAI_API_KEY/STRIPE_SECRET_KEY/Clerk keys are
+      # set here on purpose: every DB- or credential-backed suite in
+      # this repo uses the same `describe.skipIf(!process.env.X)` +
+      # dynamic-import pattern (packages/database/__tests__/rls.test.ts
+      # and every suite that follows its lead) so `bun run test` stays
+      # real and green without secrets — this job proves that, it
+      # doesn't work around a gap. `packages/agent-runtime`'s eval
+      # harness (M17-T03) is included here too: it's part of the normal
+      # `test` task, not a separate job — see QUALITY_GATES.md for why
+      # "agent evals" is still listed as its own named gate.
+      - name: Test
+        run: bun run test

@@ -13,18 +13,16 @@ export const Footer = async () => {
       description: "",
     },
     {
-      title: "Pages",
-      description: "Managing a small business today is already tough.",
+      title: "Product",
+      description: "One canonical execution state, every channel.",
       items: [
-        {
-          title: "Blog",
-          href: "/blog",
-        },
+        { title: "Pricing", href: "/pricing" },
+        { title: "Blog", href: "/blog" },
       ],
     },
     {
       title: "Legal",
-      description: "We stay on top of the latest legal requirements.",
+      description: "Terms, privacy, and data handling.",
       items: legalPages.map((post) => ({
         title: post._title,
         href: `/legal/${post._slug}`,
@@ -47,10 +45,10 @@ export const Footer = async () => {
             <div className="flex flex-col items-start gap-8">
               <div className="flex flex-col gap-2">
                 <h2 className="max-w-xl text-left font-regular text-3xl tracking-tighter md:text-5xl">
-                  next-forge
+                  EXECUTAR
                 </h2>
                 <p className="max-w-lg text-left text-foreground/75 text-lg leading-relaxed tracking-tight">
-                  This is the start of something new.
+                  Work one action at a time. Evidence required to close it.
                 </p>
               </div>
               <Status />

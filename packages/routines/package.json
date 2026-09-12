@@ -1,0 +1,28 @@
+{
+  "name": "@repo/routines",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "test": "NODE_ENV=test vitest run"
+  },
+  "dependencies": {
+    "@repo/application": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/domain": "workspace:*",
+    "@repo/email": "workspace:*",
+    "@repo/integrations": "workspace:*",
+    "@repo/observability": "workspace:*",
+    "@repo/reports": "workspace:*",
+    "@repo/schemas": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.13.10",
+    "cron-schedule": "^5.0.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

@@ -17,15 +17,18 @@
   ],
   "scripts": {
     "build": "turbo build",
+    "typecheck": "turbo typecheck",
     "dev": "turbo dev",
     "check": "ultracite check",
     "fix": "ultracite fix",
     "test": "turbo test",
+    "e2e": "turbo e2e",
     "analyze": "turbo analyze",
     "translate": "turbo translate",
     "boundaries": "turbo boundaries",
     "bump-deps": "bunx npm-check-updates --deep -u && bun install",
     "bump-ui": "bunx shadcn@latest add --all --overwrite -c packages/design-system",
+    "sync:stripe": "cd packages/billing && bun run sync:stripe",
     "migrate": "cd packages/database && bunx prisma format && bunx prisma generate && bunx prisma migrate dev",
     "migrate:deploy": "cd packages/database && bunx prisma generate && bunx prisma migrate deploy",
     "db:push": "cd packages/database && bunx prisma format && bunx prisma generate && bunx prisma db push",
@@ -47,7 +50,7 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "bun@1.3.10",
+  "packageManager": "bun@1.3.11",
   "dependencies": {
     "@clack/prompts": "^1.1.0",
     "commander": "^14.0.3",

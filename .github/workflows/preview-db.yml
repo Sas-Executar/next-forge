@@ -1,0 +1,73 @@
+# M18-T02 — Neon branch-per-PR: every PR gets its own isolated Postgres
+# branch (forked from `main`'s data, copy-on-write — real Neon branching,
+# not a fresh empty database), migrated to the current schema, and torn
+# down when the PR closes. Uses Neon's own documented GitHub Actions
+# (neondatabase/create-branch-action, neondatabase/delete-branch-action)
+# rather than hand-rolled API calls.
+#
+# This workflow provisions the branch and its schema; it does NOT wire
+# the resulting connection string into a Vercel Preview Deployment's
+# environment — that's Vercel's own Neon integration (dashboard-
+# configured, outside what a workflow file can express) per M18-T01.
+# Needs two real secrets this repo's CI doesn't have: NEON_API_KEY,
+# NEON_PROJECT_ID (a real Neon project). Without them this workflow is
+# real, correct, and simply never runs — same disclosed-GAP shape as
+# every other credential this project has been missing since M02.
+name: Preview Database
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: preview-db-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  create-branch:
+    name: Create + migrate preview branch
+    if: github.event.action != 'closed' && vars.NEON_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Neon branch for this PR
+        id: create
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: preview/pr-${{ github.event.pull_request.number }}
+          parent_branch: main
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # `migrate deploy` (not `migrate dev`) — applies committed
+      # migrations exactly as-is, never generates a new one; the right
+      # command for a CI/preview environment (packages/database's own
+      # `migrate:deploy` script uses the same command).
+      - name: Apply migrations to the preview branch
+        working-directory: packages/database
+        run: bunx prisma migrate deploy --schema=./prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ steps.create.outputs.db_url }}
+
+  delete-branch:
+    name: Delete preview branch
+    if: github.event.action == 'closed' && vars.NEON_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Neon branch for this PR
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ github.event.pull_request.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}

@@ -1,10 +1,19 @@
 import type { Dictionary } from "@repo/internationalization";
-import { MoveDownLeft, MoveUpRight } from "lucide-react";
 
 interface StatsProps {
   dictionary: Dictionary;
 }
 
+/**
+ * Rewritten (M14-T01): the stock Next Forge version rendered
+ * fabricated growth metrics (100k monthly active users, $100k MRR,
+ * ±% deltas with up/down arrows implying measured change over time).
+ * EXECUTAR is pre-launch (Trial-only, no real usage data exists) — this
+ * renders real, static, verifiable product facts instead (e.g. "1
+ * eligible action shown at a time" is literally true of every /now
+ * response, M04), with no delta/growth framing that would misrepresent
+ * a fact as a measured trend.
+ */
 export const Stats = ({ dictionary }: StatsProps) => (
   <div className="w-full py-20 lg:py-40">
     <div className="container mx-auto">
@@ -23,26 +32,14 @@ export const Stats = ({ dictionary }: StatsProps) => (
           <div className="grid w-full grid-cols-1 gap-2 text-left sm:grid-cols-2 lg:grid-cols-2">
             {dictionary.web.home.stats.items.map((item) => (
               <div
-                className="flex flex-col justify-between gap-0 rounded-md border p-6"
-                key={item.title}
+                className="flex flex-col justify-between gap-2 rounded-md border p-6"
+                key={item.label}
               >
-                {Number.parseFloat(item.delta) > 0 ? (
-                  <MoveUpRight className="mb-10 h-4 w-4 text-primary" />
-                ) : (
-                  <MoveDownLeft className="mb-10 h-4 w-4 text-destructive" />
-                )}
                 <h2 className="flex max-w-xl flex-row items-end gap-4 text-left font-regular text-4xl tracking-tighter">
-                  {item.type === "currency" && "$"}
-                  {new Intl.NumberFormat().format(
-                    Number.parseFloat(item.metric)
-                  )}
-                  <span className="text-muted-foreground text-sm tracking-normal">
-                    {Number.parseFloat(item.delta) > 0 ? "+" : ""}
-                    {item.delta}%
-                  </span>
+                  {item.value}
                 </h2>
                 <p className="max-w-xl text-left text-base text-muted-foreground leading-relaxed tracking-tight">
-                  {item.title}
+                  {item.label}
                 </p>
               </div>
             ))}

@@ -1,0 +1,168 @@
+/**
+ * @repo/design-tokens — CSS output. Hand-authored, kept 1:1 in sync with
+ * src/*.ts by convention; `scripts/check-token-drift.ts` (ADR-DS-001
+ * Required Change #10, wired into .github/workflows/ci.yml) diffs the two
+ * on every CI run so they can't drift apart silently.
+ *
+ * Consumed by packages/design-system/styles/globals.css via
+ * `@import "@repo/design-tokens/css/variables.css";` — see that file for
+ * how the semantic layer below maps onto shadcn's own custom properties.
+ */
+
+:root {
+  /* Primitives — Green/Azure/Neutral ramps (src/primitives.ts). */
+  --color-green-1: #fcfdfc;
+  --color-green-2: #f3faf6;
+  --color-green-3: #e4f6ed;
+  --color-green-4: #cff4e2;
+  --color-green-5: #b4f4d5;
+  --color-green-6: #8bf6c2;
+  --color-green-7: #58fbad;
+  --color-green-8: #1fff93;
+  --color-green-9: #00bf63;
+  --color-green-10: #008c49;
+  --color-green-11: #007a45;
+  --color-green-12: #064727;
+  --color-azure-1: #fcfcfd;
+  --color-azure-2: #f3f6fa;
+  --color-azure-3: #e4edf6;
+  --color-azure-4: #cfe2f4;
+  --color-azure-5: #b4d5f4;
+  --color-azure-6: #8bc2f6;
+  --color-azure-7: #58acfb;
+  --color-azure-8: #3ca0fd; /* interpolated — see src/primitives.ts */
+  --color-azure-9: #1f93ff;
+  --color-azure-10: #007aeb;
+  --color-azure-11: #0b6fd3;
+  --color-azure-12: #062747;
+  --color-neutral-1: #ffffff;
+  --color-neutral-2: #f6f6f6;
+  --color-neutral-3: #f0f0f0;
+  --color-neutral-4: #eaeaea;
+  --color-neutral-5: #e4e4e4;
+  --color-neutral-6: #dedede;
+  --color-neutral-7: #c5c5c5;
+  --color-neutral-8: #adadad;
+  --color-neutral-9: #959494;
+  --color-neutral-10: #7c7b7b;
+  --color-neutral-11: #646363;
+  --color-neutral-12: #4b4a4a;
+
+  /* Typography (src/typography.ts). */
+  --font-family-sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  --font-family-mono: "IBM Plex Mono", SFMono-Regular, Consolas, monospace;
+  --font-size-display: 56px;
+  --font-size-h1: 44px;
+  --font-size-h2: 34px;
+  --font-size-h3: 26px;
+  --font-size-title: 20px;
+  --font-size-subtitle: 18px;
+  --font-size-body-lg: 18px;
+  --font-size-body: 16px;
+  --font-size-body-sm: 14px;
+  --font-size-caption: 12px;
+  --font-size-label: 13px;
+  --font-size-button: 15px;
+  --font-size-overline: 11px;
+  --font-size-mono-data: 14px;
+  --font-weight-bold: 700;
+
+  /* Spacing + containers (src/spacing.ts). */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --container-page: 1200px;
+  --container-reading: 720px;
+
+  /*
+   * Radius (src/radius.ts) — the canonical 4/8/12/16px scale, exported
+   * directly (no calc()), as of ADR-DS-001 Required Change #7. Superseded:
+   * shadcn's own --radius-sm/md/lg/xl used to be calc()-derived from a
+   * single --radius token, giving 6/8/10/14px instead of the canonical
+   * scale.
+   *
+   * `sm/md/lg/xl` are exported under a `--ds-radius-*` prefix rather than
+   * bare `--radius-sm` etc: those bare names are Tailwind v4's own
+   * built-in theme keys (it already generates `rounded-sm`/`rounded-md`/…
+   * from them), so packages/design-system/styles/globals.css's own
+   * `@theme inline` block re-declares `--radius-sm: var(--ds-radius-sm)`
+   * itself — the one place that's allowed to claim the bare Tailwind
+   * theme-key names, matching how it already overrode them before this
+   * ADR (previously via calc(), now via these canonical values). `none`/
+   * `pill`/`full` don't need the same treatment — `none` and `full`
+   * already matched Tailwind's own values, and `pill` has no Tailwind
+   * equivalent to collide with — so those three are exported directly.
+   */
+  --radius-none: 0px;
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+  --ds-radius-xl: 16px;
+  --radius-pill: 999px;
+  --radius-full: 9999px;
+
+  /* Shadows (src/shadows.ts). */
+  --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --shadow-md: 0 4px 12px rgba(20, 20, 20, 0.06);
+  --shadow-hover: 0 4px 16px rgba(20, 20, 20, 0.08);
+
+  /*
+   * Semantic layer (src/semantic.ts + src/themes/light.ts) — the tokens
+   * ADR-DS-001 names verbatim. Product code should prefer these
+   * `--ds-*` custom properties (or the Tailwind theme aliases
+   * packages/design-system/styles/globals.css derives from them) over
+   * a bare ramp step.
+   */
+  --ds-color-background: var(--color-neutral-1);
+  --ds-color-surface: var(--color-neutral-2);
+  --ds-color-text-primary: var(--color-neutral-12);
+  --ds-color-text-secondary: var(--color-neutral-10);
+  --ds-color-action-primary: var(--color-green-9);
+  --ds-color-action-secondary: var(--color-neutral-3);
+  --ds-color-status-success: var(--color-green-9);
+  --ds-color-status-warning: #b45309; /* disclosed gap — see src/semantic.ts */
+  --ds-color-status-error: #dc2626; /* disclosed gap — see src/semantic.ts */
+  --ds-color-border: var(--color-neutral-5);
+  --ds-color-focus: var(--color-azure-8);
+}
+
+/*
+ * Dark theme (src/themes/dark.ts) — a disclosed EXECUTAR product decision,
+ * not Blueprint-sourced. See that file's header comment for the full
+ * rationale. `.dark` matches the existing next-themes `attribute="class"`
+ * convention already used by packages/design-system/providers/theme.tsx.
+ */
+.dark {
+  --color-dark-neutral-1: #0a0a0a;
+  --color-dark-neutral-2: #141414;
+  --color-dark-neutral-3: #1c1c1c;
+  --color-dark-neutral-4: #242424;
+  --color-dark-neutral-5: #2c2c2c;
+  --color-dark-neutral-6: #383838;
+  --color-dark-neutral-7: #4a4a4a;
+  --color-dark-neutral-8: #5e5e5e;
+  --color-dark-neutral-9: #7c7b7b;
+  --color-dark-neutral-10: #a3a3a3;
+  --color-dark-neutral-11: #d4d4d4;
+  --color-dark-neutral-12: #f5f5f5;
+
+  --ds-color-background: var(--color-dark-neutral-1);
+  --ds-color-surface: var(--color-dark-neutral-2);
+  --ds-color-text-primary: var(--color-dark-neutral-12);
+  --ds-color-text-secondary: var(--color-dark-neutral-10);
+  --ds-color-action-primary: var(--color-green-8);
+  --ds-color-action-secondary: var(--color-dark-neutral-4);
+  --ds-color-status-success: var(--color-green-8);
+  --ds-color-status-warning: #f59e0b;
+  --ds-color-status-error: #f87171;
+  --ds-color-border: var(--color-dark-neutral-5);
+  --ds-color-focus: var(--color-azure-7);
+}

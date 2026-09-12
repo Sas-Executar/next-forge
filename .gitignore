@@ -277,3 +277,5 @@ packages/database/generated
 .contentlayer
 .content-collections
 .source
+# M21 — real secrets, never committed (see vercel-env-upload/README.md)
+vercel-env-upload/

@@ -1,3 +1,4 @@
+import { keys as ai } from "@repo/ai/keys";
 import { keys as analytics } from "@repo/analytics/keys";
 import { keys as auth } from "@repo/auth/keys";
 import { keys as collaboration } from "@repo/collaboration/keys";
@@ -14,6 +15,7 @@ import { createEnv } from "@t3-oss/env-nextjs";
 export const env = createEnv({
   skipValidation: process.env.SKIP_ENV_VALIDATION === "true",
   extends: [
+    ai(),
     auth(),
     analytics(),
     collaboration(),

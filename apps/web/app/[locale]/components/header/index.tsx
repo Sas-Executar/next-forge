@@ -110,20 +110,9 @@ export const Header = ({ dictionary }: HeaderProps) => {
           </NavigationMenu>
         </div>
         <div className="flex items-center gap-2 lg:justify-center">
-          <svg
-            className="h-[18px] w-[18px] -translate-y-[0.5px] fill-current"
-            fill="none"
-            height="22"
-            viewBox="0 0 235 203"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <title>Vercel</title>
-            <path
-              d="M117.082 0L234.164 202.794H0L117.082 0Z"
-              fill="currentColor"
-            />
-          </svg>
-          <p className="whitespace-nowrap font-semibold">next-forge</p>
+          <Link className="whitespace-nowrap font-semibold" href="/">
+            EXECUTAR
+          </Link>
         </div>
         <div className="flex w-full justify-end gap-4">
           <Button asChild className="hidden md:inline" variant="ghost">
@@ -148,7 +137,16 @@ export const Header = ({ dictionary }: HeaderProps) => {
           </Button>
         </div>
         <div className="flex w-12 shrink items-end justify-end lg:hidden">
-          <Button onClick={() => setOpen(!isOpen)} variant="ghost">
+          <Button
+            aria-expanded={isOpen}
+            aria-label={
+              isOpen
+                ? dictionary.web.header.closeMenu
+                : dictionary.web.header.openMenu
+            }
+            onClick={() => setOpen(!isOpen)}
+            variant="ghost"
+          >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           {isOpen && (

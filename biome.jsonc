@@ -21,7 +21,21 @@
       "!docs",
       "!apps/docs/**/*.json",
       "!apps/email/.react-email",
-      "!packages/cms/basehub-types.d.ts"
+      "!packages/cms/basehub-types.d.ts",
+      "!packages/mapa-os/templates"
     ]
-  }
+  },
+  "overrides": [
+    {
+      // M17-T04: packages/typescript-config's shared tsconfig presets
+      // are consumed via `extends`, not the literal filename
+      // `tsconfig.json` Biome recognizes as JSONC by default — so their
+      // real, useful comments (documenting why a compiler option is set)
+      // were failing strict JSON parsing repo-wide, a pre-existing gap
+      // this milestone's CI lint gate surfaced (found while wiring
+      // ci.yml, unrelated to any of this milestone's own code changes).
+      "includes": ["packages/typescript-config/*.json"],
+      "json": { "parser": { "allowComments": true } }
+    }
+  ]
 }

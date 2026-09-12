@@ -9,6 +9,19 @@
     "allowJs": true,
     "jsx": "preserve",
     "noEmit": true,
+    // base.json's declaration/declarationMap are for packages that publish
+    // .d.ts to external consumers. Nothing in this monorepo does — apps and
+    // packages alike are consumed as raw TS source via workspace `paths`
+    // (see packages/*/package.json: no `main`/`types`/build step) — and with
+    // noEmit already true here, no declaration file is ever written anyway.
+    // Left inherited, `declaration: true` still runs TS's declaration-emit
+    // portability check during type-checking (TS2742) even though nothing
+    // emits, which false-positives on any exported value whose inferred
+    // type touches a type not cleanly nameable from node_modules (common
+    // with Radix-based component props). Disabling it here removes noise
+    // with no actual portability requirement to protect in this repo.
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "@/*": ["./*"],
       "@repo/*": ["../../packages/*"]

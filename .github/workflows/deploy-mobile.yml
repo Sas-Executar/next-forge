@@ -1,0 +1,119 @@
+# M19-T03 — CD Mobile: EAS Update (OTA, every push to main — JS/asset
+# changes only) + EAS Build (native builds, on a `mobile-v*` tag) + EAS
+# Submit (store submission, manual only — a deliberate, reviewed action,
+# never auto-triggered by a build). Uses Expo's own official
+# expo-github-action for auth, then the real `eas` CLI commands directly
+# — the same split Expo's own docs use.
+#
+# Gated on a real vars.EAS_PROJECT_CONFIGURED repository variable so
+# this safely no-ops until `eas init` has linked a real EAS project
+# (apps/mobile/app.json's `extra.eas.projectId` is empty in this repo —
+# M18's own disclosed gap, not new here) and a real `secrets.EXPO_TOKEN`
+# exists. Store credentials (Apple ID/ASC app ID/team ID, Android
+# service account key) belong in `apps/mobile/eas.json`'s own `submit`
+# section or EAS's own credential storage, not this workflow — none are
+# fabricated here; `eas submit` prompts for whatever isn't configured.
+name: Deploy Mobile
+
+on:
+  push:
+    branches: [main]
+    tags: ["mobile-v*"]
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: "Submit the latest production build to the app stores"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-mobile-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ota-update:
+    name: Publish OTA update (production channel)
+    if: vars.EAS_PROJECT_CONFIGURED == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Expo/EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # `--branch`/`--message` explicit rather than `--auto`: `--auto`
+      # derives both from the current git state and is flagged for
+      # deprecation upstream (expo/eas-cli#1500) — explicit is the
+      # form guaranteed to keep working.
+      - name: Publish update
+        working-directory: apps/mobile
+        run: |
+          eas update \
+            --branch production \
+            --message "${{ github.sha }}" \
+            --non-interactive
+
+  build:
+    name: EAS Build (all platforms, production)
+    if: vars.EAS_PROJECT_CONFIGURED == 'true' && startsWith(github.ref, 'refs/tags/mobile-v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Expo/EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build (queued, doesn't block on EAS's own build queue)
+        working-directory: apps/mobile
+        run: eas build --platform all --profile production --non-interactive --no-wait
+
+  submit:
+    name: EAS Submit (manual only)
+    if: vars.EAS_PROJECT_CONFIGURED == 'true' && github.event_name == 'workflow_dispatch' && inputs.submit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Expo/EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Submits the most recent finished production build per platform —
+      # eas.json's own `submit.production` profile decides where (App
+      # Store Connect / Google Play track); real Apple/Google credentials
+      # must already be configured there or in EAS's credential storage.
+      - name: Submit latest production build
+        working-directory: apps/mobile
+        run: eas submit --platform all --profile production --non-interactive --latest

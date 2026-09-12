@@ -1,188 +1,189 @@
 {
   "web": {
     "global": {
-      "primaryCta": "预约电话",
-      "secondaryCta": "注册"
+      "primaryCta": "Talk to us",
+      "secondaryCta": "Get started"
     },
     "header": {
-      "home": "首页",
+      "home": "Home",
       "product": {
-        "title": "产品",
-        "description": "今天管理一家小企业已经很困难。",
-        "pricing": "定价"
+        "title": "Product",
+        "description": "One state, every channel: App, MCP, WhatsApp, Email, Copilot, Mapa-OS, Scanner.",
+        "pricing": "Pricing"
       },
-      "blog": "博客",
-      "docs": "文档",
-      "contact": "联系",
-      "signIn": "登录",
-      "signUp": "开始使用"
+      "blog": "Blog",
+      "docs": "Docs",
+      "contact": "Contact",
+      "signIn": "Sign in",
+      "signUp": "Get started",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "home": {
       "meta": {
-        "title": "今天就改变您的业务运营",
-        "description": "在当今快节奏的世界中，您的企业值得拥有比过时交易系统更好的选择。我们的创新平台简化了运营，减少了复杂性，帮助小企业在现代经济中蓬勃发展。"
+        "title": "Work one action at a time. Stop switching tasks.",
+        "description": "EXECUTAR shows your one eligible next action and only accepts \"done\" with evidence attached. Keep going from the app, WhatsApp, email, the Copilot, or the Scanner."
       },
       "hero": {
-        "announcement": "阅读我们的最新文章"
-      },
-      "cases": {
-        "title": "赋能全球成功故事"
+        "announcement": "Read our latest article"
       },
       "features": {
-        "title": "现代商业的强大工具",
-        "description": "发现我们的尖端功能如何彻底改变您的日常运营。",
+        "title": "The execution surface, not another backlog",
+        "description": "Five real capabilities, one shared state — nothing here is a mockup.",
         "items": [
           {
-            "title": "简化的运营",
-            "description": "我们的平台简化了运营，减少了复杂性，帮助小企业在现代经济中蓬勃发展。"
+            "title": "Copilot",
+            "description": "Syncs your state and proposes the next step, but asks for approval before decomposing any plan — it never executes alone."
           },
           {
-            "title": "实时分析",
-            "description": "通过全面的分析和报告工具，获取对您业务表现的即时洞察。"
+            "title": "Mapa-OS",
+            "description": "Builds a printable snapshot of now, this week, and what's blocked straight from your real data — no blank template to fill in."
           },
           {
-            "title": "自动化工作流程",
-            "description": "通过智能自动化节省时间并减少错误，处理重复任务。"
+            "title": "Scanner",
+            "description": "Reads three physical symbols through your phone's camera to open chat, switch projects, or close the current task — no typing."
           },
           {
-            "title": "安全交易",
-            "description": "放心，您的业务运营受到企业级安全和加密的保护。"
+            "title": "Routines & automations",
+            "description": "Promotes ready work on its own, but waits for your confirmation before starting, verifying, or completing any of it."
+          }
+        ]
+      },
+      "principles": {
+        "title": "Rules we don't bend",
+        "items": [
+          {
+            "title": "\"Done\" needs proof",
+            "description": "Closing a task without evidence gets rejected outright. Describe the result, attach a link, or log what you observed."
+          },
+          {
+            "title": "Work one action",
+            "description": "You see exactly one eligible action at a time. Opening a second before finishing the first isn't a flow this product offers."
+          },
+          {
+            "title": "Keep one state",
+            "description": "The app, WhatsApp, email, the Copilot, and MCP all read and write the same store. No channel keeps its own version of the truth."
+          },
+          {
+            "title": "Confirm before automating",
+            "description": "A routine promotes ready backlog work on its own. Starting, verifying, or completing always waits for your yes."
           }
         ]
       },
       "stats": {
-        "title": "真实结果，真实影响",
-        "description": "加入成千上万已经通过我们的平台转变运营的企业。我们的解决方案帮助公司平均减少了60%的行政开支，并提高了45%的交易效率。",
+        "title": "What that looks like in practice",
+        "description": "Not growth metrics — this is what the product actually enforces, on every request.",
         "items": [
           {
-            "title": "每月活跃用户",
-            "metric": "100000",
-            "delta": "10",
-            "type": "单位"
+            "value": "1",
+            "label": "eligible action shown at a time"
           },
           {
-            "title": "每日活跃用户",
-            "metric": "10000",
-            "delta": "-5",
-            "type": "单位"
+            "value": "3",
+            "label": "physical symbols the Scanner recognizes"
           },
           {
-            "title": "每月经常性收入",
-            "metric": "100000",
-            "delta": "20",
-            "type": "货币"
+            "value": "6",
+            "label": "channels reading one state: App, MCP, WhatsApp, Email, Copilot, Scanner"
           },
           {
-            "title": "每次获取成本",
-            "metric": "100",
-            "delta": "-10",
-            "type": "货币"
-          }
-        ]
-      },
-      "testimonials": {
-        "title": "听听我们蓬勃发展的社区的声音",
-        "items": [
-          {
-            "title": "最佳决定",
-            "description": "我们的目标是简化中小企业的交易，使其比以往任何时候都更容易、更快速，我们一起做到了。",
-            "author": {
-              "name": "海登·布里斯尔",
-              "image": "https://github.com/haydenbleasel.png"
-            }
-          },
-          {
-            "title": "游戏改变者",
-            "description": "这个平台彻底改变了我们处理日常运营的方式。效率提升显著。",
-            "author": {
-              "name": "李·罗宾逊",
-              "image": "https://github.com/leerob.png"
-            }
-          },
-          {
-            "title": "超出预期",
-            "description": "实施过程顺利，结果立竿见影。我们的团队迅速适应，生产力飙升。",
-            "author": {
-              "name": "shadcn",
-              "image": "https://github.com/shadcn.png"
-            }
-          },
-          {
-            "title": "卓越支持",
-            "description": "这个平台不仅强大，客户支持团队在帮助我们最大化其潜力方面也表现出色。",
-            "author": {
-              "name": "庞图斯·亚伯拉罕森",
-              "image": "https://github.com/pontusab.png"
-            }
+            "value": "0",
+            "label": "completions accepted without evidence"
           }
         ]
       },
       "faq": {
-        "title": "常见问题，专家解答",
-        "description": "快速获取关于我们平台的最紧迫问题的答案。我们汇总了您需要了解的关于转变业务运营和开始使用现代交易解决方案的所有信息。",
-        "cta": "有任何问题？请联系",
+        "title": "Questions worth answering directly",
+        "description": "If something here doesn't answer your question, reach out — we'd rather explain it once than leave it vague.",
+        "cta": "Still have questions? Reach out",
         "items": [
           {
-            "question": "平台是什么？",
-            "answer": "该平台是一个交易平台，允许您自信地进行交易。"
+            "question": "What is EXECUTAR, in one sentence?",
+            "answer": "One queue holding your next eligible action — reachable from the app, WhatsApp, email, the Copilot, MCP, or a phone camera pointed at a physical symbol."
           },
           {
-            "question": "平台的安全性如何？",
-            "answer": "我们的平台采用企业级安全措施，包括端到端加密和多因素认证，以确保您的交易活动完全安全。"
+            "question": "Why only one action at a time?",
+            "answer": "Switching tasks has a real cost. Showing one removes the \"what should I do now\" decision and cuts the rework of picking back up something you left half-done."
           },
           {
-            "question": "提供哪些交易功能？",
-            "answer": "该平台提供全面的交易工具，包括实时市场数据、先进的图表、自动交易策略和详细分析，以支持明智的决策。"
+            "question": "How does pricing work?",
+            "answer": "Solo and Pro bill per executor, monthly or annually. Business bills per workspace with 5 seats included. See the pricing page for current figures — they're marked PROPOSED because they haven't been published as final commercial terms yet."
           },
           {
-            "question": "定价是如何运作的？",
-            "answer": "我们提供灵活的定价层，旨在与您的业务需求相匹配，从个人交易者的入门计划到大型组织的企业解决方案。"
+            "question": "Does my data stay in sync across channels?",
+            "answer": "Yes. There's one canonical store. WhatsApp, email, the Copilot, and MCP all read and write through it — none of them holds a competing version of your state."
           },
           {
-            "question": "您提供什么样的支持？",
-            "answer": "我们的专属支持团队通过多种渠道提供24/7服务，包括在线聊天、电子邮件和电话。我们还提供广泛的文档和培训资源。"
+            "question": "Do I need to code anything to use the Scanner?",
+            "answer": "No. Install the mobile app, point the camera at the symbol, done — recognition runs on-device, no cloud round-trip per frame."
           }
         ]
       },
       "cta": {
-        "title": "开始您的业务转型",
-        "description": "加入成千上万已经现代化运营的前瞻性企业。我们的平台提供您在当今竞争市场中成功所需的工具、支持和效率。几分钟内即可开始。"
+        "title": "Pick your one next action",
+        "description": "Start on Trial — 14 days, no card — and see whether a single-action queue actually changes your week."
       }
     },
     "blog": {
       "meta": {
-        "title": "博客",
-        "description": "想法、观点和意见。"
+        "title": "Blog",
+        "description": "Decisions, trade-offs, and what we changed our minds about building EXECUTAR."
       }
     },
     "contact": {
       "meta": {
-        "title": "让我们谈谈您的业务",
-        "description": "与我们的团队安排咨询，讨论我们如何帮助简化您的运营并推动业务增长。"
+        "title": "Talk to us",
+        "description": "Questions about a plan, a Business workspace, or how EXECUTAR fits your team — send a message and a real person replies."
       },
       "hero": {
         "benefits": [
           {
-            "title": "个性化咨询",
-            "description": "获得针对您业务需求的量身定制解决方案和专家建议。"
+            "title": "Get a real answer",
+            "description": "Every message reaches the team building the product, not a ticket queue."
           },
           {
-            "title": "无缝集成",
-            "description": "我们与您现有的系统无缝集成，以确保平稳过渡和最小干扰。"
+            "title": "Scope a Business plan",
+            "description": "Tell us your team size and we'll follow up with the right fit for a multi-seat workspace."
           },
           {
-            "title": "专家指导",
-            "description": "我们的专家团队将指导您完成整个过程，确保您充分利用我们的平台。"
+            "title": "Skip straight to Trial",
+            "description": "Rather try it first? Start now, no card required, and talk to us later if you need to."
           }
         ],
         "form": {
-          "title": "预约会议",
-          "date": "日期",
-          "firstName": "名",
-          "lastName": "姓",
-          "resume": "上传简历",
-          "cta": "预约会议"
+          "title": "Send us a message",
+          "name": "Name",
+          "email": "Email",
+          "message": "Message",
+          "cta": "Send message",
+          "sending": "Sending…",
+          "success": "Message sent — we'll get back to you soon.",
+          "error": "Couldn't send your message right now. Please try again."
         }
+      }
+    },
+    "pricing": {
+      "meta": {
+        "title": "Pricing",
+        "description": "Solo, Pro, and Business plans for EXECUTAR, priced in BRL."
+      },
+      "title": "Pick the plan that matches your team",
+      "description": "Copilot, Mapa-OS, and Scanner ship on every plan — they're never locked behind the most expensive tier.",
+      "proposedNotice": "These figures are PROPOSED per PRICING-001 — the billing architecture is authorized for experimentation and modeling, not yet published as final commercial terms.",
+      "monthly": "/mo",
+      "annual": "/yr",
+      "currentPlanLabel": "Current plan",
+      "contactSales": "Contact sales",
+      "startTrial": "Start free trial",
+      "enterprise": {
+        "title": "Enterprise",
+        "description": "Custom integrations, SLA, and deployment — sold outside self-serve checkout.",
+        "unit": "contract"
+      },
+      "trial": {
+        "title": "Trial",
+        "description": "Full access for 14 days, no card required.",
+        "unit": "14 days"
       }
     }
   }
